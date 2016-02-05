@@ -21,7 +21,10 @@
   },
   "homepage": "https://github.com/18f/bpa-trello-dashboard#readme",
   "dependencies": {
+    "chai": "^3.5.0",
+    "coffee-script": "^1.10.0",
     "js-yaml": "^3.5.2",
+    "mocha": "^2.4.5",
     "node-trello": "^1.1.2",
     "request": "^2.69.0"
   }
