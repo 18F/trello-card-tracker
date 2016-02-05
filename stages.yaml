@@ -1,21 +1,21 @@
 stages:
-  - name: "Pre-Award"
-    substages:
-    - name: "IAA"
-      expected_time: 5
-    - name: "Workshop Prep"
-      expected_time: 10
-    - name: "Workshop"
-      expected_time: 1
-    - name: "RFP Writing"
-      expected_time: 10
-    - name: "CO Review"
-      expected_time: 3
-    - name: "Client Review"
-      expected_time: 2
-    - name: "Award Finalized"
-      expected_time: 5
-    - name: "Solitication"
-      expected_time: 15
-    - name: "Vendor Review"
-      expected_time: 4
+- name: "Pre-Award"
+  substages:
+  - name: "IAA"
+    expected_time: 5
+  - name: "Workshop Prep"
+    expected_time: 10
+  - name: "Workshop"
+    expected_time: 1
+  - name: "RFP Writing"
+    expected_time: 10
+  - name: "CO Review"
+    expected_time: 3
+  - name: "Client Review"
+    expected_time: 2
+  - name: "Award Finalized"
+    expected_time: 5
+  - name: "Solicitation"
+    expected_time: 15
+  - name: "Vendor Review"
+    expected_time: 4
