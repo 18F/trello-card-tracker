@@ -15,8 +15,8 @@ if (_un.contains(args,"-s")){
 
 } else if (_un.contains(args,"-c")) {
   console.log("Invoke Card Recorder");
-  var file = args[args.indexOf("-s") + 1];
+  var file = args[args.indexOf("-c") + 1];
   cardRecorder = new app.CardRecorder('stages.yaml', board);
 } else{
-  console.log("Please supply an argument -m for Stage Manager or -c for card recorder");
+  console.log("Please supply an argument -s for Stage Manager or -c for card recorder");
 }
