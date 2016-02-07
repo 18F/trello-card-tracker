@@ -13,8 +13,8 @@ mockedStageObject =
        expected_time: 11
     ]
 
-describe 'organizeLists', ->
-  describe '.readYaml', ->
+describe 'stageManager', ->
+  describe '.readYAML', ->
     it 'maps a yaml to an object with a stages key', ->
       yamlobject = trelloIntg.readYaml(mockStageFile)
       expect(yamlobject).to.equal(mockedStageObject)
@@ -33,12 +33,12 @@ describe 'organizeLists', ->
       return
     return
 
-  describe '.makeNewList', ->
+  describe '.makeAdditionalLists', ->
     it 'makes a new list for those dont exist', ->
       expect(boardLists).to.include.members(stubbed_list)
     return
 
-  describe '.deleteLists', ->
+  describe '.deleteUnusedStages', ->
     it 'deletes lists given a list of ideas where there are no cards'->
       trelloIntg.deleteLists(delete_list)
       remaining_lists = t.get('1/boards/lists', function(err,data) ->
