@@ -1,27 +1,22 @@
 #!/usr/bin/env node
-
-
 _un = require("underscore");
-// app = require('./app');
-var StageManager = require("./app/stagemanager.js");
-var TrelloSuper = require("./app/helpers.js");
-
-
-// var t = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_API_TOK);
-
+var app = require('./app');
+//
 
 // select board ***
 var board = process.env.TRELLO_BPA_BOARD;
 
 args = process.argv.slice(2);
 
-if (_un.contains(args,"-m")){
+if (_un.contains(args,"-s")){
   console.log("Invoke Stage Manager");
-  stg_mnger = new StageManager('stages.yaml', 1234);
-
+  var file = args[args.indexOf("-s") + 1];
+  stgManager = new app.StageManager('stages.yaml', board);
 
 } else if (_un.contains(args,"-c")) {
   console.log("Invoke Card Recorder");
+  var file = args[args.indexOf("-s") + 1];
+  cardRecorder = new app.CardRecorder('stages.yaml', board);
 } else{
   console.log("Please supply an argument -m for Stage Manager or -c for card recorder");
 }

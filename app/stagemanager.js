@@ -10,7 +10,6 @@ util.inherits(StageManager, TrelloSuper);
 
 var method = StageManager.prototype;
 
-
 method.checkLists = function(){
 	return "";
 };

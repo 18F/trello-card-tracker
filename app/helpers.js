@@ -8,7 +8,7 @@ var method = TrelloSuper.prototype;
 function TrelloSuper(yaml_file, board) {
     this.yaml_file = yaml_file;
     this.board = board;
-    // this.t = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_API_TOK);
+    this.t = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_API_TOK);
 }
 
 method.readYaml = function() {

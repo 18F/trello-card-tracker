@@ -1,2 +1,2 @@
-// exports.StageManager = require("./stagemanager.js");
-// exports.cardrecord = require("./cardrecord.js");
+exports.StageManager = require("./stagemanager.js");
+exports.CardRecorder = require("./cardrecord.js");
