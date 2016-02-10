@@ -4,17 +4,19 @@ var app = require('./app');
 //
 
 // select board ***
-var board = process.env.TRELLO_BPA_BOARD;
+var board = process.env.TRELLO_BOARD_ID;
 
 args = process.argv.slice(2);
 
 if (_un.contains(args,"-s")){
-  console.log("Invoke Stage Manager");
+  console.log("--Invoke Stage Manager--");
   var file = args[args.indexOf("-s") + 1];
   stgManager = new app.StageManager('stages.yaml', board);
+  stgManager.run();
+
 
 } else if (_un.contains(args,"-c")) {
-  console.log("Invoke Card Recorder");
+  console.log("--Invoke Card Recorder--");
   var file = args[args.indexOf("-c") + 1];
   cardRecorder = new app.CardRecorder('stages.yaml', board);
 } else{

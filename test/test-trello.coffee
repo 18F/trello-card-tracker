@@ -1,25 +1,38 @@
 expect = require('chai').expect
-trelloIntg = require('../app/trello-client.js')
-var Trello = require("node-trello")
-var t = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_API_TOK)
+app = require('../app')
+
+# var Trello = require("node-trello")
+# var t = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_API_TOK)
+board = process.env.TRELLO_BPA_TEST_BOARD
+mockfile = './test/mockfile.yaml'
 
 stubbed_list = ["Kanbanian", "Kanbanian-Dos"]
-mockedStageObject =
-  stage:
-    [preaward:
-      [name: "IAA"
-       expected_time: 10,
-       name: "Workshop Prep"
-       expected_time: 11
+expectedStageObject =
+  stages: [ {
+    name: 'Pre-Award'
+    substages: [
+      {
+        name: 'IAA'
+        expected_time: 5
+      }
+      {
+        name: 'Workshop Prep'
+        expected_time: 10
+      }
     ]
+  } ]
 
 describe 'stageManager', ->
+  beforeEach ->
+    stageMgr = new app.StageManager(mockfile, board)
+    return
   describe '.readYAML', ->
     it 'maps a yaml to an object with a stages key', ->
-      yamlobject = trelloIntg.readYaml(mockStageFile)
-      expect(yamlobject).to.equal(mockedStageObject)
-    it 'raises an error when a bad there is not a yaml file', ->
-      expect(trelloIntg.readYaml('nofile')).to.throw(Error)
+      stageMgr = new app.StageManager(mockfile, board)
+      yamlObject = stageMgr.readYaml()
+      expect(yamlObject).to.eql(expectedStageObject)
+    # it 'raises an error when a bad there is not a yaml file', ->
+    #   expect(trelloIntg.readYaml('nofile')).to.throw(Error)
     return
 
   describe '.checkLists', ->
@@ -29,7 +42,7 @@ describe 'stageManager', ->
         list_2: false
 
       result_object = trelloIntg.checkLists(stubbed_list);
-      expect(result_object)to.include.members(expected_object);
+      expect(result_object).to.include.members(expected_object);
       return
     return
 
@@ -39,11 +52,11 @@ describe 'stageManager', ->
     return
 
   describe '.deleteUnusedStages', ->
-    it 'deletes lists given a list of ideas where there are no cards'->
+    it 'deletes lists given a list of ideas where there are no cards', ->
       trelloIntg.deleteLists(delete_list)
-      remaining_lists = t.get('1/boards/lists', function(err,data) ->
+      remaining_lists = t.get('1/boards/lists', (err,data) ->
         data
         )
-      expect(remaining_lists).to.not.include(delete_list) 
+      expect(remaining_lists).to.not.include(delete_list)
       return
   return

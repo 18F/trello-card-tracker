@@ -14,9 +14,11 @@ function TrelloSuper(yaml_file, board) {
 method.readYaml = function() {
     try {
     	var doc = yaml.safeLoad(fs.readFileSync(this.yaml_file, 'utf8'));
-    	console.log(doc);
+      return doc;
+    	// console.log(doc);
     } catch (e){
-    	console.log(e);
+      return e;
+    	// console.log(e);
     }
 };
 

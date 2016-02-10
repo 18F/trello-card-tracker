@@ -1,6 +1,23 @@
 # bpa-trello
 
-Content of a trello board for the agile BPA.
+Content of a Trello board for the agile BPA.
+
+
+### Installation
+
+```
+git clone https://github.com/18F/bpa-trello
+cd bpa-trello
+npm install
+```
+
+Set the following `ENV` variables
+```
+TRELLO_API_KEY
+TRELLO_API_TOK
+TRELLO_BOARD_ID
+TRELLO_BPA_TEST_BOARD
+```
 
 ### Public domain
 
