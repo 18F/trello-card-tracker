@@ -36,6 +36,12 @@ method.makeAdditionalLists = function(checkedList){
 	});
 };
 
+method.orderLists = function(stages){
+// this.t.put("1/lists/stage[listID]/pos, {value: listIndex}", function(e, data){
+// if (err) throw err;
+// });
+}
+
 method.closeUnusedStages = function(){
 	classThis = this;
 	stages = _un.pluck(classThis.relevantStage, 'name');

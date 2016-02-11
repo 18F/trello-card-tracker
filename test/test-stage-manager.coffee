@@ -5,6 +5,8 @@ app = require('../app')
 board = process.env.TRELLO_BPA_TEST_BOARD
 mockfile = './test/mockfile.yaml'
 
+board_url = '/1/boards/' + board + '/lists'
+
 stubbed_list = ["Kanbanian", "Kanbanian-Dos"]
 
 make_lists = [ { stage: 'Kanbanian', built: false },
@@ -52,7 +54,7 @@ describe 'stageManager', ->
   describe '.makeAdditionalLists', ->
     it 'given a list of objects that include the name of unbuilt lists, it makes additional lists in trello', ->
       stageMgr.makeAdditionalLists(make_lists)
-      stageMgr.t.get '/1/boards/' + stageMgr.board + '/lists', (err, data) ->
+      stageMgr.t.get board_url, (err, data) ->
         if err
           throw err
         boardLists = _un.pluck(data, 'name')
@@ -61,10 +63,24 @@ describe 'stageManager', ->
       return
     return
 
+  describe '.orderLists', ->
+    it 'reorders the list to match with the order of the stages', ->
+      stageMgr.orderLists(stages)
+      stageMgr.t.get board_url, (err, data) ->
+        if err
+          throw err
+        _un.each stages, (stage, ind) ->
+          trelloList = _un.findWhere(data, {name: stages["name"]})
+          expect(ind).to.eql(trelloList["pos"])
+          return
+        return
+      return
+    return
+
   describe '.closeUnusedStages', ->
     it 'closes a lists given a list if it is not in a stages object where there are no cards', ->
       stageMgr.closeUnusedStages(stages)
-      stageMgr.t.get '/1/boards/' + stageMgr.board + '/lists', (err, data) ->
+      stageMgr.t.get board_url, (err, data) ->
         if err
           throw err
         shouldbeClosed = _un.findWhere(data, {name: 'Should be closed board'})
