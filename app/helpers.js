@@ -9,18 +9,24 @@ function TrelloSuper(yaml_file, board) {
     this.yaml_file = yaml_file;
     this.board = board;
     this.t = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_API_TOK);
+    this.lists_url = "/1/boards/"+board+"/lists";
 }
 
 method.readYaml = function() {
     try {
     	var doc = yaml.safeLoad(fs.readFileSync(this.yaml_file, 'utf8'));
       return doc;
-    	// console.log(doc);
     } catch (e){
       return e;
-    	// console.log(e);
     }
 };
+
+method.getPreAward = function(){
+  stages = this.readYaml(this.yaml_file);
+  return stages.stages[0].substages;
+}
+
+
 
 
 module.exports = TrelloSuper;

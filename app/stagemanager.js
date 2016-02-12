@@ -1,77 +1,105 @@
 _un = require("underscore");
 TrelloSuper = require("./helpers.js");
 util = require('util');
+Q = require('q');
 
 
 function StageManager(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);
+	this.Stages = this.getPreAward();
+	classThis = this;
 }
 
 util.inherits(StageManager, TrelloSuper);
 
 var method = StageManager.prototype;
 
-method.checkLists = function(readStages, callback){
-var checked = [];
-	this.t.get("/1/boards/"+this.board+"/lists", function(err, data){
+method.run = function(){
+	this.getStageandBoard()
+	.then(this.checkLists)
+  .then(this.makeAdditionalLists)
+	.then(this.getStageandBoard().then(this.closeUnusedStages))
+	.then(this.getStageandBoard().then(this.orderLists))
+	.fin(console.log("done"))
+	.fail(function (e) {
+            console.error(e.name + ': ' + e.message );
+  });
 
-	  if (err) throw err;
-		lists = _un.pluck(data, 'name');
-		_un.each(readStages, function(stage){
-			checked.push({"stage": stage["name"], "built": _un.contains(lists, stage["name"])});
-		});
-		callback(checked);
+}
+
+method.getStageandBoard = function(){
+	var deferred = Q.defer();
+	this.t.get(this.lists_url, function(err, data){
+		if(err) {deferred.reject(new Error(err));};
+		deferred.resolve([classThis.Stages, data]);
 	});
+	return deferred.promise;
+
+}
+
+method.checkLists = function(data){ //PASS STAGES ASYNC
+	var checked = [];
+	console.log("check");
+	lists = _un.pluck(data[1], 'name');
+	_un.each(data[0], function(stage){
+		checked.push({"stage": stage["name"], "built": _un.contains(lists, stage["name"])});
+	});
+	return checked;
 };
 
 method.makeAdditionalLists = function(checkedList){
-	var classThis = this;
+	console.log("makeAdd")
 	_un.each(checkedList, function(list, i){
 		if (!list["built"]){
 			var postList = {name: list["stage"], idBoard: classThis.board, pos: i+1};
 			classThis.t.post("1/lists", postList, function(err,data){
 				if (err) throw err;
+				// console.log(data);
+				// return data;
 			});
 		}
 	});
 };
 
-method.orderLists = function(stages){
-// this.t.put("1/lists/stage[listID]/pos, {value: listIndex}", function(e, data){
-// if (err) throw err;
-// });
-}
-
-method.closeUnusedStages = function(){
-	classThis = this;
-	stages = _un.pluck(classThis.relevantStage, 'name');
-	classThis.t.get("/1/boards/"+classThis.board+"/lists", function(err, data){
-		if (err) throw err;
-		_un.each(data, function(trelloList){
-			if (!(_un.contains(stages, trelloList["name"]))){
-				classThis.t.get("/1/lists/"+trelloList["id"]+"/cards", function(err, listData){
-					if (err) throw err;
-					if (listData.length === 0){
-						classThis.t.put("/1/list/"+trelloList["id"]+"/closed", {value: true}, function(e, success){
-							console.log("Lists Closed");
-						})
-					}
+method.closeUnusedStages = function(data){
+	console.log("close");
+	stages = _un.pluck(data[0], 'name'); //Grab stage names
+	// For each list
+	_un.each(data[1], function(trelloList){
+		if (!(_un.contains(stages, trelloList["name"]))){
+				classThis.getListCards(function(d){
+					classThis.closeList(d, trelloList["id"])
 				});
-
-			}
-		});
-
-		return;
-
+		};
 	});
-};
-
-method.run = function(){
-	this.stages = this.readYaml();
-	this.relevantStage = this.stages.stages[0].substages;
-	this.checkLists(this.relevantStage, this.makeAdditionalLists);
-	this.closeUnusedStages();
+	return;
 }
 
+method.getListCards = function(callback){
+	this.t.get("/1/lists/"+trelloList["id"]+"/cards", function(err, data){
+		if(err) throw err;
+		callback(data);
+	});
+}
+
+method.closeList = function(listData, trelloID){
+	if (listData.length === 0){
+		classThis.t.put("/1/list/"+trelloID+"/closed", {value: true}, function(e, success){
+		});
+	};
+}
+
+
+method.orderLists = function(data){
+	console.log("order")
+	_un.each(data[0], function(stage, i){
+		appropriateList = _un.findWhere(data[1], {name: stage["name"]})
+		listID = appropriateList["id"];
+		classThis.t.put("1/lists/"+listID+"/pos", {value: i}, function(e, data){
+		 	if (e) {throw err};
+			// 	console.log("ordering");
+		 });
+	});
+}
 
 module.exports = StageManager;
