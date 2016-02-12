@@ -67,7 +67,7 @@ describe 'stageManager', ->
 
   describe '.orderLists', ->
     it 'reorders the list to match with the order of the stages', ->
-      stageMgr.orderLists([helpers.stages, [{}]])
+      stageMgr.getStageandBoard().then(stageMgr.orderLists)
       stageMgr.t.get helpers.board_url, (err, data) ->
         if err
           throw err
@@ -81,7 +81,7 @@ describe 'stageManager', ->
 
   describe '.closeUnusedStages', ->
     it 'closes a lists given a list if it is not in a stages object where there are no cards', ->
-      stageMgr.closeUnusedStages([helpers.stages, [{}]])
+      stageMgr.getStageandBoard().then(stageMgr.closeUnusedStages)
       stageMgr.t.get helpers.board_url, (err, data) ->
         if err
           throw err
