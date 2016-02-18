@@ -1,36 +1,10 @@
 expect = require('chai').expect
 _un = require("underscore")
 app = require('../app')
-#
-# board = process.env.TRELLO_BPA_TEST_BOARD
-# mockfile = './test/mockfile.yaml'
-#
 helpers = require('./test-helpers.js')
-#
-# board_url = '/1/boards/' + board + '/lists'
-#
-# stubbed_list = ["Kanbanian", "Kanbanian-Dos"]
-#
-# make_lists = [ { stage: 'Kanbanian', built: false },
-# { stage: 'Kanbanian-Dos', built: false }]
-#
-# expectedStageObject =
-#   stages: [ {
-#     name: 'Pre-Award'
-#     substages: [
-#       {
-#         name: 'IAA'
-#         expected_time: 5
-#       }
-#       {
-#         name: 'Workshop Prep'
-#         expected_time: 10
-#       }
-#     ]
-#   } ]
-
 stages = helpers.expectedStageObject.stages[0].substages
 # console.log stages
+
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
 
 describe 'stageManager', ->

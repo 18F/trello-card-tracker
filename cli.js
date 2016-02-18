@@ -1,24 +1,23 @@
 #!/usr/bin/env node
 _un = require("underscore");
 var app = require('./app');
-//
+var argv = require('minimist')(process.argv.slice(2));
 
 // select board ***
 var board = process.env.TRELLO_BOARD_ID;
 
-args = process.argv.slice(2);
+// args = process.argv.slice(2);
 
-if (_un.contains(args,"-s")){
+if ("s" in argv){
   console.log("--Invoke Stage Manager--");
-  var file = args[args.indexOf("-s") + 1];
-  stgManager = new app.StageManager('stages.yaml', board);
+  var file  = (argv["s"]=== true) ? 'stages.yaml' : argv["s"];
+  stgManager = new app.StageManager(file, board);
   stgManager.run();
+}
 
-
-} else if (_un.contains(args,"-c")) {
+if ("c" in argv) {
   console.log("--Invoke Card Recorder--");
-  var file = args[args.indexOf("-c") + 1];
-  cardRecorder = new app.CardRecorder('stages.yaml', board);
-} else{
-  console.log("Please supply an argument -s for Stage Manager or -c for card recorder");
+  var file  = (argv["c"]=== true) ? 'stages.yaml' : argv["c"];
+  var CR = new app.CardRecorder(file, board);
+  CR.calculateDateDifference(10, "2016-04-05", "2016-07-27")
 }
