@@ -26,6 +26,12 @@ method.getPreAward = function(){
   return stages.stages[0].substages;
 }
 
+method.getListIDbyName= function(name){
+  this.get(this.lists_url, function(e, data){
+    if (e) {throw e};
+  });
+}
+
 String.prototype.supplant = function (o) {
     return this.replace(/{([^{}]*)}/g,
         function (a, b) {

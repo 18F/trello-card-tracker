@@ -1,8 +1,8 @@
 var TrelloSuper = require("./helpers.js");
 var util = require('util');
-// var dateFormat = require('dateformat');
 var instadate = require("instadate");
 var moment = require("moment");
+yaml = require('js-yaml');
 
 function CardRecorder(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);
@@ -12,13 +12,40 @@ util.inherits(CardRecorder, TrelloSuper);
 
 var method = CardRecorder.prototype;
 
-method.createOrders = function(){
+method.createOrders = function(orderFile){
+	classThis = this;
+	var orders = yaml.safeLoad(fs.readFileSync(orderFile, 'utf8'));
+	_un.each(orders, this.createCard(order, classThis));
+}
 
+method.createCard = function(order, classThis){
+	var description = this.descriptionMaker(order);
+	var cardName = order["project"] +" - "+order["order"];
+	var listID = this.getListID(order["stage"]);
+	if (order["due"]){
+		var due = order["due"];
+	} else {
+		var due = null;
+	}
+	var cardInfo = {"name": cardName,
+									"desc": description,
+								  "idList": getID,
+							  	"due": due
+								};
+	classThis.post('1/cards/', cardInfo, function(err, data){
+		if (err) {throw err};
+		console.log(data);
+	});
+}
+
+method.descriptionMaker = function(order){
+	return "Project: {p}\nAgency: {a}\nSubAgency: {sub}\nTrello Board: {tb}"
+		.supplant({p: order["project"], a: order["agency"], sub: order["subagency"], tb: order["trello"]});
 }
 
 method.addComment = function(message, cardID){
-	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(e, data){
-		if (e) {throw err};
+	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
+		if (err) {throw err};
 		// 	console.log("ordering");
 	 });
 }

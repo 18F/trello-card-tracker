@@ -14,6 +14,20 @@ describe 'CardRecorder', ->
       return
     return
 
+  describe.skip '.createCard', ->
+    it 'will create an individual card on trello', ->
+      CR.createCard(helpers.mockOrder)
+      expect(trelloCards).to.include.members(helpers.testCard)
+      return
+    return
+
+  describe '.descriptionMaker', ->
+    it 'will create a description for a new card given bpa order details object', ->
+      description = CR.descriptionMaker(helpers.mockOrder)
+      expect(description).to.equal("Project: FedRamp Dashboard\nAgency: General Services Administration\nSubAgency: OCSIT\nTrello Board: https://trello.com/b/nmYlvlhu/bpa-test-dashboard")
+      return
+    return
+
   describe.skip '.addComment', ->
     it 'adds a comment to a board', ->
       CR.addComment("test message", helpers.testCardID)

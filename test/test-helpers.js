@@ -15,5 +15,17 @@ module.exports = {
         {name: 'Workshop Prep', expected_time: 10}]
     }]},
     ordermockfile: './test/mockorderfile.yaml',
-    testCardID: process.env.TRELLO_TEST_CARD
+    testCardID: process.env.TRELLO_TEST_CARD,
+    mockOrder: {
+      id: 1,
+      project: "FedRamp Dashboard",
+      order: "Front End",
+      agency: "General Services Administration",
+      subagency: "OCSIT",
+      trello: "https://trello.com/b/nmYlvlhu/bpa-test-dashboard",
+      stage: "CO Review",
+      open_date: "",
+      close_date: "",
+      owner: "Randy Hart"
+    }
 }

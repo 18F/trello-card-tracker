@@ -96,7 +96,7 @@ method.orderLists = function(data){
 		appropriateList = _un.findWhere(data[1], {name: stage["name"]})
 		listID = appropriateList["id"];
 		classThis.t.put("1/lists/"+listID+"/pos", {value: i}, function(e, data){
-		 	if (e) {throw err};
+		 	if (err) {throw err};
 			// 	console.log("ordering");
 		 });
 	});
