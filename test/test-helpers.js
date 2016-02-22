@@ -14,5 +14,6 @@ module.exports = {
       substages: [{name: 'IAA',  expected_time: 5},
         {name: 'Workshop Prep', expected_time: 10}]
     }]},
-    ordermockfile: './test/mockorderfile.yaml'
+    ordermockfile: './test/mockorderfile.yaml',
+    testCardID: process.env.TRELLO_TEST_CARD
 }

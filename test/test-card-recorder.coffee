@@ -17,14 +17,19 @@ describe 'CardRecorder', ->
   describe.skip '.addComment', ->
     it 'adds a comment to a board', ->
       CR.addComment("test message", helpers.testCardID)
-      expect(trelloTestCard.comment).to.include("test message")
+      CR.t.get "/1/cards/"+helpers.testCardID+"/actions", {filter: commentCard}, (err, data) ->
+        if err
+          throw err
+        _un.find
+        expect(trelloTestCard.comment).to.include("test message\n")
+        return
       return
     return
 
   describe '.calculateDateDifference', ->
     it 'calculates the difference between when the card was moved and the expected time', ->
       difference = CR.calculateDateDifference(10, "2016-04-05", "2016-07-27")
-      expect(difference).to.equal(103)
+      expect(difference).to.eql [71,81]
       return
     return
 
@@ -43,7 +48,7 @@ describe 'CardRecorder', ->
 
   describe '.buildComment', ->
     it 'generates a comment \i87\]ased off of date entry fields', ->
-      msg = CR.buildComment(103, 10, "2016-07-27T00:40:26.100Z", "2016-04-05T00:40:26.100Z")
-      expect(msg).to.equal("**WORKSHOP PHASE:** `+103 DAYS.` *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.")
+      msg = CR.buildComment(103, 10, "2016-04-05T00:40:26.100Z", "2016-07-27T00:40:26.100Z", "Workshop", 113)
+      expect(msg).to.eql("**Workshop Stage:** `+103 days.` *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.")
       return
     return

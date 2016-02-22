@@ -1,6 +1,7 @@
-TrelloSuper = require("./helpers.js");
-util = require('util');
+var TrelloSuper = require("./helpers.js");
+var util = require('util');
 var dateFormat = require('dateformat');
+var instadate = require("instadate");
 
 function CardRecorder(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);
@@ -14,15 +15,17 @@ method.createOrders = function(){
 
 }
 
-method.addComment = function(){
-
+method.addComment = function(message, cardID){
+	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(e, data){
+		if (e) {throw err};
+		// 	console.log("ordering");
+	 });
 }
 
 method.calculateDateDifference = function(expected, lastMove, recentMove){
-	var date1 = new Date(lastMove);
-	var date2 = new Date(recentMove);
-	var timeDiff = Math.abs(date2.getTime() - date1.getTime());
-	var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+	var fromDate = new Date(lastMove);
+	var toDate = new Date(recentMove);
+	var diffDays = instadate.differenceInWorkDays(fromDate, toDate);
 	return [diffDays - expected, diffDays]
 }
 
@@ -39,12 +42,13 @@ method.findLastMove = function(){
 }
 
 method.buildComment= function(dateDiff, expected, lastMove, recentMove, lastList, actual){
-	var formatLM = new Date(lastMove);
-	var formatRC = new Date(recentMove);
-	formatLM = dateFormat(formatLM, "mm/dd/yyyy");
-	formatRC = dateFormat(formatRC, "mm/dd/yyyy");
-	msg = "**{l} PHASE:** {d}. *04/05/2016 - 07/27/2016*.\n Expected days: {e} days. Actual Days spent: {a}."
-		.supplant({ e: expected, d: dateDiff, l: formatLM, r: formatRC, a: actual});
+	var fromDate = new Date(lastMove);
+	var toDate = new Date(recentMove);
+	fromDate = dateFormat(fromDate, "mm/dd/yyyy");
+	toDate = dateFormat(toDate, "mm/dd/yyyy");
+	formatDiff = (dateDiff < 0)? "**"+dateDiff+" days**" :"`+"+dateDiff+" days`"
+	msg = "**{l} Stage:** {d}. *{f} - {t}*.\n Expected days: {e} days. Actual Days spent: {a}."
+		.supplant({l: lastList, d: formatDiff, e: expected, a: actual, f: fromDate, t: toDate });
 	return msg;
 }
 
