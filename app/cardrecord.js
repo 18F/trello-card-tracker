@@ -1,7 +1,8 @@
 var TrelloSuper = require("./helpers.js");
 var util = require('util');
-var dateFormat = require('dateformat');
+// var dateFormat = require('dateformat');
 var instadate = require("instadate");
+var moment = require("moment");
 
 function CardRecorder(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);
@@ -42,10 +43,8 @@ method.findLastMove = function(){
 }
 
 method.buildComment= function(dateDiff, expected, lastMove, recentMove, lastList, actual){
-	var fromDate = new Date(lastMove);
-	var toDate = new Date(recentMove);
-	fromDate = dateFormat(fromDate, "mm/dd/yyyy");
-	toDate = dateFormat(toDate, "mm/dd/yyyy");
+	fromDate = moment(lastMove).format("L");
+	toDate = moment(recentMove).format("L");
 	formatDiff = (dateDiff < 0)? "**"+dateDiff+" days**" :"`+"+dateDiff+" days`"
 	msg = "**{l} Stage:** {d}. *{f} - {t}*.\n Expected days: {e} days. Actual Days spent: {a}."
 		.supplant({l: lastList, d: formatDiff, e: expected, a: actual, f: fromDate, t: toDate });

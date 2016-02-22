@@ -48,7 +48,7 @@ describe 'CardRecorder', ->
 
   describe '.buildComment', ->
     it 'generates a comment \i87\]ased off of date entry fields', ->
-      msg = CR.buildComment(103, 10, "2016-04-05T00:40:26.100Z", "2016-07-27T00:40:26.100Z", "Workshop", 113)
-      expect(msg).to.eql("**Workshop Stage:** `+103 days.` *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.")
+      msg = CR.buildComment(103, 10, "2016-04-05T10:40:26.100Z", "2016-07-27T10:40:26.100Z", "Workshop", 113)
+      expect(msg).to.eql("**Workshop Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.")
       return
     return
