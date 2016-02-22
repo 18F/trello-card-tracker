@@ -15,9 +15,7 @@ var method = CardRecorder.prototype;
 method.createOrders = function(orderFile){
 	classThis = this;
 	var orders = yaml.safeLoad(fs.readFileSync(orderFile, 'utf8'));
-	console.log(orders);
 	_un.each(orders.orders, function(order){
-		console.log(order);
 		classThis.createCard(order);
 	});
 }
