@@ -63,15 +63,21 @@ method.calculateDateDifference = function(expected, lastMove, recentMove){
 	return [diffDays - expected, diffDays]
 }
 
-method.findLastMove = function(){
-	// Look for actions where the data>card>id is the same & the type is update card
-	// updatedCards = _un.where(actions,{type: "updateCard", data.card.id: trelloID})
-	//if (updateCard.length  > 1){
-		//find the second to newest one
-	//}	else {
-			//cardCreated = _un.findwher(actions, {type:"createCard", data.card.id: trelloID});
-			//return cardCreated.date;
-	//}
+
+//Need to make a PROMISE
+method.findLastMoves = function(cardID){
+	this.t.get("/1/cards/"+cardID+"/actions", {"filter": ["updateCard","createCard"]}, function(e, actions){
+		if (e) throw e;
+		updatedCards = _un.where(actions, {type: 'updateCard'});
+		if (updatedCards > 1){
+			var fromAction = updatedCards[1];
+			var toAction = updateCards[0];
+		} else {
+			var fromAction = _un.findWhere(actions, {type:"createCard"});
+			var toAction = _un.findWhere(actions, {type:"updateCard"});
+		}
+		return [fromAction["date"], toAction["date"]]; // From to To Date
+	});
 
 }
 

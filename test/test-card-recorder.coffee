@@ -47,10 +47,10 @@ describe 'CardRecorder', ->
       return
     return
 
-  describe.skip '.findLastMove', ->
+  describe.skip '.findLastMoves', ->
     it 'finds when the last time a card was moved and returns a date', ->
       CR.findLastMove(helpers.testCardID).then (lastMove) ->
-        expect(lastMove).to.equal '2016-02-16'
+        expect(lastMove).to.equal ['2016-02-16', '2016-02-16']
         return
       return
     return
