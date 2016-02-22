@@ -26,9 +26,20 @@ method.getPreAward = function(){
   return stages.stages[0].substages;
 }
 
-method.getListIDbyName= function(name){
-  this.get(this.lists_url, function(e, data){
+method.getListIDbyName= function(name, callback){
+  var find = true;
+  if (!name) {
+    var find = false;
+  }
+  this.t.get(this.lists_url, function(e, data){
     if (e) {throw e};
+    if(find){
+      var list = _un.findWhere(data, {"name": name});
+    }
+    if (!find || !list){ //Add it to the first list if there is not one
+      var list = data[0];
+    }
+    callback(list["id"]);
   });
 }
 

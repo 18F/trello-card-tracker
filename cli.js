@@ -19,6 +19,19 @@ if ("c" in argv) {
   console.log("--Invoke Card Recorder--");
   var file  = (argv["c"]=== true) ? 'stages.yaml' : argv["c"];
   var CR = new app.CardRecorder(file, board);
+  var order = {
+    id: 1,
+    project: "FedRamp Dashboard",
+    order: "Front End",
+    agency: "General Services Administration",
+    subagency: "OCSIT",
+    trello: "https://trello.com/b/nmYlvlhu/bpa-test-dashboard",
+    stage: "CO Review",
+    open_date: "",
+    close_date: "",
+    owner: "Randy Hart"
+  }
+  CR.createOrders("orders.yml");
   // diff = CR.calculateDateDifference(10, "2016-04-05", "2016-07-27")
   // console.log(diff);
   // CR.addComment("testComment")

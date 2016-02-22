@@ -15,26 +15,34 @@ var method = CardRecorder.prototype;
 method.createOrders = function(orderFile){
 	classThis = this;
 	var orders = yaml.safeLoad(fs.readFileSync(orderFile, 'utf8'));
-	_un.each(orders, this.createCard(order, classThis));
+	console.log(orders);
+	_un.each(orders.orders, function(order){
+		console.log(order);
+		classThis.createCard(order);
+	});
 }
 
-method.createCard = function(order, classThis){
+method.createCard = function(order){
 	var description = this.descriptionMaker(order);
 	var cardName = order["project"] +" - "+order["order"];
-	var listID = this.getListID(order["stage"]);
+
 	if (order["due"]){
 		var due = order["due"];
 	} else {
 		var due = null;
 	}
-	var cardInfo = {"name": cardName,
-									"desc": description,
-								  "idList": getID,
-							  	"due": due
-								};
-	classThis.post('1/cards/', cardInfo, function(err, data){
-		if (err) {throw err};
-		console.log(data);
+	classThis = this;
+	this.getListIDbyName(order["stage"], function(listID){
+		var cardInfo = {"name": cardName,
+										"desc": description,
+										"idList": listID,
+										"due": due
+									};
+		classThis.t.post('1/cards/', cardInfo, function(err, data){
+			if (err) {throw err};
+			console.log(data);
+		});
+
 	});
 }
 
