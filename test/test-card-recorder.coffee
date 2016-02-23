@@ -34,10 +34,11 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe.skip '.buildCurrentComment', ->
-    it 'adds a comment for the current phase of the project', ->
-      return
-    return
+  # not necessary outside of run
+  # describe.skip '.buildCurrentComment', ->
+  #   it 'adds a comment for the current phase of the project', ->
+  #     return
+  #   return
 
   describe '.buildComment', ->
     it 'generates a comment \i87\]ased off of date entry fields', ->

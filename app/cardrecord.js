@@ -27,10 +27,11 @@ method.calculateDateDifference = function(expected, lastMove, recentMove){
 }
 
 
-//Need to make a PROMISE
+
 method.findLastMoves = function(cardID){
-	this.t.get("/1/cards/"+cardID+"/actions", {"filter": ["updateCard","createCard"]}, function(e, actions){
-		if (e) throw e;
+	var deferred = Q.defer();
+	this.t.get("/1/cards/"+cardID+"/actions", {"filter": ["updateCard","createCard"]}, function(err, actions){
+		if(err) {deferred.reject(new Error(err));};
 		updatedCards = _un.where(actions, {type: 'updateCard'});
 		if (updatedCards > 1){
 			var fromAction = updatedCards[1];
@@ -39,12 +40,16 @@ method.findLastMoves = function(cardID){
 			var fromAction = _un.findWhere(actions, {type:"createCard"});
 			var toAction = _un.findWhere(actions, {type:"updateCard"});
 		}
-		return [fromAction["date"], toAction["date"]]; // From to To Date
+		deferred.resolve([fromAction["date"], toAction["date"]]); // From to To Date
 	});
-
+ return deferred.promise;
 }
 
-method.buildComment= function(dateDiff, expected, lastMove, recentMove, lastList, actual){
+// method.buildCurrentComment = function(){
+//
+// }
+
+method.buildComment = function(dateDiff, expected, lastMove, recentMove, lastList, actual){
 	fromDate = moment(lastMove).format("L");
 	toDate = moment(recentMove).format("L");
 	formatDiff = (dateDiff < 0)? "**"+dateDiff+" days**" :"`+"+dateDiff+" days`"
