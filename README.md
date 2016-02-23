@@ -2,6 +2,13 @@
 
 Content of a Trello board for the agile BPA.
 
+### Features
+#### Stage Manager
+Takes a yaml file of a list of stages and expected times of completion and builds Trello lists in the order of the file.
+The stage manager will also close all lists that are not in the stages file.
+
+#### Card Recorder
+Will add comments to cards to see how long a card has taken to update.
 
 ### Installation
 
@@ -35,7 +42,10 @@ Or run the cli.
 
 Soon there will be a server to run the cardrecorder.
 
+### Testing
 
+Run the Mocha/Chai tests
+`npm tests`
 
 ### Public domain
 
