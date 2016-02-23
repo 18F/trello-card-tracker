@@ -49,7 +49,7 @@ Soon there will be a server to run the cardrecorder.
 ### Testing
 
 Run the Mocha/Chai tests
-`npm tests`
+`npm test`
 
 ### Public domain
 
