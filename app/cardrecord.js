@@ -2,7 +2,7 @@ var TrelloSuper = require("./helpers.js");
 var util = require('util');
 var instadate = require("instadate");
 var moment = require("moment");
-yaml = require('js-yaml');
+var yaml = require('js-yaml');
 
 function CardRecorder(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);

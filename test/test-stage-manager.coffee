@@ -7,7 +7,7 @@ stages = helpers.expectedStageObject.stages[0].substages
 
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
 
-describe 'stageManager', ->
+describe 'app.StageManager', ->
   describe '.readYAML', ->
     it 'maps a yaml to an object with a stages key', ->
       yamlObject = stageMgr.readYaml()
