@@ -10,6 +10,9 @@ The stage manager will also close all lists that are not in the stages file.
 #### Card Recorder
 Will add comments to cards to see how long a card has taken to update.
 
+#### Card Creator
+Will create cards that correspond to a particular order listed in an order file.
+
 ### Installation
 
 ```
@@ -35,8 +38,9 @@ Or run the cli.
 
 `node  cli.js [options]`
 
-- -s   Run the stage manager class with an optional stages file parameter. Without the file it will default to `stages.yaml`.
-- -c   Run the cardrecorder with an optional stages file parameter. Without the file it will default to `stages.yaml`.    
+- -s   Run the stage manager class with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.
+- -r   Run the card recorder with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.   
+- -c   Run the card creator with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.  
 
 ##### Coming Soon
 
