@@ -17,7 +17,25 @@ TRELLO_API_KEY
 TRELLO_API_TOK
 TRELLO_BOARD_ID
 TRELLO_BPA_TEST_BOARD
+TRELLO_TEST_CARD
 ```
+
+### Running
+
+Either `npm start` to run the stagemanger with the default file stages.yaml.
+
+Or run the cli.
+
+`node  cli.js [options]`
+
+- -s   Run the stage manager class with an optional stages file parameter. Without the file it will default to `stages.yaml`.
+- -c   Run the cardrecorder with an optional stages file parameter. Without the file it will default to `stages.yaml`.    
+
+##### Coming Soon
+
+Soon there will be a server to run the cardrecorder.
+
+
 
 ### Public domain
 
