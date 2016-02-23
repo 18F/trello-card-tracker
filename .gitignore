@@ -35,3 +35,4 @@ node_modules
 # Order file
 data/orders.yaml
 data/orders.yml
+orders.yml
