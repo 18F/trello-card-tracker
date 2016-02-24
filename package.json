@@ -25,6 +25,7 @@
     "async": "^1.5.2",
     "chai": "^3.5.0",
     "coffee-script": "^1.10.0",
+    "dotenv": "^2.0.0",
     "instadate": "^0.1.7",
     "js-yaml": "^3.5.2",
     "minimalist": "^1.0.0",
