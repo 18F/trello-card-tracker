@@ -12,6 +12,37 @@ util.inherits(CardRecorder, TrelloSuper);
 
 var method = CardRecorder.prototype;
 
+method.run = function(){
+	this.t.get('/1/boards/'+this.board+'/cards', {actions: ["createCard", "updateCard"]}, function(err, cards){
+		if (err) {throw err};
+		_un.each(cards, function(card){
+			this.deleteCurrentComment(card["id"]);
+			var now = moment();
+			if (now.diff(moment(card.actions[0].date), 'hours') < 24 ){
+				this.findLastMoves(card["id"]).then();
+			} else {
+
+			}
+		});
+	});
+}
+
+method.deleteCurrentComment = function(cardID){
+	classThis = this;
+	this.t.get('/1/cards/'+cardID+'/actions', {filter:'commentCard'}, function(err, comments){
+		_un.each(comments,function(c){
+			if (c.data.text.indexOf("**Current Stage:**") != -1){
+				var currentCommentID = c["id"];
+			}
+		});
+		if(currentCommentID){
+			classThis.t.delete('/1/cards/'+cardID+'/actions/'+currentCommentID+'/comments', function(err, data){
+				if (err) throw err;
+			});
+		}
+	});
+}
+
 method.addComment = function(message, cardID){
 	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
 		if (err) {throw err};

@@ -24,7 +24,7 @@ describe 'app.CardCreator', ->
   describe '.descriptionMaker', ->
     it 'will create a description for a new card given bpa order details object', ->
       description = CC.descriptionMaker(helpers.mockOrder)
-      expect(description).to.equal("Project: FedRamp Dashboard\nAgency: General Services Administration\nSubAgency: OCSIT\nTrello Board: https://trello.com/b/nmYlvlhu/bpa-test-dashboard")
+      expect(description).to.equal("Project: BPA Project\nAgency: General Services Administration\nSubAgency: OCSIT\nTrello Board: https://trello.com/b/nmYlvlhu/bpa-test-dashboard")
       return
     return
 

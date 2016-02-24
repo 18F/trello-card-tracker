@@ -7,6 +7,11 @@ q = require('q')
 CR = new app.CardRecorder(helpers.ordermockfile, helpers.board)
 
 describe 'app.CardRecorder', ->
+  describe.skip '.deleteCurrentComment(cardID)', ->
+    it 'will delete a comment if a bolded text saying "Current Stage" appears', ->
+      return
+    return
+
   describe.skip '.addComment', ->
     it 'adds a comment to a board', ->
       CR.addComment("test message", helpers.testCardID)

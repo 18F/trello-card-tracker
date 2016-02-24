@@ -18,7 +18,7 @@ module.exports = {
     testCardID: process.env.TRELLO_TEST_CARD,
     mockOrder: {
       id: 1,
-      project: "FedRamp Dashboard",
+      project: "BPA Project",
       order: "Front End",
       agency: "General Services Administration",
       subagency: "OCSIT",
