@@ -4,7 +4,7 @@ app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
 
-CR = new app.CardRecorder(helpers.ordermockfile, helpers.board)
+CR = new app.CardRecorder(helpers.mockfile, helpers.board)
 
 describe 'app.CardRecorder', ->
   describe.skip '.deleteCurrentComment(cardID)', ->

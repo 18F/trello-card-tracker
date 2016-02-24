@@ -4,7 +4,7 @@ app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
 
-CC = new app.CardCreator(helpers.ordermockfile, helpers.board)
+CC = new app.CardCreator(helpers.mockfile, helpers.board)
 
 describe 'app.CardCreator', ->
   describe.skip '.createOrders', ->
