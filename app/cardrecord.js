@@ -6,6 +6,8 @@ var yaml = require('js-yaml');
 
 function CardRecorder(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);
+	this.Stages = this.getPreAward();
+	classThis = this;
 }
 
 util.inherits(CardRecorder, TrelloSuper);
@@ -13,18 +15,54 @@ util.inherits(CardRecorder, TrelloSuper);
 var method = CardRecorder.prototype;
 
 method.run = function(){
-	this.t.get('/1/boards/'+this.board+'/cards', {actions: ["createCard", "updateCard"]}, function(err, cards){
+	classThis = this;
+	classThis.t.get('/1/boards/'+this.board+'/cards', {actions: ["createCard", "updateCard"]}, function(err, cards){
 		if (err) {throw err};
 		_un.each(cards, function(card){
-			this.deleteCurrentComment(card["id"]);
+			classThis.deleteCurrentComment(card["id"]);
 			var now = moment();
-			if (now.diff(moment(card.actions[0].date), 'hours') < 24 ){
-				this.findLastMoves(card["id"]).then();
+			hasBeenUpdated = _un.findWhere(card["actions"], {type:"updateCard"});
+			if ((now.diff(moment(card.actions[0].date), 'hours') < 24 ) || (!hasBeenUpdated)){
+				console.log("recent");
+				// classThis.findLastMoves(card["id"]);
 			} else {
-
+				console.log("new phase");
+				 Q.all([classThis.getListNameByID(card["idList"]), classThis.findLastMoves(card["id"]), classThis.getLastList(card.actions[0]["id"])])
+				 .then(function(values){
+					 var phase = values[2];
+				 	classThis.compileCommentArtifact(card["id"], values, phase);
+				 });
 			}
 		});
 	});
+}
+
+method.compileCommentArtifact = function(cardID, asyncValues, phase){
+	console.log(asyncValues);
+	var listName = asyncValues[0];
+		var stage = _un.findWhere(classThis.Stages, {name: listName});
+		var expectedTime = stage["expected_time"];
+		var frmDate = asyncValues[1][0];
+		var toDate = asyncValues[1][1];
+		var diffArray = classThis.calculateDateDifference(expectedTime, frmDate, toDate);
+		var differenceFromExpected = diffArray[0]
+		var timeTaken = diffArray[1];
+		var comment = classThis.buildComment(differenceFromExpected, expectedTime, frmDate, toDate, phase, timeTaken);
+		console.log(comment);
+		classThis.addComment(comment, cardID);
+
+};
+
+
+method.getLastList = function(updateListID){
+	var deferred = Q.defer();
+	this.t.get('/1/actions/'+updateListID, function(err, action){
+		if(err) {deferred.reject(new Error(err));};
+		console.log("get last list");
+		console.log(action["data"]["listBefore"]);
+		deferred.resolve(action["data"]["listBefore"]["name"]);
+	});
+	return deferred.promise;
 }
 
 method.deleteCurrentComment = function(cardID){
@@ -34,12 +72,12 @@ method.deleteCurrentComment = function(cardID){
 			if (c.data.text.indexOf("**Current Stage:**") != -1){
 				var currentCommentID = c["id"];
 			}
+			if(currentCommentID){
+				classThis.t.delete('/1/cards/'+cardID+'/actions/'+currentCommentID+'/comments', function(err, data){
+					if (err) throw err;
+				});
+			}
 		});
-		if(currentCommentID){
-			classThis.t.delete('/1/cards/'+cardID+'/actions/'+currentCommentID+'/comments', function(err, data){
-				if (err) throw err;
-			});
-		}
 	});
 }
 
@@ -76,9 +114,6 @@ method.findLastMoves = function(cardID){
  return deferred.promise;
 }
 
-// method.buildCurrentComment = function(){
-//
-// }
 
 method.buildComment = function(dateDiff, expected, lastMove, recentMove, lastList, actual){
 	fromDate = moment(lastMove).format("L");
