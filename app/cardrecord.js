@@ -21,13 +21,13 @@ method.run = function(){
 		_un.each(cards, function(card){
 			classThis.deleteCurrentComment(card["id"]).done(function(d){
 				var now = moment();
-				var hasBeenUpdated = _un.findWhere(card["actions"], {type:"updateCard"});
+				hasMoved = classThis.hasMovedCheck(card["actions"]);
 				var daysSinceUpdate = now.diff(moment(card.actions[0].date), 'days');
-				if ((daysSinceUpdate > 0 ) || (!hasBeenUpdated)){
+				if ((daysSinceUpdate > 0 ) || (!hasMoved)){
 					console.log("Write Current Comment: "+card["name"]);
 					classThis.getListNameByID(card["idList"])
 						.then(function(listName){
-							classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, moment().format());
+							classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format());
 						});
 				} else {
 					console.log("Write New Phase: "+card["name"]);
@@ -64,6 +64,18 @@ method.deleteCurrentComment = function(cardID){
 		}
 	});
 		return deferred.promise;
+}
+
+method.hasMovedCheck = function(actionList){
+	var updated = false;
+	var updates = _un.where(actionList, {type:"updateCard"});
+	if(updates.length > 0){
+		moves = _un.filter(updates, function(a){ return 'listBefore' in a.data});
+		if(moves.length > 0){
+			updated = true;
+		}
+	}
+	return updated;
 }
 
 
