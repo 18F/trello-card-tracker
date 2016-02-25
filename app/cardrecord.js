@@ -24,18 +24,18 @@ method.run = function(){
 				var hasBeenUpdated = _un.findWhere(card["actions"], {type:"updateCard"});
 				var daysSinceUpdate = now.diff(moment(card.actions[0].date), 'days');
 				if ((daysSinceUpdate > 0 ) || (!hasBeenUpdated)){
-					console.log("Write Current Comment");
+					console.log("Write Current Comment: "+card["name"]);
 					classThis.getListNameByID(card["idList"])
 						.then(function(listName){
 							classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, moment().format());
 						});
 				} else {
-					console.log("Write New Phase");
+					console.log("Write New Phase: "+card["name"]);
 					 Q.all([classThis.getListNameByID(card["idList"]), classThis.getLastList(card.actions[0]["id"])])
 					 .then(function(lists){
 						 var listName = lists[0]
-						 var lastPhase = list[1];
-						classThis.compileCommentArtifact(card["id"], listName, lastPhase, lists, card["actions"][1]["date"], card["actions"][0]["date"]);
+						 var lastPhase = lists[1];
+						classThis.compileCommentArtifact(card["id"], listName, lastPhase, lists, card.actions[1].date, card.actions[0].date);
 					 });
 				}
 			});
@@ -45,21 +45,23 @@ method.run = function(){
 
 method.deleteCurrentComment = function(cardID){
 	var deferred = Q.defer();
+	var currentCommentID = "";
 	classThis.t.get('/1/cards/'+cardID+'/actions', {filter:'commentCard'}, function(err, comments){
 		if(err) {deferred.reject(new Error(err));};
 		_un.each(comments,function(c){
 			if (c.data.text.indexOf("**Current Stage:**") != -1){
-				var currentCommentID = c["id"];
-			}
-			if(currentCommentID){
-				classThis.t.del('/1/actions/'+currentCommentID, function(err, data){
-					if(err) {deferred.reject(new Error(err));};
-					deferred.resolve(data);
-				});
-			} else {
-				deferred.resolve("no delete");
+				currentCommentID = c["id"];
 			}
 		});
+		if(currentCommentID != ""){
+			classThis.t.del('/1/actions/'+currentCommentID, function(err, data){
+				if(err) { console.log(err);
+					deferred.reject(new Error(err));};
+				deferred.resolve(data);
+			});
+		} else {
+			deferred.resolve("no current comment");
+		}
 	});
 		return deferred.promise;
 }
@@ -83,7 +85,6 @@ method.compileCommentArtifact = function(cardID, listName, phase, fromDate, toDa
 		var differenceFromExpected = diffArray[0];
 		var timeTaken = diffArray[1];
 		var comment = classThis.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, phase, timeTaken);
-		console.log(comment);
 		classThis.addComment(comment, cardID);
 
 };
