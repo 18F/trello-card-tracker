@@ -3,18 +3,10 @@ _un = require("underscore")
 app = require('../app')
 helpers = require('./test-helpers.js')
 stages = helpers.expectedStageObject.stages[0].substages
-# console.log stages
 
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
 
 describe 'app.StageManager', ->
-  describe '.readYAML', ->
-    it 'maps a yaml to an object with a stages key', ->
-      yamlObject = stageMgr.readYaml()
-      expect(yamlObject).to.eql(helpers.expectedStageObject)
-      return
-    return
-
   describe '.checkLists', -> # skipping because testing async fxn callback...boooo
     it 'checks which stages in an object of stages are in a trello board', ->
       expected_object = ["Kanbanian", "Kanbanian-Dos"]

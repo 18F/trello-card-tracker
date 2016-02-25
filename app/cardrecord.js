@@ -79,7 +79,6 @@ method.hasMovedCheck = function(actionList){
 }
 
 
-
 method.getLastList = function(updateListID){
 	var deferred = Q.defer();
 	this.t.get('/1/actions/'+updateListID, function(err, action){
