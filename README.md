@@ -1,5 +1,8 @@
 # bpa-trello
 
+[![Build Status](https://travis-ci.org/18F/bpa-trello.svg?branch=master)](https://travis-ci.org/18F/bpa-trello)
+
+
 Content of a Trello board for the agile BPA.
 
 ### Features
