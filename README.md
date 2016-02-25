@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/18F/bpa-trello.svg?branch=master)](https://travis-ci.org/18F/bpa-trello)
 
+[![Code Climate](https://codeclimate.com/github/18F/bpa-trello/badges/gpa.svg)](https://codeclimate.com/github/18F/bpa-trello)
+
+[![codecov.io](https://codecov.io/github/18F/bpa-trello/coverage.svg?branch=master)](https://codecov.io/github/18F/bpa-trello?branch=master)
 
 Content of a Trello board for the agile BPA.
 
