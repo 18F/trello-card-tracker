@@ -25,7 +25,11 @@ describe 'app.TrelloSuper', ->
   describe 'getListIDbyName(ListName)', ->
     it 'will ping Trello to grab a list ID given a list name', (done) ->
 
+      # Calls to trello.get will call the callback with no error and
+      # the supplied array as data.
       stub = helpers.trelloStub("get", null, [{ name: "IAA", id: "abc123" }]);
+
+      # Ask for the ID that matches the name from above.
       stageMgr.getListIDbyName "IAA", (id) ->
         expect(id).to.eql("abc123");
         stub.restore()
