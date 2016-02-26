@@ -36,5 +36,8 @@
     "q": "^1.4.1",
     "request": "^2.69.0",
     "underscore": "~1.8.3"
+  },
+  "devDependencies": {
+    "sinon": "^1.17.3"
   }
 }
