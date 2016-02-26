@@ -16,29 +16,35 @@ var method = CardRecorder.prototype;
 
 method.run = function(){
 	classThis = this;
+	this.getUpdateCards(function(card){
+		classThis.deleteCurrentComment(card["id"]).done(function(d){
+			var now = moment();
+			hasMoved = classThis.hasMovedCheck(card["actions"]);
+			var daysSinceUpdate = now.diff(moment(card.actions[0].date), 'days');
+			if ((daysSinceUpdate > 0 ) || (!hasMoved)){
+				console.log("Write Current Comment: "+card["name"]);
+				classThis.getListNameByID(card["idList"])
+					.then(function(listName){
+						classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format());
+					});
+			} else {
+				console.log("Write New Phase: "+card["name"]);
+				 Q.all([classThis.getListNameByID(card["idList"]), classThis.getLastList(card.actions[0]["id"])])
+				 .then(function(lists){
+					 var listName = lists[0];
+					 var lastPhase = lists[1];
+					classThis.compileCommentArtifact(card["id"], listName, lastPhase, lists, card.actions[1].date, card.actions[0].date);
+				 });
+			}
+		});
+	});
+}
+
+method.getUpdateCards = function(callback){
 	classThis.t.get('/1/boards/'+this.board+'/cards', {actions: ["createCard", "updateCard"]}, function(err, cards){
 		if (err) {throw err};
 		_un.each(cards, function(card){
-			classThis.deleteCurrentComment(card["id"]).done(function(d){
-				var now = moment();
-				hasMoved = classThis.hasMovedCheck(card["actions"]);
-				var daysSinceUpdate = now.diff(moment(card.actions[0].date), 'days');
-				if ((daysSinceUpdate > 0 ) || (!hasMoved)){
-					console.log("Write Current Comment: "+card["name"]);
-					classThis.getListNameByID(card["idList"])
-						.then(function(listName){
-							classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format());
-						});
-				} else {
-					console.log("Write New Phase: "+card["name"]);
-					 Q.all([classThis.getListNameByID(card["idList"]), classThis.getLastList(card.actions[0]["id"])])
-					 .then(function(lists){
-						 var listName = lists[0]
-						 var lastPhase = lists[1];
-						classThis.compileCommentArtifact(card["id"], listName, lastPhase, lists, card.actions[1].date, card.actions[0].date);
-					 });
-				}
-			});
+			callback(card);
 		});
 	});
 }
@@ -79,9 +85,9 @@ method.hasMovedCheck = function(actionList){
 }
 
 
-method.getLastList = function(updateListID){
+method.getLastList = function(updateActionID){
 	var deferred = Q.defer();
-	this.t.get('/1/actions/'+updateListID, function(err, action){
+	this.t.get('/1/actions/'+updateActionID, function(err, action){
 		if(err) {deferred.reject(new Error(err));};
 		deferred.resolve(action["data"]["listBefore"]["name"]);
 	});
