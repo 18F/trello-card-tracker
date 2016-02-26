@@ -15,13 +15,19 @@ describe 'app.TrelloSuper', ->
       return
     return
 
-  describe.skip '.getPreAward()', ->
+  describe '.getPreAward()', ->
     it 'will grab the Pre-Award stage from a file', ->
+      preaward = stageMgr.getPreAward()
+      expect(preaward).to.eql(helpers.expectedStageObject.stages[0].substages)
       return
     return
 
-  describe.skip 'getListIDbyName(ListName)', ->
-    it 'will ping Trello to grab a list ID given a list name', ->
+  describe 'getListIDbyName(ListName)', ->
+    it 'will ping Trello to grab a list ID given a list name', (done) ->
+      listName = helpers.expectedStageObject.stages[0].substages[0].name
+      stageMgr.getListIDbyName listName, (id) ->
+        expect(id).to.be.a('string')
+        done()
       return
     return
 
