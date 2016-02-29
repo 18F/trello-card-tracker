@@ -1,0 +1,6 @@
+---
+applications:
+- name: bpa-trello
+  memory: 512M
+  instances: 1
+  no-route: true

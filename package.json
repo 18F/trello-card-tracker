@@ -4,7 +4,7 @@
   "description": "An interface to interact with trello kanban lists",
   "main": "cli.js",
   "scripts": {
-    "start": "node cli.js -s stages.yaml",
+    "start": "node server.js",
     "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec"
   },
   "repository": {
