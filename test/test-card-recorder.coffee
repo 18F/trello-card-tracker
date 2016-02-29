@@ -13,8 +13,8 @@ sinon = require("sinon");
 CR = new app.CardRecorder(helpers.mockfile, helpers.board)
 
 describe 'app.CardRecorder', ->
-  sandbox = undefined
   describe '.getUpdateCards(callback)', ->
+    sandbox = undefined
     before ->
       sandbox = sinon.sandbox.create();
       sandbox.stub(trello.prototype, 'get').returns(helpers.actionListMove)
@@ -31,7 +31,7 @@ describe 'app.CardRecorder', ->
 
   describe '.deleteCurrentComment(cardID)', ->
     sandbox = undefined
-    beforeEach ->
+    before ->
       currentComment = _un.clone(helpers.mockCurrentComment)
       currentComment["text"] = "**Current Stage** This comment says comment stage."
       notCurrentComment = _un.clone(helpers.mockCurrentComment)
@@ -40,7 +40,7 @@ describe 'app.CardRecorder', ->
       sandbox.stub(trello.prototype, 'get').withArgs('380').yieldsAsync([ currentComment ]).withArgs('1000').yieldsAsync([ notCurrentComment ])
       delStub = sandbox.stub(trello.prototype, 'del').withArgs("380").yieldsAsync({}).withArgs("1000").yieldsAsync("no current comment")
       return
-    afterEach ->
+    after ->
       sandbox.restore()
       return
     it 'will delete a comment if a bolded text saying "Current Stage" appears', ->
@@ -68,20 +68,24 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe.skip '.getLastList(updateActionID)', ->
+  describe '.getLastList(updateActionID)', ->
+    sandbox = undefined
+    before ->
+      sandbox = sinon.sandbox.create()
+      sandbox.stub(trello.prototype, 'get').withArgs("47").yieldsAsync(helpers.actionListMove[1]).withArgs("4c").yieldsAsync(helpers.actionListMove[0])
+      return
+    after ->
+      sandbox.restore()
+      return
     it 'will grab the name of the last list a trello card was part of given that the card has moved', ->
-      listStub = helpers.trelloStub("get", null, helpers.actionListMove[1])
       CR.getListIDbyName "47", (listName)->
         expect(listName).to.eql("Old List")
-        listStub.restore()
         return
       return
 
     it 'will return an error if the action does not have a list before', ->
-      listStub = helpers.trelloStub("get", null, helpers.actionListMove[0])
       CR.getListIDbyName "4c", (result)->
         expect(result).to.be.undefined
-        listStub.restore()
         return
       return
 
@@ -106,10 +110,16 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe.skip '.addComment', ->
+  describe '.addComment', ->
+    sandbox = undefined
+    before ->
+      sandbox = sinon.sandbox.create().stub(trello.prototype, 'get').yieldsAsync(helpers.createCommentResp)
+      return
+    after ->
+      sandbox.restore()
+      return
     it 'adds a comment to a board', ->
-      commentStub = helpers.trelloStub('get', null, helpers.createCommentResp)
-      CR.addComment 'test message\n', cardID, (resp) ->
+      CR.addComment 'test message\n', '3333', (resp) ->
         expect(resp.data.text).to.equal 'test message\n'
         return
     return

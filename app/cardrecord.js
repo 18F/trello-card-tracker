@@ -19,8 +19,8 @@ method.run = function(){
 	this.getUpdateCards(function(card){
 		classThis.deleteCurrentComment(card["id"]).done(function(d){
 			var now = moment();
-			hasMoved = classThis.hasMovedCheck(card["actions"]);
 			var daysSinceUpdate = now.diff(moment(card.actions[0].date), 'days');
+			hasMoved = classThis.hasMovedCheck(card["actions"]);
 			if ((daysSinceUpdate > 0 ) || (!hasMoved)){
 				console.log("Write Current Comment: "+card["name"]);
 				classThis.getListNameByID(card["idList"])
@@ -103,7 +103,6 @@ method.compileCommentArtifact = function(cardID, listName, phase, fromDate, toDa
 		var timeTaken = diffArray[1];
 		var comment = classThis.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, phase, timeTaken);
 		classThis.addComment(comment, cardID);
-
 };
 
 method.calculateDateDifference = function(expected, lastMove, recentMove){
@@ -126,25 +125,5 @@ method.addComment = function(message, cardID){
 		// 	console.log("ordering");
 	 });
 }
-
-
-
-
-
-// method.findLastMoves = function(cardActions){
-// 		updatedCards = _un.where(actions, {type: 'updateCard'});
-// 		if (updatedCards > 1){
-// 			var fromAction = updatedCards[1];
-// 			var toAction = updateCards[0];
-// 		} else {
-// 			var fromAction = _un.findWhere(actions, {type:"createCard"});
-// 			var toAction = _un.findWhere(actions, {type:"updateCard"});
-// 		}
-// 	return [fromAction["date"], toAction["date"]]; // From to To Date
-// }
-
-
-
-
 
 module.exports = CardRecorder;
