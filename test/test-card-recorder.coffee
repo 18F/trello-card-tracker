@@ -3,43 +3,55 @@ _un = require("underscore")
 app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
+trello = require("node-trello")
+sinon = require("sinon");
+
+# sinon.stub::asyncOutcome = (args, asyncResp) ->
+#   @withArgs(args).yieldsAsync(asyncResp)
+#   this
 
 CR = new app.CardRecorder(helpers.mockfile, helpers.board)
 
 describe 'app.CardRecorder', ->
-  describe.skip '.getUpdateCards(callback)', ->
+  sandbox = undefined
+  describe '.getUpdateCards(callback)', ->
+    before ->
+      sandbox = sinon.sandbox.create();
+      sandbox.stub(trello.prototype, 'get').returns(helpers.actionListMove)
+      return
+    after ->
+      sandbox.restore()
+      return
     it 'will ping trello and get the updated actions of a card', ->
-      stub = helpers.trelloStub("get", null, helpers.actionListMove)
       CR.getUpdateCards "callback", (resp)->
         expect(resp).to.equal(helpers.actionListMove)
-        stub.restore()
         return
       return
     return
 
   describe '.deleteCurrentComment(cardID)', ->
-    it 'will delete a comment if a bolded text saying "Current Stage" appears', ->
-      currentComment = helpers.mockCurrentComment;
+    sandbox = undefined
+    beforeEach ->
+      currentComment = _un.clone(helpers.mockCurrentComment)
       currentComment["text"] = "**Current Stage** This comment says comment stage."
-      getCommentsStub = helpers.trelloStub("get", null, [helpers.mockCurrentComment]);
-      deleteStub = helpers.trelloStub("del", null, {})
-
+      notCurrentComment = _un.clone(helpers.mockCurrentComment)
+      notCurrentComment["text"] = "This comment is not in the current stage."
+      sandbox = sinon.sandbox.create()
+      sandbox.stub(trello.prototype, 'get').withArgs('380').yieldsAsync([ currentComment ]).withArgs('1000').yieldsAsync([ notCurrentComment ])
+      delStub = sandbox.stub(trello.prototype, 'del').withArgs("380").yieldsAsync({}).withArgs("1000").yieldsAsync("no current comment")
+      return
+    afterEach ->
+      sandbox.restore()
+      return
+    it 'will delete a comment if a bolded text saying "Current Stage" appears', ->
       CR.deleteCurrentComment "380", (data) ->
         expect(data).to.eql({});
-        getCommentsStub.restore()
-        deleteStub.restore()
         return
       return
-    it 'will not delete a comment that does not have a current stage', ->
-      currentComment = helpers.mockCurrentComment;
-      currentComment["text"] = "This comment is not in the current stage."
-      getCommentsStub = helpers.trelloStub("get", null, [helpers.mockCurrentComment]);
-      deleteStub = helpers.trelloStub("del", null, "no current comment")
 
-      CR.deleteCurrentComment "380", (data) ->
+    it 'will not delete a comment that does not have a current stage', ->
+      CR.deleteCurrentComment "1000", (data) ->
         expect(data).to.eql("no current comment");
-        getCommentsStub.restore()
-        deleteStub.restore()
         return
       return
     return
@@ -56,7 +68,7 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.getLastList(updateActionID)', ->
+  describe.skip '.getLastList(updateActionID)', ->
     it 'will grab the name of the last list a trello card was part of given that the card has moved', ->
       listStub = helpers.trelloStub("get", null, helpers.actionListMove[1])
       CR.getListIDbyName "47", (listName)->
@@ -94,7 +106,7 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.addComment', ->
+  describe.skip '.addComment', ->
     it 'adds a comment to a board', ->
       commentStub = helpers.trelloStub('get', null, helpers.createCommentResp)
       CR.addComment 'test message\n', cardID, (resp) ->
