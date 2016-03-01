@@ -49,16 +49,30 @@ method.checkLists = function(data){ //PASS STAGES ASYNC
 
 method.makeAdditionalLists = function(checkedList){
 	console.log("makeAdd")
+	var deferred = Q.defer();
+	var all = [ ];
+	var newLists = [ ];
+
 	_un.each(checkedList, function(list, i){
+		var listDefer = Q.defer();
+		all.push(listDefer.promise);
 		if (!list["built"]){
 			var postList = {name: list["stage"], idBoard: classThis.board, pos: i+1};
 			classThis.t.post("1/lists", postList, function(err,data){
-				if (err) throw err;
-				// console.log(data);
-				// return data;
+				if (err) {
+					listDefer.reject(err);
+				}
+				newLists.push(data);
+				listDefer.resolve();
 			});
 		}
 	});
+
+	Q.all(all).then(function() {
+		deferred.resolve(newLists);
+	});
+
+	return deferred.promise;
 };
 
 method.closeUnusedStages = function(data){
