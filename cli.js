@@ -1,22 +1,28 @@
 #!/usr/bin/env node
 _un = require("underscore");
 var app = require('./app');
-//
+var argv = require('minimist')(process.argv.slice(2));
 
 // select board ***
-var board = process.env.TRELLO_BPA_BOARD;
+var board = process.env.TRELLO_BOARD_ID;
 
-args = process.argv.slice(2);
+if ("s" in argv){
+  console.log("--Invoke Stage Manager--");
+  var file  = (argv["s"]=== true) ? 'data/stages.yaml' : argv["s"];
+  stgManager = new app.StageManager(file, board);
+  stgManager.run();
+}
 
-if (_un.contains(args,"-s")){
-  console.log("Invoke Stage Manager");
-  var file = args[args.indexOf("-s") + 1];
-  stgManager = new app.StageManager('stages.yaml', board);
+if ("r" in argv) {
+  console.log("--Invoke Card Recorder--");
+  var file  = (argv["r"]=== true) ? 'data/stages.yaml' : argv["r"];
+  var CR = new app.CardRecorder(file, board);
+  CR.run();
+}
 
-} else if (_un.contains(args,"-c")) {
-  console.log("Invoke Card Recorder");
-  var file = args[args.indexOf("-c") + 1];
-  cardRecorder = new app.CardRecorder('stages.yaml', board);
-} else{
-  console.log("Please supply an argument -s for Stage Manager or -c for card recorder");
+if ("c" in argv) {
+  console.log("--Invoke Card Creator--");
+  var file  = (argv["c"]=== true) ? 'data/stages.yaml' : argv["c"];
+  var CC = new app.CardCreator(file, board);
+  CC.createOrders('data/orders.yaml');
 }

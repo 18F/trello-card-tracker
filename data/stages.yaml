@@ -1,0 +1,23 @@
+stages:
+- name: "Pre-Award"
+  substages:
+  - name: "IAA"
+    expected_time: 25
+  - name: "Workshop Prep"
+    expected_time: 7
+  - name: "Workshop"
+    expected_time: 2
+  - name: "RFP Writing"
+    expected_time: 14
+  - name: "CO Review"
+    expected_time: 7
+  - name: "Client Review"
+    expected_time: 2
+  - name: "RFP Posted, Proposal and Evaluation Process"
+    expected_time: 21
+  - name: "CO Review of Award Documentation"
+    expected_time: 7
+  - name: "Award"
+    expected_time: 1
+  - name: "Post-Award Kick-off"
+    expected_time: 5

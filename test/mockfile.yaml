@@ -1,0 +1,7 @@
+stages:
+- name: "Pre-Award"
+  substages:
+  - name: "IAA"
+    expected_time: 5
+  - name: "Workshop Prep"
+    expected_time: 10
