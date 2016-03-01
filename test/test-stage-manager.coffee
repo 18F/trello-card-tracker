@@ -27,27 +27,39 @@ describe 'app.StageManager', ->
       return
     return
 
+  describe '.checkLists', ->
+    expected = undefined
+
+    before ->
+      expected = [ ];
+      helpers.expectedStageObject.stages[0].substages.forEach (s) ->
+        expected.push { stage: s.name, built: null }
+
     it 'checks which stages in an object of stages are in a trello board', ->
-      expected_object = ["Kanbanian", "Kanbanian-Dos"]
-      stageMgr.checkLists(helpers.stubbed_list, testCallback)
-      testCallback = (checkedList) ->
-        stgs = _un.pluck(checkedList, 'name')
-        expect(checkedListg).to.eql expected_list
-        return
-      # expect(result_object).to.include.members(expected_object);
+      checkedList = stageMgr.checkLists([helpers.expectedStageObject.stages[0].substages, [{ name:expected[0].stage }]])
+      expected[0].built = true;
+      expected[1].built = false;
+      expect(checkedList).to.eql expected
       return
     return
 
   describe '.makeAdditionalLists', ->
-    it 'given a list of objects that include the name of unbuilt lists, it makes additional lists in trello', ->
-      stageMgr.makeAdditionalLists(helpers.make_lists)
-      stageMgr.t.get helpers.board_url, (err, data) ->
-        if err
-          throw err
-        boardLists = _un.pluck(data, 'name')
-        expect(boardLists).to.include.members(helpers.stubbed_list)
-        return
-      return
+    stub = undefined
+    unbuilt = undefined
+
+    before ->
+      stub = helpers.trelloStub("post", null, true);
+      unbuilt = helpers.make_lists.filter (l) ->
+        return !l.built
+
+    after ->
+      stub.restore()
+
+    it 'given a list of objects that include the name of unbuilt lists, it makes additional lists in trello', (done) ->
+      stageMgr.makeAdditionalLists(helpers.make_lists).then (data) ->
+        expect(data.length).to.eql helpers.make_lists.length
+        expect(stub.callCount).to.eql unbuilt.length
+        done()
     return
 
   describe '.orderLists', ->
