@@ -4,7 +4,7 @@
   "description": "An interface to interact with trello kanban lists",
   "main": "cli.js",
   "scripts": {
-    "start": "node cli.js -s stages.yaml",
+    "start": "node server.js",
     "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec"
   },
   "repository": {
@@ -32,6 +32,7 @@
     "mocha": "^2.4.5",
     "moment": "^2.11.2",
     "moment-timezone": "^0.5.0",
+    "node-schedule": "^1.0.0",
     "node-trello": "^1.1.2",
     "q": "^1.4.1",
     "request": "^2.69.0",

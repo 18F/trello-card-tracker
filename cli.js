@@ -18,9 +18,6 @@ if ("r" in argv) {
   var file  = (argv["r"]=== true) ? 'data/stages.yaml' : argv["r"];
   var CR = new app.CardRecorder(file, board);
   CR.run();
-  // diff = CR.calculateDateDifference(10, "2016-04-05", "2016-07-27")
-  // console.log(diff);
-  // CR.addComment("testComment")
 }
 
 if ("c" in argv) {

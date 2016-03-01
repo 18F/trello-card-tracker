@@ -39,3 +39,5 @@ node_modules
 data/orders.yaml
 data/orders.yml
 orders.yml
+
+cf-ssh.yml
