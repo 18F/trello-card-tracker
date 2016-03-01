@@ -7,7 +7,26 @@ stages = helpers.expectedStageObject.stages[0].substages
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
 
 describe 'app.StageManager', ->
-  describe '.checkLists', -> # skipping because testing async fxn callback...boooo
+  describe '.getStageandBoard', ->
+    stub = undefined
+    expected = undefined
+
+    before ->
+      stubData = { output: "data" };
+      stub = helpers.trelloStub("get", null, stubData);
+      expected = [helpers.expectedStageObject.stages[0].substages, stubData]
+
+    after ->
+      stub.restore()
+
+    it 'gets stages and lists in the trello board', (done) ->
+      stageMgr.getStageandBoard().then (data) ->
+        expect(data).to.eql expected
+        expect(stub.callCount).to.eql 1
+        done()
+      return
+    return
+
     it 'checks which stages in an object of stages are in a trello board', ->
       expected_object = ["Kanbanian", "Kanbanian-Dos"]
       stageMgr.checkLists(helpers.stubbed_list, testCallback)
