@@ -4,8 +4,8 @@
   "description": "An interface to interact with trello kanban lists",
   "main": "cli.js",
   "scripts": {
-    "start": "node cli.js -s stages.yaml",
-    "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec"
+    "start": "node server.js",
+    "test": "istanbul cover ./node_modules/.bin/_mocha -- -R spec --compilers coffee:coffee-script/register && ./node_modules/.bin/codecov"
   },
   "repository": {
     "type": "git",
@@ -23,13 +23,11 @@
   "homepage": "https://github.com/18f/bpa-trello-dashboard#readme",
   "dependencies": {
     "async": "^1.5.2",
-    "chai": "^3.5.0",
     "coffee-script": "^1.10.0",
     "dotenv": "^2.0.0",
     "instadate": "^0.1.7",
     "js-yaml": "^3.5.2",
     "minimalist": "^1.0.0",
-    "mocha": "^2.4.5",
     "moment": "^2.11.2",
     "moment-timezone": "^0.5.0",
     "node-trello": "^1.1.2",
@@ -37,5 +35,11 @@
     "request": "^2.69.0",
     "sinon": "^1.17.3",
     "underscore": "~1.8.3"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.2",
+    "codecov": "^1.0.1"
   }
 }
