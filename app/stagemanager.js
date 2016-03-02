@@ -70,7 +70,9 @@ method.makeAdditionalLists = function(checkedList){
 
 	Q.all(all).then(function() {
 		deferred.resolve(newLists);
-	});
+	}).catch(function(e) {
+		deferred.reject(e);
+	})
 
 	return deferred.promise;
 };
