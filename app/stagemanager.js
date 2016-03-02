@@ -108,13 +108,16 @@ method.closeList = function(listData, trelloID){
 
 method.orderLists = function(data){
 	console.log("order")
+	var position = 0;
 	_un.each(data[0], function(stage, i){
 		appropriateList = _un.findWhere(data[1], {name: stage["name"]})
-		listID = appropriateList["id"];
-		classThis.t.put("1/lists/"+listID+"/pos", {value: i}, function(e, data){
-		 	if (e) {throw e};
-			// 	console.log("ordering");
-		 });
+		if(appropriateList) {
+			listID = appropriateList["id"];
+			classThis.t.put("1/lists/"+listID+"/pos", {value: position}, function(e, data) {
+				if (e) {throw e};
+			});
+			position++;
+		}
 	});
 }
 
