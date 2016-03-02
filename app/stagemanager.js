@@ -83,16 +83,16 @@ method.closeUnusedStages = function(data){
 	// For each list
 	_un.each(data[1], function(trelloList){
 		if (!(_un.contains(stages, trelloList["name"]))){
-				classThis.getListCards(function(d){
-					classThis.closeList(d, trelloList["id"])
-				});
+			classThis.getListCards(trelloList["id"], function(d){
+				classThis.closeList(d, trelloList["id"])
+			});
 		};
 	});
 	return;
 }
 
-method.getListCards = function(callback){
-	this.t.get("/1/lists/"+trelloList["id"]+"/cards", function(err, data){
+method.getListCards = function(trelloID, callback){
+	this.t.get("/1/lists/"+trelloID+"/cards", function(err, data){
 		if(err) throw err;
 		callback(data);
 	});
@@ -102,7 +102,7 @@ method.closeList = function(listData, trelloID){
 	if (listData.length === 0){
 		classThis.t.put("/1/list/"+trelloID+"/closed", {value: true}, function(e, success){
 		});
-	};
+	}
 }
 
 
