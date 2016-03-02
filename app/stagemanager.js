@@ -39,7 +39,6 @@ method.getStageandBoard = function(){
 
 method.checkLists = function(data){ //PASS STAGES ASYNC
 	var checked = [];
-	console.log("check");
 	lists = _un.pluck(data[1], 'name');
 	_un.each(data[0], function(stage){
 		checked.push({"stage": stage["name"], "built": _un.contains(lists, stage["name"])});
@@ -48,7 +47,6 @@ method.checkLists = function(data){ //PASS STAGES ASYNC
 };
 
 method.makeAdditionalLists = function(checkedList){
-	console.log("makeAdd")
 	var deferred = Q.defer();
 	var all = [ ];
 	var newLists = [ ];
@@ -78,7 +76,6 @@ method.makeAdditionalLists = function(checkedList){
 };
 
 method.closeUnusedStages = function(data){
-	console.log("close");
 	stages = _un.pluck(data[0], 'name'); //Grab stage names
 	// For each list
 	_un.each(data[1], function(trelloList){
@@ -105,9 +102,7 @@ method.closeList = function(listData, trelloID){
 	}
 }
 
-
 method.orderLists = function(data){
-	console.log("order")
 	var position = 0;
 	_un.each(data[0], function(stage, i){
 		appropriateList = _un.findWhere(data[1], {name: stage["name"]})
