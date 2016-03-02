@@ -7,7 +7,7 @@ stages = helpers.expectedStageObject.stages[0].substages
 
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
 
-timeout = 50
+timeout = 10
 
 describe 'app.StageManager', ->
   describe '.getStageandBoard', ->
@@ -154,11 +154,8 @@ describe 'app.StageManager', ->
 
     it 'asks Trello to close the list', (done) ->
       stageMgr.closeList([], 'abc123');
-      setTimeout (->
-        expect(stub.callCount).to.eql 1
-        done()
-        return
-      ), timeout
+      expect(stub.callCount).to.eql 1
+      done()
       return
     return
 
@@ -186,11 +183,8 @@ describe 'app.StageManager', ->
       # First argument: all stages
       # Second argument: all lists on the board
       stageMgr.orderLists([stages, lists])
-      setTimeout (->
-        expect(stub.callCount).to.eql 1
-        done()
-        return
-      ), timeout
+      expect(stub.callCount).to.eql 1
+      done()
       return
 
     return
