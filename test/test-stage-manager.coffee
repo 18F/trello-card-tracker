@@ -7,8 +7,6 @@ stages = helpers.expectedStageObject.stages[0].substages
 
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
 
-timeout = 10
-
 describe 'app.StageManager', ->
   describe '.getStageandBoard', ->
     stub = undefined
@@ -105,20 +103,18 @@ describe 'app.StageManager', ->
 
     it 'gets card info for all lists that are not in the stages', (done) ->
       stageMgr.closeUnusedStages(input)
-      setTimeout (->
+      helpers.waitTicks 2, ->
         expect(getListCardsStub.callCount).to.eql input[1].length
         done()
         return
-      ), timeout
       return
 
     it 'calls close on all lists that are not in stages', (done) ->
       stageMgr.closeUnusedStages(input)
-      setTimeout (->
+      helpers.waitTicks 2, ->
         expect(closeListStub.callCount).to.eql input[1].length
         done()
         return
-      ), timeout
       return
     return
 
