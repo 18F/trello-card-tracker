@@ -7,6 +7,8 @@ stages = helpers.expectedStageObject.stages[0].substages
 
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
 
+timeout = 50
+
 describe 'app.StageManager', ->
   describe '.getStageandBoard', ->
     stub = undefined
@@ -58,7 +60,7 @@ describe 'app.StageManager', ->
     unbuilt = undefined
 
     beforeEach ->
-      stub = helpers.trelloStub("post", error, true);
+      stub = helpers.trelloStub('post', error, true);
       unbuilt = helpers.make_lists.filter (l) ->
         return !l.built
       return
@@ -91,9 +93,9 @@ describe 'app.StageManager', ->
     closeListStub = undefined
 
     beforeEach ->
-      input = [ [], [{ name: "List", id: "abc" }] ]
-      getListCardsStub = helpers.trelloStub("get", null, [ ])
-      closeListStub = helpers.trelloStub("put", null, null)
+      input = [ [], [{ name: 'List', id: 'abc' }] ]
+      getListCardsStub = helpers.trelloStub('get', null, [ ])
+      closeListStub = helpers.trelloStub('put', null, null)
       return
 
     afterEach ->
@@ -107,7 +109,7 @@ describe 'app.StageManager', ->
         expect(getListCardsStub.callCount).to.eql input[1].length
         done()
         return
-      ), 30
+      ), timeout
       return
 
     it 'calls close on all lists that are not in stages', (done) ->
@@ -116,7 +118,7 @@ describe 'app.StageManager', ->
         expect(closeListStub.callCount).to.eql input[1].length
         done()
         return
-      ), 30
+      ), timeout
       return
     return
 
@@ -156,7 +158,7 @@ describe 'app.StageManager', ->
         expect(stub.callCount).to.eql 1
         done()
         return
-      ), 30
+      ), timeout
       return
     return
 
@@ -188,7 +190,7 @@ describe 'app.StageManager', ->
         expect(stub.callCount).to.eql 1
         done()
         return
-      ), 30
+      ), timeout
       return
 
     return
