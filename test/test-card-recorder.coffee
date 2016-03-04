@@ -113,7 +113,7 @@ describe 'app.CardRecorder', ->
   describe '.addComment', ->
     sandbox = undefined
     before ->
-      sandbox = sinon.sandbox.create().stub(trello.prototype, 'get').yieldsAsync(helpers.createCommentResp)
+      sandbox = sinon.sandbox.create().stub(trello.prototype, 'post').yieldsAsync(helpers.createCommentResp)
       return
     after ->
       sandbox.restore()
