@@ -3,6 +3,7 @@ _un = require("underscore")
 app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
+trello = require('node-trello')
 
 CC = new app.CardCreator(helpers.mockfile, helpers.board)
 
@@ -14,10 +15,32 @@ describe 'app.CardCreator', ->
       return
     return
 
-  describe.skip '.createCard', ->
-    it 'will create an individual card on trello', ->
-      CC.createCard(helpers.mockOrder)
-      expect(trelloCards).to.include.members(helpers.testCard)
+  describe '.createCard', ->
+    postStub = undefined
+    sandbox = undefined
+    err = null
+    beforeEach ->
+      sandbox = sinon.sandbox.create()
+      postStub = sandbox.stub(trello.prototype, 'post').yieldsAsync(err, undefined)
+      listStub = sandbox.stub(CC, 'getListIDbyName').withArgs("CO Review").yieldsAsync('aaaaaa')
+      return
+    afterEach ->
+      sandbox.restore()
+      err = new Error('Test Error')
+      return
+
+    it 'will create an individual card on trello', (done) ->
+      CC.createCard(helpers.mockOrder).then (resp) ->
+        expect(resp).to.equal(helpers.testCard)
+        done()
+        return
+      return
+
+    it 'survives a trello error', (done) ->
+      CC.createCard(helpers.mockOrder).catch ->
+        expect(postStub.callCount).to.eql 1
+        done()
+        return
       return
     return
 
