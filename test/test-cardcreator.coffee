@@ -40,17 +40,15 @@ describe 'app.CardCreator', ->
       err = new Error('Test Error')
       return
 
-    it 'will create an individual card on trello', (done) ->
+    it 'will create an individual card on trello',  ->
       CC.createCard(helpers.mockOrder).then (resp) ->
         expect(resp).to.equal(helpers.testCard)
-        done()
         return
       return
 
-    it 'survives a trello error', (done) ->
+    it 'survives a trello error', ->
       CC.createCard(helpers.mockOrder).catch ->
         expect(postStub.callCount).to.eql 1
-        done()
         return
       return
     return

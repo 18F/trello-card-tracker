@@ -42,7 +42,6 @@ method.createCard = function(order){
 									};
 		classThis.t.post('1/cards/', cardInfo, function(err, data){
 			if(err) {deferred.reject(new Error(err));};
-			console.log(data)
 			deferred.resolve(data);
 		});
 
