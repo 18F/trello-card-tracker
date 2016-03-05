@@ -3,8 +3,8 @@ _un = require("underscore")
 app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
-trello = require("node-trello")
-sinon = require("sinon");
+trello = require('node-trello')
+sinon = require('sinon');
 
 # sinon.stub::asyncOutcome = (args, asyncResp) ->
 #   @withArgs(args).yieldsAsync(asyncResp)
@@ -13,6 +13,34 @@ sinon = require("sinon");
 CR = new app.CardRecorder(helpers.mockfile, helpers.board)
 
 describe 'app.CardRecorder', ->
+  describe '.run', ->
+    sandbox = undefined
+    before ->
+      sandbox = sinon.sandbox.create()
+    after ->
+      sandbox.restore()
+
+    it 'will run the cardRecorder class for a list that has moved', ->
+      getCards = sandbox.stub(CR, 'getUpdateCards').returns({id: 'cccc', idList: 'vvv', actions: helpers.actionListMove}) # need to stub card resp
+      deleteCards = sandbox.stub(CR, 'deleteCurrentComment')
+      listStub = sandbox.stub(CR, 'getListNameByID').returns('List Name')
+      compileStub = sandbox.stub(CR, 'compileCommentArtifact')
+      CR.run ->
+        expect(deleteCards.callCount).to.eql 1
+        expect(compileStub.callCount).to.eql 1
+      return
+
+      it 'will run the cardRecorder class for a list that has not moved', ->
+        getCards = sandbox.stub(CR, 'getUpdateCards').returns({id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove}) # need to stub card resp
+        deleteCards = sandbox.stub(CR, 'deleteCurrentComment')
+        listStub = sandbox.stub(CR, 'getListNameByID').returns('List Name')
+        compileStub = sandbox.stub(CR, 'compileCommentArtifact')
+        CR.run ->
+          expect(deleteCards.callCount).to.eql 1
+          expect(compileStub.callCount).to.eql 1
+        return
+    return
+
   describe '.getUpdateCards(callback)', ->
     sandbox = undefined
     before ->
@@ -113,7 +141,7 @@ describe 'app.CardRecorder', ->
   describe '.addComment', ->
     sandbox = undefined
     before ->
-      sandbox = sinon.sandbox.create().stub(trello.prototype, 'get').yieldsAsync(helpers.createCommentResp)
+      sandbox = sinon.sandbox.create().stub(trello.prototype, 'post').yieldsAsync(helpers.createCommentResp)
       return
     after ->
       sandbox.restore()

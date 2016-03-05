@@ -42,7 +42,7 @@ method.run = function(){
 
 method.getUpdateCards = function(callback){
 	classThis.t.get('/1/boards/'+this.board+'/cards', {actions: ["createCard", "updateCard"]}, function(err, cards){
-		if (err) {throw err};
+		if (err) {throw err}
 		_un.each(cards, function(card){
 			callback(card);
 		});
@@ -55,14 +55,14 @@ method.deleteCurrentComment = function(cardID){
 	classThis.t.get('/1/cards/'+cardID+'/actions', {filter:'commentCard'}, function(err, comments){
 		if(err) {deferred.reject(new Error(err));};
 		_un.each(comments,function(c){
-			if (c.data.text.indexOf("**Current Stage:**") != -1){
+			if (c.data.text.indexOf("**Current Stage:**") !== -1){
 				currentCommentID = c["id"];
 			}
 		});
 		if(currentCommentID != ""){
 			classThis.t.del('/1/actions/'+currentCommentID, function(err, data){
 				if(err) { console.log(err);
-					deferred.reject(new Error(err));};
+					deferred.reject(new Error(err))};
 				deferred.resolve(data);
 			});
 		} else {
@@ -88,7 +88,7 @@ method.hasMovedCheck = function(actionList){
 method.getLastList = function(updateActionID){
 	var deferred = Q.defer();
 	this.t.get('/1/actions/'+updateActionID, function(err, action){
-		if(err) {deferred.reject(new Error(err));};
+		if(err) {deferred.reject(new Error(err))};
 		deferred.resolve(action["data"]["listBefore"]["name"]);
 	});
 	return deferred.promise;
@@ -121,8 +121,7 @@ method.buildComment = function(dateDiff, expected, lastMove, recentMove, lastLis
 
 method.addComment = function(message, cardID){
 	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
-		if (err) {throw err};
-		// 	console.log("ordering");
+		if (err) {throw err}
 	 });
 }
 

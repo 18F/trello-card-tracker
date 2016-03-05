@@ -26,7 +26,7 @@ method.getPreAward = function(){
   return stages.stages[0].substages;
 }
 
-method.getListIDbyName= function(name, callback){
+method.getListIDbyName = function(name, callback){
   var find = true;
   if (!name) {
     var find = false;
