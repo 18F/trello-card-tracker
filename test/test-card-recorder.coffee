@@ -37,7 +37,7 @@ describe 'app.CardRecorder', ->
         expect(compileStub.callCount).to.equal 1
         done()
         return
-      ), 95 #Will fail if below 95
+      ), 105 #Will fail if below 95
       return
     it 'will run the cardRecorder class for a list that has not moved', ->
       getCards = sandbox.stub(CR, 'getUpdateCards').returns({id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove})
