@@ -5,6 +5,7 @@ helpers = require('./test-helpers.js')
 q = require('q')
 trello = require('node-trello')
 sinon = require('sinon');
+require('sinon-as-promised');
 
 # sinon.stub::asyncOutcome = (args, asyncResp) ->
 #   @withArgs(args).yieldsAsync(asyncResp)
@@ -23,7 +24,8 @@ describe 'app.CardRecorder', ->
     lastListStub = undefined
     beforeEach ->
       sandbox = sinon.sandbox.create()
-      deleteCards = sandbox.stub(CR, 'deleteCurrentComment')
+      deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({});
+      sandbox.stub(CR, 'getListNameByID').resolves('list name');
       lastListStub = sandbox.stub(CR, 'getLastList')
       compileStub = sandbox.stub(CR, 'compileCommentArtifact')
 
@@ -37,7 +39,7 @@ describe 'app.CardRecorder', ->
         expect(compileStub.callCount).to.equal 1
         done()
         return
-      ), 105 #Will fail if below 95
+      ), 10 #Will fail if below 95
       return
     it 'will run the cardRecorder class for a list that has not moved', (done) ->
       getCards = sandbox.stub(CR, 'getUpdateCards').yieldsAsync({id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove})
@@ -47,7 +49,7 @@ describe 'app.CardRecorder', ->
         expect(compileStub.callCount).to.equal 1
         done()
         return
-      ), 100 #Will fail if below 100
+      ), 10 #Will fail if below 100
       return
     return
 

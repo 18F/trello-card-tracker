@@ -17,7 +17,7 @@ var method = CardRecorder.prototype;
 
 method.run = function(){
 	this.getUpdateCards(function(card){
-		classThis.deleteCurrentComment(card["id"]).done(function(d){
+		classThis.deleteCurrentComment(card["id"]).then(function(d){
 			var now = moment();
 			var daysSinceUpdate = now.diff(moment(card.actions[0].date), 'days');
 			hasMoved = classThis.hasMovedCheck(card["actions"]);
