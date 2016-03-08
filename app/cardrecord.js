@@ -4,6 +4,7 @@ var instadate = require("instadate");
 var moment = require("moment");
 var yaml = require('js-yaml');
 
+var classThis;
 function CardRecorder(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);
 	this.Stages = this.getPreAward();
