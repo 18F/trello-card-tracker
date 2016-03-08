@@ -29,9 +29,9 @@ describe 'app.CardRecorder', ->
 
     afterEach ->
       sandbox.restore()
-    it 'will run the cardRecorder class for a list that has moved', ->
-      getCards = sandbox.stub(CR, 'getUpdateCards').returns({id: 'cccc', idList: 'vvv', actions: helpers.actionListMove})
-      CR.run
+    it 'will run the cardRecorder class for a list that has moved', (done) ->
+      getCards = sandbox.stub(CR, 'getUpdateCards').yieldsAsync({id: 'cccc', idList: 'vvv', actions: helpers.actionListMove})
+      CR.run()
       setTimeout (->
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
@@ -39,9 +39,9 @@ describe 'app.CardRecorder', ->
         return
       ), 105 #Will fail if below 95
       return
-    it 'will run the cardRecorder class for a list that has not moved', ->
-      getCards = sandbox.stub(CR, 'getUpdateCards').returns({id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove})
-      CR.run
+    it 'will run the cardRecorder class for a list that has not moved', (done) ->
+      getCards = sandbox.stub(CR, 'getUpdateCards').yieldsAsync({id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove})
+      CR.run()
       setTimeout (->
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
