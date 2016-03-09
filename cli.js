@@ -9,15 +9,15 @@ var board = process.env.TRELLO_BOARD_ID;
 if ("s" in argv){
   console.log("--Invoke Stage Manager--");
   var file  = (argv["s"]=== true) ? 'data/stages.yaml' : argv["s"];
-  stgManager = new app.StageManager(file, board);
-  stgManager.run();
+  var SM = new app.StageManager(file, board);
+  SM.run();
 }
 
 if ("r" in argv) {
   console.log("--Invoke Card Recorder--");
   var file  = (argv["r"]=== true) ? 'data/stages.yaml' : argv["r"];
   var CR = new app.CardRecorder(file, board);
-  CR.run();
+  CR.run(console.log("CR Complete"));
 }
 
 if ("c" in argv) {
