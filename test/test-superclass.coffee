@@ -8,7 +8,7 @@ stageMgr = new app.StageManager(helpers.mockfile, helpers.board) # The trello su
 
 describe 'app.TrelloSuper', ->
 
-  describe '.readYAML()', ->
+  describe.skip '.readYAML()', ->
     it 'maps a yaml to an object with a stages key', ->
       yamlObject = stageMgr.readYaml()
       expect(yamlObject).to.eql(helpers.expectedStageObject)

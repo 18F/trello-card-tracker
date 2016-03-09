@@ -15,7 +15,6 @@ util.inherits(CardRecorder, TrelloSuper);
 var method = CardRecorder.prototype;
 
 method.run = function(){
-	classThis = this;
 	this.getUpdateCards(function(card){
 		classThis.deleteCurrentComment(card["id"]).done(function(d){
 			var now = moment();
@@ -23,18 +22,13 @@ method.run = function(){
 			hasMoved = classThis.hasMovedCheck(card["actions"]);
 			if ((daysSinceUpdate > 0 ) || (!hasMoved)){
 				console.log("Write Current Comment: "+card["name"]);
-				classThis.getListNameByID(card["idList"])
-					.then(function(listName){
+				classThis.getListNameByID(card["idList"]).then(function(listName){
 						classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format());
-					});
+				});
 			} else {
 				console.log("Write New Phase: "+card["name"]);
-				 Q.all([classThis.getListNameByID(card["idList"]), classThis.getLastList(card.actions[0]["id"])])
-				 .then(function(lists){
-					 var listName = lists[0];
-					 var lastPhase = lists[1];
-					classThis.compileCommentArtifact(card["id"], listName, lastPhase, lists, card.actions[1].date, card.actions[0].date);
-				 });
+				var lastPhase = classThis.getLastList(card.actions[0]);
+				classThis.compileCommentArtifact(card["id"], lastPhase, lastPhase, lists, card.actions[1].date, card.actions[0].date);
 			}
 		});
 	});
@@ -55,14 +49,14 @@ method.deleteCurrentComment = function(cardID){
 	classThis.t.get('/1/cards/'+cardID+'/actions', {filter:'commentCard'}, function(err, comments){
 		if(err) {deferred.reject(new Error(err));};
 		_un.each(comments,function(c){
-			if (c.data.text.indexOf("**Current Stage:**") != -1){
+			if (c.data.text.indexOf("**Current Stage:**") !== -1){
 				currentCommentID = c["id"];
 			}
 		});
 		if(currentCommentID != ""){
 			classThis.t.del('/1/actions/'+currentCommentID, function(err, data){
 				if(err) { console.log(err);
-					deferred.reject(new Error(err));};
+					deferred.reject(new Error(err))};
 				deferred.resolve(data);
 			});
 		} else {
@@ -84,32 +78,26 @@ method.hasMovedCheck = function(actionList){
 	return updated;
 }
 
-
-method.getLastList = function(updateActionID){
-	var deferred = Q.defer();
-	this.t.get('/1/actions/'+updateActionID, function(err, action){
-		if(err) {deferred.reject(new Error(err));};
-		deferred.resolve(action["data"]["listBefore"]["name"]);
-	});
-	return deferred.promise;
+method.getLastList = function(cardAction){
+		return(cardAction["data"]["listBefore"]["name"]);
 }
 
 //Run function to build a comment
-method.compileCommentArtifact = function(cardID, listName, phase, fromDate, toDate){
-		var stage = _un.findWhere(classThis.Stages, {name: listName});
+method.compileCommentArtifact = function(cardID, dateList, nameList, fromDate, toDate){
+		var stage = _un.findWhere(classThis.Stages, {name: dateList});
 		var expectedTime = stage["expected_time"];
-		var diffArray = classThis.calculateDateDifference(expectedTime, fromDate, toDate);
+		var diffArray = this.calculateDateDifference(expectedTime, fromDate, toDate);
 		var differenceFromExpected = diffArray[0];
 		var timeTaken = diffArray[1];
-		var comment = classThis.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, phase, timeTaken);
-		classThis.addComment(comment, cardID);
-};
+		var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken);
+		this.addComment(comment, cardID);
+}
 
 method.calculateDateDifference = function(expected, lastMove, recentMove){
 	var fromDate = new Date(lastMove);
 	var toDate = new Date(recentMove);
 	var diffDays = instadate.differenceInWorkDays(fromDate, toDate);
-	return [diffDays - expected, diffDays]
+	return [diffDays - expected, diffDays];
 }
 
 method.buildComment = function(dateDiff, expected, lastMove, recentMove, lastList, actual){
@@ -121,8 +109,7 @@ method.buildComment = function(dateDiff, expected, lastMove, recentMove, lastLis
 
 method.addComment = function(message, cardID){
 	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
-		if (err) {throw err};
-		// 	console.log("ordering");
+		if (err) {throw err}
 	 });
 }
 

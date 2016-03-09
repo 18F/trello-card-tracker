@@ -3,16 +3,56 @@ _un = require("underscore")
 app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
-trello = require("node-trello")
-sinon = require("sinon");
+trello = require('node-trello')
+sinon = require('sinon');
 
 # sinon.stub::asyncOutcome = (args, asyncResp) ->
 #   @withArgs(args).yieldsAsync(asyncResp)
 #   this
 
 CR = new app.CardRecorder(helpers.mockfile, helpers.board)
+CR.Stages = helpers.expectedStageObject
 
 describe 'app.CardRecorder', ->
+  describe '.run', ->
+    sandbox = undefined
+    deleteCards = undefined
+    listStub = undefined
+    compileStub = undefined
+    getCards = undefined
+    lastListStub = undefined
+    beforeEach ->
+      sandbox = sinon.sandbox.create()
+      deleteCards = sandbox.stub(CR, 'deleteCurrentComment')
+      lastListStub = sandbox.stub(CR, 'getLastList')
+      compileStub = sandbox.stub(CR, 'compileCommentArtifact')
+      return
+
+    afterEach ->
+      sandbox.restore()
+      return
+    it 'will run the cardRecorder class for a list that has moved', ->
+      getCards = sandbox.stub(CR, 'getUpdateCards').returns({id: 'cccc', idList: 'vvv', actions: helpers.actionListMove})
+      CR.run
+      setTimeout (->
+        expect(deleteCards.callCount).to.equal 1
+        expect(compileStub.callCount).to.equal 1
+        done()
+        return
+      ), 105 #Will fail if below 95
+      return
+    it 'will run the cardRecorder class for a list that has not moved', ->
+      getCards = sandbox.stub(CR, 'getUpdateCards').returns({id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove})
+      CR.run
+      setTimeout (->
+        expect(deleteCards.callCount).to.equal 1
+        expect(compileStub.callCount).to.equal 1
+        done()
+        return
+      ), 100 #Will fail if below 100
+      return
+    return
+
   describe '.getUpdateCards(callback)', ->
     sandbox = undefined
     before ->
@@ -69,30 +109,36 @@ describe 'app.CardRecorder', ->
     return
 
   describe '.getLastList(updateActionID)', ->
+    it 'will grab the name of the last list a trello card was part of given that the card has moved', ->
+      listName = CR.getLastList helpers.actionListMove[1]
+      expect(listName).to.equal("Old List")
+      return
+
+    it 'will return an error if the action does not have a list before', ->
+      listName = CR.getListIDbyName helpers.actionListMove[0]
+      expect(listName).to.be.undefined
+      return
+    return
+
+  describe '.compileCommentArtifact', ->
     sandbox = undefined
+    addComment = undefined
     before ->
       sandbox = sinon.sandbox.create()
-      sandbox.stub(trello.prototype, 'get').withArgs("47").yieldsAsync(helpers.actionListMove[1]).withArgs("4c").yieldsAsync(helpers.actionListMove[0])
+      addComment = sandbox.stub(CR, 'addComment')
+      calcStub = sandbox.stub(CR, 'calculateDateDifference').returns([103,113]);
       return
     after ->
       sandbox.restore()
       return
-    it 'will grab the name of the last list a trello card was part of given that the card has moved', ->
-      CR.getListIDbyName "47", (listName)->
-        expect(listName).to.eql("Old List")
-        return
-      return
-
-    it 'will return an error if the action does not have a list before', ->
-      CR.getListIDbyName "4c", (result)->
-        expect(result).to.be.undefined
-        return
-      return
-
-    return
-
-  describe.skip '.compileCommentArtifact', ->
     it 'will run the date diff functions, build and post a comment', ->
+      CR.compileCommentArtifact 'xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z'
+      setTimeout (->
+        expect(addComment.calledWith(text: '**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.')).to.be.ok
+        expect(addComment.callCount).to.equal 1
+        done()
+        return
+      ), 200
       return
     return
 
@@ -104,7 +150,7 @@ describe 'app.CardRecorder', ->
     return
 
   describe '.buildComment', ->
-    it 'generates a comment \i87\]ased off of date entry fields', ->
+    it 'generates a comment Based off of date entry fields', ->
       msg = CR.buildComment(103, 10, "2016-04-05T10:40:26.100Z", "2016-07-27T10:40:26.100Z", "Workshop", 113)
       expect(msg).to.eql("**Workshop Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.")
       return

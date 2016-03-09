@@ -41,7 +41,7 @@ method.createCard = function(order){
 										"due": due
 									};
 		classThis.t.post('1/cards/', cardInfo, function(err, data){
-			if (err) {deferred.reject(err)};
+			if(err) {deferred.reject(new Error(err));};
 			deferred.resolve(data);
 		});
 
