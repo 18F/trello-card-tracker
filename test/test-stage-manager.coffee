@@ -4,22 +4,25 @@ app = require('../app')
 helpers = require('./test-helpers.js')
 sinon = require('sinon');
 stages = helpers.expectedStageObject.stages[0].substages
+trello = require('node-trello')
 
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
 
 describe 'app.StageManager', ->
   describe '.getStageandBoard', ->
-    stub = undefined
+    sandbox = undefined
     error = null
     expected = undefined
 
     beforeEach ->
       stubData = { output: 'data' };
-      stub = helpers.trelloStub('get', error, stubData);
+      sandbox = sinon.sandbox.create()
+      # stub = helpers.trelloStub('get', error, stubData);
+      sandbox.stub(trello.prototype, 'get').yieldsAsync(error, stubData)
       expected = [helpers.expectedStageObject.stages[0].substages, stubData]
 
     afterEach ->
-      stub.restore()
+      sandbox.restore()
       error = new Error('Test error')
 
     it 'gets stages and lists in the trello board', (done) ->
@@ -102,16 +105,14 @@ describe 'app.StageManager', ->
       return
 
     it 'gets card info for all lists that are not in the stages', (done) ->
-      stageMgr.closeUnusedStages(input)
-      helpers.waitTicks 2, ->
+      stageMgr.closeUnusedStages input, ->
         expect(getListCardsStub.callCount).to.eql input[1].length
         done()
         return
       return
 
     it 'calls close on all lists that are not in stages', (done) ->
-      stageMgr.closeUnusedStages(input)
-      helpers.waitTicks 2, ->
+      stageMgr.closeUnusedStages input, ->
         expect(closeListStub.callCount).to.eql input[1].length
         done()
         return
@@ -149,7 +150,7 @@ describe 'app.StageManager', ->
       return
 
     it 'asks Trello to close the list', (done) ->
-      stageMgr.closeList([], 'abc123');
+      stageMgr.closeList [], 'abc123', ->
       expect(stub.callCount).to.eql 1
       done()
       return
