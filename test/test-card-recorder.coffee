@@ -115,9 +115,11 @@ describe 'app.CardRecorder', ->
       expect(listName).to.equal("Old List")
       return
 
+    # get this should be undefined
     it 'will return an error if the action does not have a list before', ->
-      listName = CR.getListIDbyName helpers.actionListMove[0]
-      expect(listName).to.be.undefined
+      expect(->
+        CR.getLastList helpers.actionListMove[0]
+      ).to.throw Error
       return
     return
 

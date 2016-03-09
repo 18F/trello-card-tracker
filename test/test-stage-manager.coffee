@@ -13,28 +13,31 @@ describe 'app.StageManager', ->
     sandbox = undefined
     error = null
     expected = undefined
+    stubData = undefined
+    getStub = undefined
 
     beforeEach ->
       stubData = { output: 'data' };
       sandbox = sinon.sandbox.create()
       # stub = helpers.trelloStub('get', error, stubData);
-      sandbox.stub(trello.prototype, 'get').yieldsAsync(error, stubData)
-      expected = [helpers.expectedStageObject.stages[0].substages, stubData]
+      getStub = sandbox.stub(trello.prototype, 'get').yieldsAsync(error, stubData)
+
 
     afterEach ->
       sandbox.restore()
       error = new Error('Test error')
 
     it 'gets stages and lists in the trello board', (done) ->
+      expected = [helpers.expectedStageObject.stages[0].substages, stubData]
       SM.getStageandBoard().then (data) ->
         expect(data).to.eql expected
-        expect(stub.callCount).to.eql 1
+        expect(getStub.callCount).to.eql 1
         done()
       return
 
     it 'survives a Trello error', (done) ->
       SM.getStageandBoard().catch ->
-        expect(stub.callCount).to.eql 1
+        expect(getStub.callCount).to.eql 1
         done()
       return
     return

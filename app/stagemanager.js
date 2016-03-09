@@ -3,7 +3,7 @@ TrelloSuper = require("./helpers.js");
 util = require('util');
 Q = require('q');
 
-
+var classThis;
 function StageManager(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);
 	this.Stages = this.getPreAward();
@@ -95,7 +95,7 @@ method.getListCards = function(trelloID, callback){
 	});
 }
 
-method.closeList = function(listData, trelloID){
+method.closeList = function(listData, trelloID, callback){
 	if (listData.length === 0){
 		classThis.t.put("/1/list/"+trelloID+"/closed", {value: true}, function(e, success){
 			if (e) {throw e};

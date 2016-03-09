@@ -3,8 +3,10 @@ var util = require('util');
 var yaml = require('js-yaml');
 Q = require('q');
 
+var classThis;
 function CardCreator(yaml_file, board){
 	TrelloSuper.call(this, yaml_file, board);
+		classThis = this;
 }
 
 util.inherits(CardCreator, TrelloSuper);
@@ -14,7 +16,6 @@ module.exports = CardCreator;
 var method = CardCreator.prototype;
 
 method.createOrders = function(orderFile){
-	classThis = this;
 	var orders = yaml.safeLoad(fs.readFileSync(orderFile, 'utf8'));
 	var promises = [ ];
 	_un.each(orders.orders, function(order){
