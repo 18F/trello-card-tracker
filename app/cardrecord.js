@@ -15,7 +15,7 @@ util.inherits(CardRecorder, TrelloSuper);
 
 var method = CardRecorder.prototype;
 
-method.run = function(){
+method.run = function(callback){
 	this.getUpdateCards(function(card){
 		classThis.deleteCurrentComment(card["id"]).then(function(d){
 			var now = moment();
@@ -24,12 +24,12 @@ method.run = function(){
 			if ((daysSinceUpdate > 0 ) || (!hasMoved)){
 				console.log("Write Current Comment: "+card["name"]);
 				classThis.getListNameByID(card["idList"]).then(function(listName){
-						classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format());
+						classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format(), callback);
 				});
 			} else {
 				console.log("Write New Phase: "+card["name"]);
 				var lastPhase = classThis.getLastList(card.actions[0]);
-				classThis.compileCommentArtifact(card["id"], lastPhase, lastPhase, lists, card.actions[1].date, card.actions[0].date);
+				classThis.compileCommentArtifact(card["id"], lastPhase, lastPhase, lists, card.actions[1].date, card.actions[0].date, callback);
 			}
 		});
 	});
@@ -84,14 +84,14 @@ method.getLastList = function(cardAction){
 }
 
 //Run function to build a comment
-method.compileCommentArtifact = function(cardID, dateList, nameList, fromDate, toDate){
+method.compileCommentArtifact = function(cardID, dateList, nameList, fromDate, toDate, callback){
 		var stage = _un.findWhere(classThis.Stages, {name: dateList});
 		var expectedTime = stage["expected_time"];
 		var diffArray = this.calculateDateDifference(expectedTime, fromDate, toDate);
 		var differenceFromExpected = diffArray[0];
 		var timeTaken = diffArray[1];
 		var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken);
-		this.addComment(comment, cardID);
+		this.addComment(comment, cardID, callback);
 }
 
 method.calculateDateDifference = function(expected, lastMove, recentMove){
@@ -108,9 +108,10 @@ method.buildComment = function(dateDiff, expected, lastMove, recentMove, lastLis
 	return msg;
 }
 
-method.addComment = function(message, cardID){
+method.addComment = function(message, cardID, callback){
 	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
 		if (err) {throw err}
+		callback(data);
 	 });
 }
 
