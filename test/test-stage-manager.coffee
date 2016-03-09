@@ -6,7 +6,7 @@ sinon = require('sinon');
 stages = helpers.expectedStageObject.stages[0].substages
 trello = require('node-trello')
 
-stageMgr = new app.StageManager(helpers.mockfile, helpers.board)
+SM = new app.StageManager(helpers.mockfile, helpers.board)
 
 describe 'app.StageManager', ->
   describe '.getStageandBoard', ->
@@ -26,14 +26,14 @@ describe 'app.StageManager', ->
       error = new Error('Test error')
 
     it 'gets stages and lists in the trello board', (done) ->
-      stageMgr.getStageandBoard().then (data) ->
+      SM.getStageandBoard().then (data) ->
         expect(data).to.eql expected
         expect(stub.callCount).to.eql 1
         done()
       return
 
     it 'survives a Trello error', (done) ->
-      stageMgr.getStageandBoard().catch ->
+      SM.getStageandBoard().catch ->
         expect(stub.callCount).to.eql 1
         done()
       return
@@ -48,7 +48,7 @@ describe 'app.StageManager', ->
         expected.push { stage: s.name, built: null }
 
     it 'checks which stages in an object of stages are in a trello board', ->
-      checkedList = stageMgr.checkLists([helpers.expectedStageObject.stages[0].substages, [{ name:expected[0].stage }]])
+      checkedList = SM.checkLists([helpers.expectedStageObject.stages[0].substages, [{ name:expected[0].stage }]])
       expected[0].built = true;
       expected[1].built = false;
       expect(checkedList).to.eql expected
@@ -72,7 +72,7 @@ describe 'app.StageManager', ->
       return
 
     it 'given a list of objects that include the name of unbuilt lists, it makes additional lists in trello', (done) ->
-      stageMgr.makeAdditionalLists(helpers.make_lists).then (data) ->
+      SM.makeAdditionalLists(helpers.make_lists).then (data) ->
         expect(data.length).to.eql helpers.make_lists.length
         expect(stub.callCount).to.eql unbuilt.length
         done()
@@ -80,7 +80,7 @@ describe 'app.StageManager', ->
       return
 
     it 'survives a Trello error', (done) ->
-      stageMgr.makeAdditionalLists(helpers.make_lists).catch (e) ->
+      SM.makeAdditionalLists(helpers.make_lists).catch (e) ->
         expect(stub.callCount).to.be.most unbuilt.length
         done()
         return
@@ -105,14 +105,14 @@ describe 'app.StageManager', ->
       return
 
     it 'gets card info for all lists that are not in the stages', (done) ->
-      stageMgr.closeUnusedStages input, ->
+      SM.closeUnusedStages input, ->
         expect(getListCardsStub.callCount).to.eql input[1].length
         done()
         return
       return
 
     it 'calls close on all lists that are not in stages', (done) ->
-      stageMgr.closeUnusedStages input, ->
+      SM.closeUnusedStages input, ->
         expect(closeListStub.callCount).to.eql input[1].length
         done()
         return
@@ -131,7 +131,7 @@ describe 'app.StageManager', ->
       return
 
     it 'gets a list of cards for a given list ID', (done) ->
-      stageMgr.getListCards 'abc123', (data) ->
+      SM.getListCards 'abc123', (data) ->
         expect(stub.callCount).to.eql 1
         done()
         return
@@ -150,7 +150,7 @@ describe 'app.StageManager', ->
       return
 
     it 'asks Trello to close the list', (done) ->
-      stageMgr.closeList [], 'abc123', ->
+      SM.closeList [], 'abc123', ->
       expect(stub.callCount).to.eql 1
       done()
       return
@@ -179,7 +179,7 @@ describe 'app.StageManager', ->
     it 'updates the positions of appropriate number of lists', (done) ->
       # First argument: all stages
       # Second argument: all lists on the board
-      stageMgr.orderLists([stages, lists])
+      SM.orderLists([stages, lists])
       expect(stub.callCount).to.eql 1
       done()
       return
