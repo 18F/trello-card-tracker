@@ -28,7 +28,7 @@ describe 'app.CardRecorder', ->
       deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({});
       sandbox.stub(CR, 'getListNameByID').resolves('list name');
       lastListStub = sandbox.stub(CR, 'getLastList')
-      compileStub = sandbox.stub(CR, 'compileCommentArtifact')
+      compileStub = sandbox.stub(CR, 'compileCommentArtifact').yieldsAsync();
       return
 
     afterEach ->
@@ -126,7 +126,7 @@ describe 'app.CardRecorder', ->
     addComment = undefined
     before ->
       sandbox = sinon.sandbox.create()
-      addComment = sandbox.stub(CR, 'addComment')
+      addComment = sandbox.stub(CR, 'addComment').yieldsAsync();
       calcStub = sandbox.stub(CR, 'calculateDateDifference').returns([103,113]);
       return
     after ->
