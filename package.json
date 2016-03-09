@@ -37,14 +37,11 @@
     "underscore": "~1.8.3"
   },
   "devDependencies": {
-<<<<<<< HEAD
-    "sinon-as-promised": "^4.0.0"
-=======
+    "sinon-as-promised": "^4.0.0",
     "mocha": "^2.4.5",
     "chai": "^3.5.0",
     "sinon": "^1.17.3",
     "istanbul": "^0.4.2",
     "codecov": "^1.0.1"
->>>>>>> develop
   }
 }
