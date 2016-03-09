@@ -26,9 +26,11 @@ describe 'app.CardRecorder', ->
       deleteCards = sandbox.stub(CR, 'deleteCurrentComment')
       lastListStub = sandbox.stub(CR, 'getLastList')
       compileStub = sandbox.stub(CR, 'compileCommentArtifact')
+      return
 
     afterEach ->
       sandbox.restore()
+      return
     it 'will run the cardRecorder class for a list that has moved', ->
       getCards = sandbox.stub(CR, 'getUpdateCards').returns({id: 'cccc', idList: 'vvv', actions: helpers.actionListMove})
       CR.run
