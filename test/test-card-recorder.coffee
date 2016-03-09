@@ -22,7 +22,6 @@ describe 'app.CardRecorder', ->
     compileStub = undefined
     getCards = undefined
     lastListStub = undefined
-    return
 
     beforeEach ->
       sandbox = sinon.sandbox.create()
@@ -34,6 +33,8 @@ describe 'app.CardRecorder', ->
 
     afterEach ->
       sandbox.restore()
+      return
+
     it 'will run the cardRecorder class for a list that has moved', (done) ->
       getCards = sandbox.stub(CR, 'getUpdateCards').yieldsAsync({id: 'cccc', idList: 'vvv', actions: helpers.actionListMove})
       CR.run ->
