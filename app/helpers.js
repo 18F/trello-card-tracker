@@ -46,7 +46,9 @@ method.getListIDbyName = function(name, callback){
 method.getListNameByID = function(listID){
   var deferred = Q.defer();
   this.t.get('/1/lists/'+listID, function(err, list){
-    if(err) {deferred.reject(new Error(err));};
+    if(err) {
+      return deferred.reject(new Error(err));
+    };
 		deferred.resolve(list["name"]);
   });
   return deferred.promise;
