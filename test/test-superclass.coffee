@@ -94,7 +94,7 @@ describe 'app.TrelloSuper', ->
 
     it 'will survive a Trello error', (done) ->
       stageMgr.getListNameByID(testListID).catch (err) ->
-        #expect(err).to.eql(error);
+        expect(err).to.eql(error);
         done()
         return
       return
