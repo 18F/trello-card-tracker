@@ -1,5 +1,7 @@
 expect = require('chai').expect
 _un = require("underscore")
+sinon = require('sinon')
+trello = require('node-trello')
 app = require('../app')
 helpers = require('./test-helpers.js')
 stages = helpers.expectedStageObject.stages[0].substages
@@ -35,6 +37,40 @@ describe 'app.TrelloSuper', ->
         stub.restore()
         done()
       return
+    return
+
+  describe 'getListNameByID', ->
+    sandbox = undefined
+    stub = undefined
+    error = null
+    result = { name: 'Test List' }
+    testListID = 'test-list-id'
+
+    beforeEach ->
+      sandbox = sinon.sandbox.create()
+      stub = sandbox.stub(trello.prototype, 'get').withArgs('/1/lists/' + testListID).yieldsAsync(error, result)
+      return
+
+    afterEach ->
+      sandbox.restore()
+      error = new Error('Test Error')
+      result = null
+      return
+
+    it 'will ping Trello to grab a list name given a list ID', (done) ->
+      stageMgr.getListNameByID(testListID).then (list) ->
+        expect(list).to.eql(result.name);
+        done()
+        return
+      return
+
+    it 'will survive a Trello error', (done) ->
+      stageMgr.getListNameByID(testListID).catch (err) ->
+        #expect(err).to.eql(error);
+        done()
+        return
+      return
+
     return
 
   return
