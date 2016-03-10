@@ -35,7 +35,7 @@ method.createCard = function(order){
 		var due = null;
 	}
 	classThis = this;
-	this.getListIDbyName(order["stage"], function(listID){
+	this.getListIDbyName(order["stage"]).then(function(listID){
 		var cardInfo = {"name": cardName,
 										"desc": description,
 										"idList": listID,
