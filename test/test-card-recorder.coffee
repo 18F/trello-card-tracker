@@ -36,7 +36,14 @@ describe 'app.CardRecorder', ->
       return
 
     it 'will run the cardRecorder class for a list that has moved', (done) ->
-      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: helpers.actionListMove}])
+      # Set the action date to less than a day ago
+      # to trigger the phase change
+      cardActions = helpers.actionListMove
+      cardActions.forEach (action) ->
+        action.date = (new Date(Date.now() - 21600000)).toISOString();
+        return
+
+      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: cardActions}])
       CR.run ->
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1

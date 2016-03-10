@@ -22,12 +22,12 @@ method.run = function(callback){
 				var now = moment();
 				var daysSinceUpdate = now.diff(moment(card.actions[0].date), 'days');
 				hasMoved = classThis.hasMovedCheck(card["actions"]);
-				if (hasMoved) {
+				if (hasMoved && daysSinceUpdate < 1) {
 					console.log("Write New Phase: "+card["name"]);
 					var lastPhase = classThis.getLastList(card.actions[0]);
 					classThis.compileCommentArtifact(card["id"], lastPhase, lastPhase, card.actions[1].date, card.actions[0].date, callback);
-				} else if(daysSinceUpdate > 0) {
-					console.log("Write Current Comment: "+card["name"]);
+				} else {
+					console.log("Write Current Phase: "+card["name"]);
 					classThis.getListNameByID(card["idList"]).then(function(listName){
 							classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format(), callback);
 					});
