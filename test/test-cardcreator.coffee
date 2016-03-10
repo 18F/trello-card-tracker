@@ -4,6 +4,7 @@ app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
 sinon = require('sinon')
+require('sinon-as-promised')
 trello = require('node-trello')
 CC = new app.CardCreator(helpers.mockfile, helpers.board)
 
@@ -33,7 +34,7 @@ describe 'app.CardCreator', ->
     beforeEach ->
       sandbox = sinon.sandbox.create()
       postStub = sandbox.stub(trello.prototype, 'post').yieldsAsync(err, undefined)
-      listStub = sandbox.stub(CC, 'getListIDbyName').withArgs("CO Review").yieldsAsync('aaaaaa')
+      listStub = sandbox.stub(CC, 'getListIDbyName').withArgs("CO Review").resolves('aaaaaa')
       return
     afterEach ->
       sandbox.restore()
