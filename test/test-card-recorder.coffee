@@ -36,7 +36,7 @@ describe 'app.CardRecorder', ->
       return
 
     it 'will run the cardRecorder class for a list that has moved', (done) ->
-      getCards = sandbox.stub(CR, 'getUpdateCards').yieldsAsync({id: 'cccc', idList: 'vvv', actions: helpers.actionListMove})
+      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: helpers.actionListMove}])
       CR.run ->
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
@@ -45,7 +45,7 @@ describe 'app.CardRecorder', ->
       return
 
     it 'will run the cardRecorder class for a list that has not moved', (done) ->
-      getCards = sandbox.stub(CR, 'getUpdateCards').yieldsAsync({id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove})
+      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove}])
       CR.run ->
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
@@ -56,45 +56,93 @@ describe 'app.CardRecorder', ->
 
   describe '.getUpdateCards(callback)', ->
     sandbox = undefined
-    before ->
+    stub = undefined
+    error = null
+    cards = [ 'card1', 'card2', 'card3' ];
+
+    beforeEach ->
       sandbox = sinon.sandbox.create();
-      sandbox.stub(trello.prototype, 'get').returns(helpers.actionListMove)
+      stub = sandbox.stub(trello.prototype, 'get').yieldsAsync(error, cards)
       return
-    after ->
+
+    afterEach ->
       sandbox.restore()
+      error = new Error('Test Error')
       return
-    it 'will ping trello and get the updated actions of a card', ->
-      CR.getUpdateCards "callback", (resp)->
-        expect(resp).to.equal(helpers.actionListMove)
+
+    it 'will ping trello and get the updated actions of a card', (done) ->
+      CR.getUpdateCards().then (resp) ->
+        expect(stub.callCount).to.eql 1
+        expect(resp).to.eql cards
+        done()
+        return
+      return
+
+    it 'will survive a trello error', (done) ->
+      CR.getUpdateCards().catch (err) ->
+        expect(stub.callCount).to.eql 1
+        expect(err).to.eql error
+        done()
         return
       return
     return
 
   describe '.deleteCurrentComment(cardID)', ->
+    runs = 0
     sandbox = undefined
-    before ->
-      currentComment = _un.clone(helpers.mockCurrentComment)
-      currentComment["text"] = "**Current Stage** This comment says comment stage."
-      notCurrentComment = _un.clone(helpers.mockCurrentComment)
-      notCurrentComment["text"] = "This comment is not in the current stage."
+    getStub = undefined
+    delStub = undefined
+    error = new Error('Test Error')
+
+    beforeEach ->
+      currentComment = JSON.parse(JSON.stringify(helpers.mockCurrentComment))
+      currentComment.data.text = "**Current Stage** This comment says current stage."
+      notCurrentComment = JSON.parse(JSON.stringify(helpers.mockCurrentComment))
+      notCurrentComment.data.text = "This comment is not in the current stage."
+      notCurrentComment.id = 'not-current'
       sandbox = sinon.sandbox.create()
-      sandbox.stub(trello.prototype, 'get').withArgs('380').yieldsAsync([ currentComment ]).withArgs('1000').yieldsAsync([ notCurrentComment ])
-      delStub = sandbox.stub(trello.prototype, 'del').withArgs("380").yieldsAsync({}).withArgs("1000").yieldsAsync("no current comment")
+      getStub = sandbox.stub(trello.prototype, 'get').withArgs('/1/cards/380/actions').yieldsAsync(null, [ currentComment ]).withArgs('/1/cards/1000/actions').yieldsAsync(null, [ notCurrentComment ])
+      delStub = sandbox.stub(trello.prototype, 'del').withArgs('/1/actions/' + currentComment.id).yieldsAsync(null, {}).withArgs('/1/actions/' + notCurrentComment.id).yieldsAsync(null, "no current comment")
+
+      runs++
+      if runs == 3
+        getStub.withArgs('/1/cards/380/actions').yieldsAsync(error, null)
+      else if runs == 4
+        delStub.withArgs('/1/actions/' + currentComment.id).yieldsAsync(error, null)
       return
-    after ->
+
+    afterEach ->
       sandbox.restore()
       return
-    it 'will delete a comment if a bolded text saying "Current Stage" appears', ->
-      CR.deleteCurrentComment "380", (data) ->
-        expect(data).to.eql({});
+
+    it 'will delete a comment if a bolded text saying "Current Stage" appears', (done) ->
+      CR.deleteCurrentComment("380").then (data) ->
+        expect(data).to.eql {};
+        done()
         return
       return
 
-    it 'will not delete a comment that does not have a current stage', ->
-      CR.deleteCurrentComment "1000", (data) ->
-        expect(data).to.eql("no current comment");
+    it 'will not delete a comment that does not have a current stage', (done) ->
+      CR.deleteCurrentComment("1000").then (data) ->
+        expect(data).to.eql "no current comment";
+        done()
         return
       return
+
+    it 'will survive a trello error fetching cards', (done) ->
+      CR.deleteCurrentComment("380").catch (err) ->
+        expect(err).to.eql error;
+        done()
+        return
+      return
+
+    it 'will survive a trello error deleting a comment', (done) ->
+      CR.deleteCurrentComment("380").catch (err) ->
+        expect(err).to.eql error;
+        done()
+        return
+      return
+
     return
 
   describe '.hasMovedCheck(actionList)', ->
@@ -128,7 +176,7 @@ describe 'app.CardRecorder', ->
     addComment = undefined
     before ->
       sandbox = sinon.sandbox.create()
-      addComment = sandbox.stub(CR, 'addComment').yieldsAsync();
+      addComment = sandbox.stub(CR, 'addComment').resolves();
       calcStub = sandbox.stub(CR, 'calculateDateDifference').returns([103,113]);
       return
     after ->
@@ -159,14 +207,29 @@ describe 'app.CardRecorder', ->
 
   describe '.addComment', ->
     sandbox = undefined
-    before ->
-      sandbox = sinon.sandbox.create().stub(trello.prototype, 'post').yieldsAsync(helpers.createCommentResp)
+    error = null
+
+    beforeEach ->
+      sandbox = sinon.sandbox.create().stub(trello.prototype, 'post').yieldsAsync(error, helpers.createCommentResp)
       return
-    after ->
+
+    afterEach ->
       sandbox.restore()
+      error = new Error('Test Error')
       return
-    it 'adds a comment to a board', ->
-      CR.addComment 'test message\n', '3333', (resp) ->
-        expect(resp.data.text).to.equal 'test message\n'
+
+    it 'adds a comment to a board', (done) ->
+      CR.addComment('test message\n', '3333').then (resp) ->
+        expect(resp.data.text).to.eql 'test message\n'
+        done()
         return
+      return
+
+    it 'survives a trello error', (done) ->
+      CR.addComment('test message\n', '3333').catch (err) ->
+        expect(err).to.eql error
+        done()
+        return
+      return
+
     return
