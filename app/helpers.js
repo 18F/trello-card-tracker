@@ -27,26 +27,33 @@ method.getPreAward = function(){
 }
 
 method.getListIDbyName = function(name, callback){
+  var deferred = Q.defer();
   var find = true;
   if (!name) {
     var find = false;
   }
   this.t.get(this.lists_url, function(e, data){
-    if (e) {throw e};
+    if(e) {
+      return deferred.reject(e);
+    }
     if(find){
       var list = _un.findWhere(data, {"name": name});
     }
     if (!find || !list){ //Add it to the first list if there is not one
       var list = data[0];
     }
-    callback(list["id"]);
+    deferred.resolve(list["id"]);
   });
+
+  return deferred.promise;
 }
 
 method.getListNameByID = function(listID){
   var deferred = Q.defer();
   this.t.get('/1/lists/'+listID, function(err, list){
-    if(err) {deferred.reject(new Error(err));};
+    if(err) {
+      return deferred.reject(new Error(err));
+    };
 		deferred.resolve(list["name"]);
   });
   return deferred.promise;
