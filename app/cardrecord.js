@@ -57,7 +57,7 @@ method.deleteCurrentComment = function(cardID){
 		}
 
 		_un.each(comments,function(c){
-			if (c.data.text.indexOf("**Current Stage**") !== -1){
+			if (c.data.text.indexOf("**Current Stage:**") !== -1){
 				currentCommentID = c["id"];
 			}
 		});

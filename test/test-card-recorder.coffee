@@ -103,7 +103,7 @@ describe 'app.CardRecorder', ->
 
     beforeEach ->
       currentComment = JSON.parse(JSON.stringify(helpers.mockCurrentComment))
-      currentComment.data.text = "**Current Stage** This comment says current stage."
+      currentComment.data.text = "**Current Stage:** This comment says current stage."
       notCurrentComment = JSON.parse(JSON.stringify(helpers.mockCurrentComment))
       notCurrentComment.data.text = "This comment is not in the current stage."
       notCurrentComment.id = 'not-current'
