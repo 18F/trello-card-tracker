@@ -10,7 +10,7 @@ if ("s" in argv){
   console.log("--Invoke Stage Manager--");
   var file  = (argv["s"]=== true) ? 'data/stages.yaml' : argv["s"];
   var SM = new app.StageManager(file, board);
-  SM.run();
+  SM.run(console.log("Stage Manager Complete"));
 }
 
 if ("r" in argv) {

@@ -14,13 +14,13 @@ util.inherits(StageManager, TrelloSuper);
 
 var method = StageManager.prototype;
 
-method.run = function(){
+method.run = function(callback){
 	this.getStageandBoard()
 	.then(this.checkLists)
   .then(this.makeAdditionalLists)
 	.then(this.getStageandBoard().then(this.closeUnusedStages))
 	.then(this.getStageandBoard().then(this.orderLists))
-	.fin(console.log("done"))
+	.fin(callback())
 	.fail(function (e) {
             console.error(e.name + ': ' + e.message );
   });

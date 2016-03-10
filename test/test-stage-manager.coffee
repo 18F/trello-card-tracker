@@ -2,13 +2,46 @@ expect = require('chai').expect
 _un = require('underscore')
 app = require('../app')
 helpers = require('./test-helpers.js')
-sinon = require('sinon');
+sinon = require('sinon')
+require('sinon-as-promised')
 stages = helpers.expectedStageObject.stages[0].substages
 trello = require('node-trello')
 
 SM = new app.StageManager(helpers.mockfile, helpers.board)
 
 describe 'app.StageManager', ->
+  describe '.run(callback)', ->
+    sandbox = undefined
+    getStageStub = undefined
+    checkListsStub = undefined
+    makeAddListStub = undefined
+    closeListStub = undefined
+    orderListStub = undefined
+    boardLists = undefined
+
+    beforeEach ->
+      sandbox = sinon.sandbox.create()
+      boardlists = [ ];
+      helpers.expectedStageObject.stages[0].substages.forEach (s) ->
+        boardLists.push { stage: s.name, built: null }
+      getStageStub = sandbox.stub(SM, 'getStageandBoard').resolves([helpers.expectedStageObject.stages[0].substages, boardLists])
+      checkListsStub = sandbox.stub(SM, 'checkLists').resolves(helpers.make_lists)
+      makeAddListStub = sandbox.stub(SM, 'makeAdditionalLists').resolves({})
+      closeListStub = sandbox.stub(SM, 'closeUnusedStages').resolves({})
+      orderListStub = sandbox.stub(SM, 'orderLists').resolves({})
+      return
+    afterEach ->
+      sandbox.restore()
+      return
+    it 'runs the stage manager class', ->
+      SM.run ->
+        expect(checkListsStub.callCount).to.equal 1
+        expect(makeAddListStub.callCount).to.equal 1
+        expect(closeListStub.callCount).to.equal 1
+        expect(orderListStub.callCount).to.equal 1
+        return
+      return
+    return
   describe '.getStageandBoard', ->
     sandbox = undefined
     error = null
