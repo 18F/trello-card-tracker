@@ -10,6 +10,15 @@ module.exports = {
     stub.yieldsAsync(err, callbackData);
     return stub;
   },
+  waitTicks: function(numberOfTicks, callback) {
+    if(numberOfTicks <= 0) {
+      return callback();
+    }
+
+    process.nextTick(function() {
+      module.exports.waitTicks(numberOfTicks - 1, callback);
+    });
+  },
   board: process.env.TRELLO_BPA_TEST_BOARD,
   mockfile: './test/mockfile.yaml',
   board_url: '/1/boards/' + this.board + '/lists',
@@ -21,19 +30,19 @@ module.exports = {
       substages: [{name: 'IAA',  expected_time: 5},
         {name: 'Workshop Prep', expected_time: 10}]
     }]},
-  ordermockfile: './test/mockorderfile.yaml',
+  orderMockFile: './test/mockOrders.yaml',
   testCardID: process.env.TRELLO_TEST_CARD,
   mockOrder: {
     id: 1,
     project: "BPA Project",
-    order: "Front End",
+    order: "Phase II",
     agency: "General Services Administration",
     subagency: "OCSIT",
-    trello: "https://trello.com/b/nmYlvlhu/bpa-test-dashboard",
+    trello: "https://trello.com/b/xxxx/bpa-dash",
     stage: "CO Review",
     open_date: "",
     close_date: "",
-    owner: "Randy Hart"
+    owner: "Toni Coltona"
   },
   mockCurrentComment: {
     id: "0",
@@ -167,6 +176,38 @@ createCommentResp: { id: 'cccc',
       { contextOn: {},
         card: {},
         comment: {},
-        memberCreator: {} } } }
-
+        memberCreator: {} } } },
+testCard: { id: 'xxxxx',
+  badges:
+   { votes: 0,
+     viewingMemberVoted: false,
+     subscribed: false,
+     fogbugz: '',
+     checkItems: 0,
+     checkItemsChecked: 0,
+     comments: 0,
+     attachments: 0,
+     description: true,
+     due: null },
+  checkItemStates: [],
+  closed: false,
+  dateLastActivity: '2016-03-02T16:53:32.017Z',
+  desc: 'Project: BPA Project\nAgency: General Services Administration\nSubAgency: OCSIT\nTrello Board: https://trello.com/b/xxxx/bpa-dash',
+  descData: { emoji: {} },
+  due: null,
+  email: 'testuser+xxxxx@boards.trello.com',
+  idBoard: 'bbbbbb',
+  idChecklists: [],
+  idLabels: [],
+  idList: 'aaaaaa',
+  idMembers: [],
+  idShort: 45,
+  idAttachmentCover: null,
+  manualCoverAttachment: false,
+  labels: [],
+  name: 'BPA Project - Phase II',
+  pos: 16384,
+  shortUrl: 'https://trello.com/c/xddwxws',
+  url: 'https://trello.com/c/xddwxws/34-bpa-project-phase-ii',
+  stickers: [] }
 }
