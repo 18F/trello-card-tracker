@@ -1,6 +1,7 @@
 expect = require('chai').expect
 _un = require("underscore")
 sinon = require('sinon')
+require('sinon-as-promised')
 trello = require('node-trello')
 app = require('../app')
 helpers = require('./test-helpers.js')
@@ -25,18 +26,45 @@ describe 'app.TrelloSuper', ->
     return
 
   describe 'getListIDbyName(ListName)', ->
-    it 'will ping Trello to grab a list ID given a list name', (done) ->
+    sandbox = undefined
+    stub = undefined
+    error = null
+    run = 0
+    result = [{ id: 'test-list-1', name: 'Test List #1' }, { id: 'test-list-2', name: 'Test List #2' }]
 
-      # Calls to trello.get will call the callback with no error and
-      # the supplied array as data.
-      stub = helpers.trelloStub("get", null, [{ name: "IAA", id: "abc123" }]);
-
-      # Ask for the ID that matches the name from above.
-      stageMgr.getListIDbyName "IAA", (id) ->
-        expect(id).to.eql("abc123");
-        stub.restore()
-        done()
+    beforeEach ->
+      sandbox = sinon.sandbox.create()
+      stub = sandbox.stub(trello.prototype, 'get').withArgs('/1/boards/' + helpers.board + '/lists').yieldsAsync(error, result)
       return
+
+    afterEach ->
+      sandbox.restore()
+      if ++run == 2 # after end of second run...
+        error = new Error('Test Error')
+        result = null
+      return
+
+    it 'will ping Trello to grab a list ID given a list name', (done) ->
+      stageMgr.getListIDbyName(result[1].name).then (id) ->
+        expect(id).to.eql(result[1].id);
+        done()
+        return
+      return
+
+    it 'will return the first list ID if no name is specified', (done) ->
+      stageMgr.getListIDbyName(null).then (id) ->
+        expect(id).to.eql(result[0].id);
+        done()
+        return
+      return
+
+    it 'will survive a Trello error', (done) ->
+      stageMgr.getListIDbyName(null).catch (err) ->
+        expect(err).to.eql(error);
+        done()
+        return
+      return
+
     return
 
   describe 'getListNameByID', ->
