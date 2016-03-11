@@ -10,7 +10,7 @@ trello = require('node-trello')
 SM = new app.StageManager(helpers.mockfile, helpers.board)
 
 describe 'app.StageManager', ->
-  describe '.run(callback)', ->
+  describe.skip '.run()', ->
     sandbox = undefined
     getStageStub = undefined
     checkListsStub = undefined
@@ -21,10 +21,7 @@ describe 'app.StageManager', ->
 
     beforeEach ->
       sandbox = sinon.sandbox.create()
-      boardlists = [ ];
-      helpers.expectedStageObject.stages[0].substages.forEach (s) ->
-        boardLists.push { stage: s.name, built: null }
-      getStageStub = sandbox.stub(SM, 'getStageandBoard').resolves([helpers.expectedStageObject.stages[0].substages, boardLists])
+      getStageStub = sandbox.stub(SM, 'getStageandBoard').resolves([stages, helpers.mockGetBoardList])
       checkListsStub = sandbox.stub(SM, 'checkLists').resolves(helpers.make_lists)
       makeAddListStub = sandbox.stub(SM, 'makeAdditionalLists').resolves({})
       closeListStub = sandbox.stub(SM, 'closeUnusedStages').resolves({})
@@ -33,15 +30,20 @@ describe 'app.StageManager', ->
     afterEach ->
       sandbox.restore()
       return
-    it 'runs the stage manager class', ->
-      SM.run ->
+
+    before ->
+      return
+    it 'runs the stage manager class', (done) ->
+      SM.run().done (data) ->
         expect(checkListsStub.callCount).to.equal 1
         expect(makeAddListStub.callCount).to.equal 1
         expect(closeListStub.callCount).to.equal 1
         expect(orderListStub.callCount).to.equal 1
+        done()
         return
       return
     return
+
   describe '.getStageandBoard', ->
     sandbox = undefined
     error = null
