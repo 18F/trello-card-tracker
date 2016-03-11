@@ -17,7 +17,7 @@ var method = StageManager.prototype;
 method.run = function(){
 	var deferred = Q.defer();
 	classThis.getStageandBoard()
-	.then(this.checkLists)
+	.then(classThis.checkLists)
   .then(this.makeAdditionalLists)
 	.then(this.getStageandBoard().then(this.closeUnusedStages))
 	.then(this.getStageandBoard().then(this.orderLists))

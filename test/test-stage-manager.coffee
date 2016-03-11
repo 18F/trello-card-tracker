@@ -10,7 +10,7 @@ trello = require('node-trello')
 SM = new app.StageManager(helpers.mockfile, helpers.board)
 
 describe 'app.StageManager', ->
-  describe.skip '.run()', ->
+  describe '.run()', ->
     sandbox = undefined
     getStageStub = undefined
     checkListsStub = undefined
@@ -33,10 +33,10 @@ describe 'app.StageManager', ->
 
     before ->
       return
-    it 'runs the stage manager class', (done) ->
-      SM.run().done (data) ->
+    it 'runs the stage manager class', (done)  ->
+      SM.run().then ->
         expect(checkListsStub.callCount).to.equal 1
-        expect(makeAddListStub.callCount).to.equal 1
+        expect(makeAddListStub.callCount).to.equal 3
         expect(closeListStub.callCount).to.equal 1
         expect(orderListStub.callCount).to.equal 1
         done()
