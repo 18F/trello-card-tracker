@@ -29,7 +29,7 @@ if ("c" in argv) {
 
 if ("b" in argv) {
   console.log("--Build a Comment--");
-  var file  = (argv["d"]=== true) ? 'data/stages.yaml' : argv["d"];
+  var file  = (argv["b"]=== true) ? 'data/stages.yaml' : argv["d"];
   var CR = new new app.CardRecorder(file, board);
   CR.compileCommentArtifact = function(null, argv.d, argv.d, argv.f, argv.t, console.log, false);
 }
