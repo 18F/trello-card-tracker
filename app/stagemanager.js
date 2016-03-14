@@ -15,16 +15,19 @@ util.inherits(StageManager, TrelloSuper);
 var method = StageManager.prototype;
 
 method.run = function(){
+	var deferred = Q.defer();
 	this.getStageandBoard()
 	.then(this.checkLists)
   .then(this.makeAdditionalLists)
 	.then(this.getStageandBoard().then(this.closeUnusedStages))
 	.then(this.getStageandBoard().then(this.orderLists))
-	.fin(console.log("done"))
-	.fail(function (e) {
-            console.error(e.name + ': ' + e.message );
+	.then(function() { deferred.resolve("complete") })
+	.catch(function (e) {
+            deferred.reject();
+
   });
 
+	return deferred.promise;
 }
 
 method.getStageandBoard = function(){

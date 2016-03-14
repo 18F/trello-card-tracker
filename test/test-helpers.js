@@ -30,6 +30,18 @@ module.exports = {
       substages: [{name: 'IAA',  expected_time: 5},
         {name: 'Workshop Prep', expected_time: 10}]
     }]},
+  mockGetBoardList: [ { id: '77777',
+    name: 'Kanbanian',
+    closed: false,
+    idBoard: 'xxxx',
+    pos: 1,
+    subscribed: false },
+  { id: '8888888',
+    name: 'Kanbanian-Dos',
+    closed: false,
+    idBoard: 'xxxx',
+    pos: 2,
+    subscribed: false }],
   orderMockFile: './test/mockOrders.yaml',
   testCardID: process.env.TRELLO_TEST_CARD,
   mockOrder: {
@@ -42,7 +54,8 @@ module.exports = {
     stage: "CO Review",
     open_date: "",
     close_date: "",
-    owner: "Toni Coltona"
+    owner: "Toni Coltona",
+    due: "Tomorrow"
   },
   mockCurrentComment: {
     id: "0",
