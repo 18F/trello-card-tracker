@@ -28,24 +28,24 @@ method.createCard = function(order){
 	var deferred = Q.defer();
 	var description = this.descriptionMaker(order);
 	var cardName = order["project"] +" - "+order["order"];
+	var due = null;
 
 	if (order["due"]){
-		var due = order["due"];
-	} else {
-		var due = null;
+		due = order["due"];
 	}
-	classThis = this;
-	this.getListIDbyName(order["stage"], function(listID){
+
+	classThis.getListIDbyName(order["stage"]).then(function(listID){
 		var cardInfo = {"name": cardName,
 										"desc": description,
 										"idList": listID,
 										"due": due
 									};
 		classThis.t.post('1/cards/', cardInfo, function(err, data){
-			if(err) {deferred.reject(new Error(err));};
+			if(err) {
+				return deferred.reject(new Error(err));
+			}
 			deferred.resolve(data);
 		});
-
 	});
 	return deferred.promise;
 }

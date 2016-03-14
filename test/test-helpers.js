@@ -54,7 +54,8 @@ module.exports = {
     stage: "CO Review",
     open_date: "",
     close_date: "",
-    owner: "Toni Coltona"
+    owner: "Toni Coltona",
+    due: "Tomorrow"
   },
   mockCurrentComment: {
     id: "0",
