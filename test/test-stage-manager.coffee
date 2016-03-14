@@ -33,10 +33,10 @@ describe 'app.StageManager', ->
 
     before ->
       return
-    it 'runs the stage manager class', (done)  ->
-      SM.run().then ->
+    it 'runs the stage manager class', (done) ->
+      SM.run().done (data) ->
         expect(checkListsStub.callCount).to.equal 1
-        expect(makeAddListStub.callCount).to.equal 3
+        expect(makeAddListStub.callCount).to.equal 1
         expect(closeListStub.callCount).to.equal 1
         expect(orderListStub.callCount).to.equal 1
         done()

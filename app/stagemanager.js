@@ -16,16 +16,17 @@ var method = StageManager.prototype;
 
 method.run = function(){
 	var deferred = Q.defer();
-	classThis.getStageandBoard()
-	.then(classThis.checkLists)
+	this.getStageandBoard()
+	.then(this.checkLists)
   .then(this.makeAdditionalLists)
 	.then(this.getStageandBoard().then(this.closeUnusedStages))
 	.then(this.getStageandBoard().then(this.orderLists))
-	.fin(deferred.resolve("complete"))
-	.fail(function (e) {
+	.then(function() { deferred.resolve("complete") })
+	.catch(function (e) {
             deferred.reject();
 
   });
+
 	return deferred.promise;
 }
 
