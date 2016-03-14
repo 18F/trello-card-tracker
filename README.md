@@ -27,7 +27,7 @@ cd bpa-trello
 npm install
 ```
 
-Set the following `ENV` variables
+Set the following `ENV` variables. Can be loaded from a `.env` file.
 ```
 TRELLO_API_KEY
 TRELLO_API_TOK
@@ -38,7 +38,7 @@ TRELLO_TEST_CARD
 
 ### Running
 
-Either `npm start` to run the stagemanger with the default file stages.yaml.
+Either `npm start` to run the server that will run a daily call to the card-recorder with the default file stages.yaml.
 
 Or run the cli.
 
@@ -52,9 +52,18 @@ Or run the cli.
 
 Soon there will be a server to run the cardrecorder.
 
-### Testing
+### Development
+Use the `develop` branch
 
-Run the Mocha/Chai tests
+```
+git clone https://github.com/18F/bpa-trello.git
+git fetch origin develop
+npm install --dev
+npm start
+
+```
+
+Run the Mocha/Chai tests run via Istanbul.
 `npm test`
 
 ### Public domain
