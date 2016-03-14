@@ -22,9 +22,8 @@ method.run = function(){
 	.then(this.getStageandBoard().then(this.closeUnusedStages))
 	.then(this.getStageandBoard().then(this.orderLists))
 	.then(function() { deferred.resolve("complete") })
-	.catch(function (e) {
-            deferred.reject();
-
+	.catch(function(e) {
+		deferred.reject(e);
   });
 
 	return deferred.promise;

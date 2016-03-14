@@ -18,10 +18,13 @@ describe 'app.StageManager', ->
     closeListStub = undefined
     orderListStub = undefined
     boardLists = undefined
+    error = null
 
     beforeEach ->
       sandbox = sinon.sandbox.create()
       getStageStub = sandbox.stub(SM, 'getStageandBoard').resolves([stages, helpers.mockGetBoardList])
+      if error
+        getStageStub.rejects(error)
       checkListsStub = sandbox.stub(SM, 'checkLists').resolves(helpers.make_lists)
       makeAddListStub = sandbox.stub(SM, 'makeAdditionalLists').resolves({})
       closeListStub = sandbox.stub(SM, 'closeUnusedStages').resolves({})
@@ -29,16 +32,22 @@ describe 'app.StageManager', ->
       return
     afterEach ->
       sandbox.restore()
+      error = new Error('Test Error')
       return
 
-    before ->
-      return
     it 'runs the stage manager class', (done) ->
       SM.run().done (data) ->
         expect(checkListsStub.callCount).to.equal 1
         expect(makeAddListStub.callCount).to.equal 1
         expect(closeListStub.callCount).to.equal 1
         expect(orderListStub.callCount).to.equal 1
+        done()
+        return
+      return
+
+    it 'rejects if there are any errors', (done) ->
+      SM.run().catch (e) ->
+        expect(e).to.equal error
         done()
         return
       return
