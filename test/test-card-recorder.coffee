@@ -190,7 +190,7 @@ describe 'app.CardRecorder', ->
       sandbox.restore()
       return
     it 'will run the date diff functions, build and post a comment', (done) ->
-      CR.compileCommentArtifact 'xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', ->
+      CR.compileCommentArtifact 'xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', true, '2016-07-27T10:40:26.100Z', ->
         expect(addComment.calledWith('**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.')).to.be.ok
         expect(addComment.callCount).to.equal 1
         done()
