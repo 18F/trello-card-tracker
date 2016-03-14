@@ -17,13 +17,17 @@ method.readYaml = function() {
     	var doc = yaml.safeLoad(fs.readFileSync(this.yaml_file, 'utf8'));
       return doc;
     } catch (e){
-      return e;
+      return null;
     }
 };
 
 method.getPreAward = function(){
   stages = this.readYaml(this.yaml_file);
-  return stages.stages[0].substages;
+  if(stages) {
+    return stages.stages[0].substages;
+  } else {
+    return [ ];
+  }
 }
 
 method.getListIDbyName = function(name, callback){

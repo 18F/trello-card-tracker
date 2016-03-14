@@ -10,12 +10,16 @@ stages = helpers.expectedStageObject.stages[0].substages
 stageMgr = new app.StageManager(helpers.mockfile, helpers.board) # The trello super class is not directly accessible
 
 describe 'app.TrelloSuper', ->
-
   describe '.readYAML()', ->
     it 'maps a yaml to an object with a stages key', ->
       yamlObject = stageMgr.readYaml()
       expect(yamlObject).to.eql(helpers.expectedStageObject)
       return
+
+    it 'returns null if the YAML file doesn\'t exist', ->
+      sm = new app.StageManager('', helpers.board)
+      preaward = sm.readYaml()
+      expect(preaward).to.eql null
     return
 
   describe '.getPreAward()', ->
@@ -23,6 +27,11 @@ describe 'app.TrelloSuper', ->
       preaward = stageMgr.getPreAward()
       expect(preaward).to.eql(helpers.expectedStageObject.stages[0].substages)
       return
+
+    it 'returns an empty array if readYAML returns invalid data', ->
+      sm = new app.StageManager('', helpers.board)
+      preaward = sm.getPreAward()
+      expect(preaward).to.eql [ ]
     return
 
   describe 'getListIDbyName(ListName)', ->
