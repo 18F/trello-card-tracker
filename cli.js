@@ -28,8 +28,9 @@ if ("c" in argv) {
 }
 
 if ("b" in argv) {
+  //Args = Name of list > -d ,fromDate > -f, toDate > -t
   console.log("--Build a Comment--");
   var file  = (argv["b"]=== true) ? 'data/stages.yaml' : argv["d"];
-  var CR = new new app.CardRecorder(file, board);
-  CR.compileCommentArtifact = function(null, argv.d, argv.d, argv.f, argv.t, console.log, false);
+  var CR = new app.CardRecorder(file, board);
+  CR.compileCommentArtifact(null, argv.d, argv.d, argv.f, argv.t, console.log, false);
 }
