@@ -111,7 +111,7 @@ method.buildComment = function(dateDiff, expected, lastMove, recentMove, lastLis
 method.addComment = function(message, cardID, callback){
 	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
 		if (err) {throw err}
-		callback(data);
+		if (callback) callback(data);
 	 });
 }
 
