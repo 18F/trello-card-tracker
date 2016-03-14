@@ -26,3 +26,10 @@ if ("c" in argv) {
   var CC = new app.CardCreator(file, board);
   CC.createOrders('data/orders.yaml');
 }
+
+if ("b" in argv) {
+  console.log("--Build a Comment--");
+  var file  = (argv["d"]=== true) ? 'data/stages.yaml' : argv["d"];
+  var CR = new new app.CardRecorder(file, board);
+  CR.compileCommentArtifact = function(null, argv.d, argv.d, argv.f, argv.t, console.log, false);
+}
