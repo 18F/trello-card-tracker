@@ -10,15 +10,6 @@ module.exports = {
     stub.yieldsAsync(err, callbackData);
     return stub;
   },
-  waitTicks: function(numberOfTicks, callback) {
-    if(numberOfTicks <= 0) {
-      return callback();
-    }
-
-    process.nextTick(function() {
-      module.exports.waitTicks(numberOfTicks - 1, callback);
-    });
-  },
   board: process.env.TRELLO_BPA_TEST_BOARD,
   mockfile: './test/mockfile.yaml',
   board_url: '/1/boards/' + this.board + '/lists',

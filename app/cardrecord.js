@@ -25,11 +25,11 @@ method.run = function(callback){
 				if (hasMoved && daysSinceUpdate < 1) {
 					console.log("Write New Phase: "+card["name"]);
 					var lastPhase = classThis.getLastList(card.actions[0]);
-					classThis.compileCommentArtifact(card["id"], lastPhase, lastPhase, card.actions[1].date, card.actions[0].date, callback);
+					classThis.compileCommentArtifact(card["id"], lastPhase, lastPhase, card.actions[1].date, card.actions[0].date, true, callback);
 				} else {
 					console.log("Write Current Phase: "+card["name"]);
 					classThis.getListNameByID(card["idList"]).then(function(listName){
-							classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format(), callback);
+							classThis.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format(), true, callback);
 					});
 				}
 			});
@@ -65,7 +65,6 @@ method.deleteCurrentComment = function(cardID){
 		if(currentCommentID != ""){
 			classThis.t.del('/1/actions/'+currentCommentID, function(err, data){
 				if(err) {
-					console.log(err);
 					deferred.reject(new Error(err));
 				}
 				return deferred.resolve(data);
@@ -94,14 +93,18 @@ method.getLastList = function(cardAction){
 }
 
 //Run function to build a comment
-method.compileCommentArtifact = function(cardID, dateList, nameList, fromDate, toDate, callback){
+method.compileCommentArtifact = function(cardID, dateList, nameList, fromDate, toDate, addCommentOpt, callback){
 		var stage = _un.findWhere(classThis.Stages, {name: dateList});
 		var expectedTime = stage["expected_time"];
 		var diffArray = this.calculateDateDifference(expectedTime, fromDate, toDate);
 		var differenceFromExpected = diffArray[0];
 		var timeTaken = diffArray[1];
 		var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken);
-		this.addComment(comment, cardID).then(callback);
+		if(addCommentOpt) {
+			this.addComment(comment, cardID).then(callback);
+		} else {
+			callback(comment);
+		};
 }
 
 method.calculateDateDifference = function(expected, lastMove, recentMove){
