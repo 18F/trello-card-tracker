@@ -65,7 +65,6 @@ method.deleteCurrentComment = function(cardID){
 		if(currentCommentID != ""){
 			classThis.t.del('/1/actions/'+currentCommentID, function(err, data){
 				if(err) {
-					console.log(err);
 					deferred.reject(new Error(err));
 				}
 				return deferred.resolve(data);
