@@ -121,15 +121,10 @@ method.buildComment = function(dateDiff, expected, lastMove, recentMove, lastLis
 method.addComment = function(message, cardID){
 	var deferred = Q.defer();
 	this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
-<<<<<<< HEAD
-		if (err) {throw err}
-		if (callback) callback(data);
-=======
 		if (err) {
 			return deferred.reject(err);
 		}
 		deferred.resolve(data);
->>>>>>> develop
 	 });
 	 return deferred.promise;
 }
