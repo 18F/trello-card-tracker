@@ -181,18 +181,24 @@ describe 'app.CardRecorder', ->
   describe '.compileCommentArtifact', ->
     sandbox = undefined
     addComment = undefined
-    before ->
+    beforeEach ->
       sandbox = sinon.sandbox.create()
       addComment = sandbox.stub(CR, 'addComment').resolves();
       calcStub = sandbox.stub(CR, 'calculateDateDifference').returns([103,113]);
       return
-    after ->
+    afterEach ->
       sandbox.restore()
       return
     it 'will run the date diff functions, build and post a comment', (done) ->
       CR.compileCommentArtifact 'xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', true, ->
         expect(addComment.calledWith('**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.')).to.be.ok
         expect(addComment.callCount).to.equal 1
+        done()
+        return
+      return
+    it 'will run the date diff functions, but not actually create a comment', (done) ->
+      CR.compileCommentArtifact 'xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', false, (comment) ->
+        expect(comment).to.eql '**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.'
         done()
         return
       return
