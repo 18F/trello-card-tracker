@@ -1,7 +1,18 @@
 language: node_js
 node_js:
-  - "5.4"
+- '5.4'
 install:
-  - npm install --dev
+- npm install --dev
 script:
-  - npm test
+- npm test
+deploy:
+  edge: true
+  provider: cloudfoundry
+  api: https://api.cloud.gov
+  username: laura.gerhardt@gsa.gov
+  password:
+    secure: XW/RlGRxWp/G0CtMQzmrgKOo3cJgvnbObW9PK7sLcRZ/qFsZWrqGfGKdvWLxB6G0RLrD8ZXnS7aNlSRLBig+T9HmC5N4aHroq42W3a2ONNfDwCTKq8oDRqvCfdVEwBsNvY/02/9yWb+T3wvCdOa6xY3u5q272YRCX00aiTnuscsufTZvA9C01w/g4VCzoSFk4TquUbPhmFA5guYAJEE7V6Az5+zGYrFwi/303OQr4SgqaFeJPpeENE4zRr4zhKkvmOsBtnRvswBbR7meYh2POKMltQ+Px+Jq+hivNEN2p8yx3IPqi/HEj+0ryBAMh5m+G3m9C5iqWlJS3SkyQsAT8U9JXMMdxc9d4RvKy1QHO4UvhLnWqaQTlR5A7G46ozpJheeRiNPLoUKwsjslNl8spzI5czBTHMPLpR6g1twhpNms/izwSmvzx9Uo4/QnEHfhTZFfehlqhwsChsk9B255b6g8dlk09boRody1w9dvjd5+E980ZO1SlQogkG++WIT6oGCjRSq7LDO4n3cTeI/5to4VfGTwjrGJLOqcfZDgn47VLqpbPPAapmHt1dXqNghD27ssjYg6vvbYaWk7TGsiF8/hkFn64ZhtNmA3q6ZgUIB/xA93SHvqjJQnfbi0a1mM/vJN1eFLCtxkRkcpoe7yfLbQzSNSX3T2ecYDbYxKqT4=
+  organization: 18F-acq
+  space: tools
+  on:
+    repo: 18F/bpa-trello
