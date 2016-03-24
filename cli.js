@@ -4,7 +4,13 @@ var app = require('./app');
 var argv = require('minimist')(process.argv.slice(2));
 
 // select board ***
-var board = process.env.TRELLO_BOARD_ID;
+var board;
+if ("i" in argv){
+  board = argv["i"]
+} else {
+  board = process.env.TRELLO_BOARD_ID;
+}
+
 
 if ("s" in argv){
   console.log("--Invoke Stage Manager--");
