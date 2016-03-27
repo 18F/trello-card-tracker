@@ -51,8 +51,8 @@ class StageManager extends TrelloSuper{
 			var listDefer = Q.defer();
 			all.push(listDefer.promise);
 			if (!list["built"]){
-				var postList = {name: list["stage"], idBoard: classThis.board, pos: i+1};
-				classThis.t.post("1/lists", postList, function(err,data){
+				var postList = {name: list["stage"], idBoard: this.board, pos: i+1};
+				this.t.post("1/lists", postList, function(err,data){
 					if (err) {
 						listDefer.reject(err);
 					}
@@ -76,8 +76,8 @@ class StageManager extends TrelloSuper{
 		// For each list
 		_un.each(data[1], function(trelloList){
 			if (!(_un.contains(stages, trelloList["name"]))){
-				classThis.getListCards(trelloList["id"], function(d){
-					classThis.closeList(d, trelloList["id"], callback)
+				this.getListCards(trelloList["id"], function(d){
+					this.closeList(d, trelloList["id"], callback)
 				});
 			};
 		});
@@ -93,7 +93,7 @@ class StageManager extends TrelloSuper{
 
 	closeList(listData, trelloID, callback){
 		if (listData.length === 0){
-			classThis.t.put("/1/list/"+trelloID+"/closed", {value: true}, function(e, success){
+			this.t.put("/1/list/"+trelloID+"/closed", {value: true}, function(e, success){
 				if (e) {throw e};
 				callback(success);
 			});
@@ -106,7 +106,7 @@ class StageManager extends TrelloSuper{
 			appropriateList = _un.findWhere(data[1], {name: stage["name"]})
 			if(appropriateList) {
 				listID = appropriateList["id"];
-				classThis.t.put("1/lists/"+listID+"/pos", {value: position}, function(e, data) {
+				this.t.put("1/lists/"+listID+"/pos", {value: position}, function(e, data) {
 					if (e) {throw e};
 				});
 				position++;
