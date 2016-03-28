@@ -24,7 +24,7 @@ class CardCreator extends TrelloSuper{
 			due = order["due"];
 		}
 
-		this.getListIDbyName(order["stage"]).then(function(listID){
+		super.getListIDbyName(order["stage"]).then(function(listID){
 			var cardInfo = {"name": cardName,
 											"desc": description,
 											"idList": listID,
@@ -41,8 +41,7 @@ class CardCreator extends TrelloSuper{
 	}
 
 	descriptionMaker(order){
-		return "Project: {p}\nAgency: {a}\nSubAgency: {sub}\nTrello Board: {tb}"
-			.supplant({p: order["project"], a: order["agency"], sub: order["subagency"], tb: order["trello"]});
+		return `Project: ${order.project}\nAgency: ${order.agency}\nSubAgency: ${order.subagency}\nTrello Board: ${order.trello}`;
 	}
 }
 

@@ -22,7 +22,7 @@ class CardRecorder extends TrelloSuper{
 						this.compileCommentArtifact(card["id"], lastPhase, lastPhase, card.actions[1].date, card.actions[0].date, true, callback);
 					} else {
 						console.log("Write Current Phase: "+card["name"]);
-						this.getListNameByID(card["idList"]).then(function(listName){
+						super.getListNameByID(card["idList"]).then(function(listName){
 								this.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format(), true, callback);
 						});
 					}
@@ -110,9 +110,9 @@ class CardRecorder extends TrelloSuper{
 
 	buildComment(dateDiff, expected, lastMove, recentMove, lastList, actual){
 		formatDiff = (dateDiff < 0)? "**"+dateDiff+" days**" :"`+"+dateDiff+" days`"
-		msg = "**{l} Stage:** {d}. *{f} - {t}*.\n Expected days: {e} days. Actual Days spent: {a}."
-			.supplant({l: lastList, d: formatDiff, e: expected, a: actual, f: moment(lastMove).format("L"), t: moment(recentMove).format("L")});
-		return msg;
+		var fromDate = moment(lastMove).format("L");
+		var toDate = moment(recentMove).format("L");
+		return `**${lastList} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${expected} days. Actual Days spent: ${actual}.`;
 	}
 
 	addComment(message, cardID){
