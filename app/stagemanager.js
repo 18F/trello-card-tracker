@@ -7,8 +7,6 @@ var Q = require('q');
 
 class StageManager extends TrelloSuper{
 
-	this.Stages = super.getPreAward();
-
 	run(){
 		var deferred = Q.defer();
 		this.getStageandBoard()
@@ -28,7 +26,7 @@ class StageManager extends TrelloSuper{
 		var deferred = Q.defer();
 		this.t.get(this.lists_url, function(err, data){
 			if(err) {deferred.reject(new Error(err));};
-			deferred.resolve([classThis.Stages, data]);
+			deferred.resolve([this.Stages, data]);
 		});
 		return deferred.promise;
 	}

@@ -10,6 +10,14 @@ class TrelloSuper{
     this.board = board;
     this.t = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_API_TOK);
     this.lists_url = "/1/boards/"+board+"/lists";
+    this.getPreAward = function(){
+      var stages = this.readYaml(this.yaml_file);
+      if(stages) {
+        this.Stages = stages.stages[0].substages;
+      } else {
+        this.Stages = [];
+      }
+    }
 }
 
   readYaml() {
@@ -21,14 +29,9 @@ class TrelloSuper{
     }
   }
 
-  getPreAward(){
-    stages = this.readYaml(this.yaml_file);
-    if(stages) {
-      return stages.stages[0].substages;
-    } else {
-      return [ ];
-    }
-  }
+  // getPreAward(){
+  //
+  // }
 
   getListIDbyName(name, callback){
     var deferred = Q.defer();

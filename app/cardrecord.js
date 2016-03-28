@@ -7,7 +7,7 @@ var yaml = require('js-yaml');
 
 class CardRecorder extends TrelloSuper{
 
-	this.Stages = super.getPreAward();
+	// var Stages = this.getPreAward();
 
 	run(callback){
 		this.getUpdateCards().then(function(cards){
@@ -22,7 +22,7 @@ class CardRecorder extends TrelloSuper{
 						this.compileCommentArtifact(card["id"], lastPhase, lastPhase, card.actions[1].date, card.actions[0].date, true, callback);
 					} else {
 						console.log("Write Current Phase: "+card["name"]);
-						super.getListNameByID(card["idList"]).then(function(listName){
+						this.getListNameByID(card["idList"]).then(function(listName){
 								this.compileCommentArtifact(card["id"], listName, "Current", card.actions[0].date, now.format(), true, callback);
 						});
 					}

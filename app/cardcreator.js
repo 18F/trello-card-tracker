@@ -24,7 +24,7 @@ class CardCreator extends TrelloSuper{
 			due = order["due"];
 		}
 
-		super.getListIDbyName(order["stage"]).then(function(listID){
+		this.getListIDbyName(order["stage"]).then(function(listID){
 			var cardInfo = {"name": cardName,
 											"desc": description,
 											"idList": listID,
