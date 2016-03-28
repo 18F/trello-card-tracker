@@ -101,7 +101,7 @@ class StageManager extends TrelloSuper{
 	orderLists(data){
 		var position = 0;
 		_un.each(data[0], function(stage, i){
-			appropriateList = _un.findWhere(data[1], {name: stage["name"]})
+			var appropriateList = _un.findWhere(data[1], {name: stage["name"]})
 			if(appropriateList) {
 				listID = appropriateList["id"];
 				this.t.put("1/lists/"+listID+"/pos", {value: position}, function(e, data) {

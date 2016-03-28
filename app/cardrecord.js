@@ -74,7 +74,7 @@ class CardRecorder extends TrelloSuper{
 		var updated = false;
 		var updates = _un.where(actionList, {type:"updateCard"});
 		if(updates.length > 0){
-			moves = _un.filter(updates, function(a){ return 'listBefore' in a.data});
+			var moves = _un.filter(updates, function(a){ return 'listBefore' in a.data});
 			if(moves.length > 0){
 				updated = true;
 			}
@@ -116,14 +116,15 @@ class CardRecorder extends TrelloSuper{
 	}
 
 	addComment(message, cardID){
-		var deferred = Q.defer();
-		this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
-			if (err) {
-				return deferred.reject(err);
-			}
-			deferred.resolve(data);
-		 });
-		 return deferred.promise;
+		var promise = new Promise(function(resolve, reject){
+			this.t.post("1/cards/"+cardID+"/actions/comments", {text: message}, function(err, data){
+				if (err) {
+					reject(err);
+				}
+				resolve(data);
+			 });
+
+		});
 	}
 }
 

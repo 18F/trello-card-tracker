@@ -3,6 +3,7 @@ var TrelloSuper = require("./helpers.js");
 var util = require('util');
 var yaml = require('js-yaml');
 var Q = require('q');
+var fs = require('fs')
 
 class CardCreator extends TrelloSuper{
 	createOrders(orderFile){
@@ -11,7 +12,7 @@ class CardCreator extends TrelloSuper{
 		_un.each(orders.orders, function(order){
 			promises.push(this.createCard(order));
 		});
-		return Q.all(promises);
+		return Promise.all(promises);
 	}
 
 	createCard(order){

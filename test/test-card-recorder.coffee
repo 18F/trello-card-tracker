@@ -233,14 +233,16 @@ describe 'app.CardRecorder', ->
       return
 
     it 'adds a comment to a board', (done) ->
-      CR.addComment('test message\n', '3333').then (resp) ->
+      promise = CR.addComment('test message\n', '3333')
+      return promise.then (resp) ->
         expect(resp.data.text).to.eql 'test message\n'
         done()
         return
       return
 
     it 'survives a trello error', (done) ->
-      CR.addComment('test message\n', '3333').catch (err) ->
+      promise = CR.addComment('test message\n', '3333')
+      return promise.catch (err) ->
         expect(err).to.eql error
         done()
         return
