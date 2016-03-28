@@ -1,13 +1,13 @@
-_un = require("underscore");
-TrelloSuper = require("./helpers.js");
-util = require('util');
-Q = require('q');
+"use strict";
+var _un = require("underscore");
+var TrelloSuper = require("./helpers.js");
+var util = require('util');
+var Q = require('q');
 
 
 class StageManager extends TrelloSuper{
-	constructor(){
-		this.Stages = this.getPreAward();
-	}
+
+	this.Stages = super.getPreAward();
 
 	run(){
 		var deferred = Q.defer();

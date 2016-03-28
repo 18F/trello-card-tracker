@@ -1,7 +1,8 @@
+"use strict";
 var TrelloSuper = require("./helpers.js");
 var util = require('util');
 var yaml = require('js-yaml');
-Q = require('q');
+var Q = require('q');
 
 class CardCreator extends TrelloSuper{
 	createOrders(orderFile){

@@ -1,3 +1,4 @@
+"use strict";
 require("dotenv").config();
 
 exports.StageManager = require("./stagemanager.js");

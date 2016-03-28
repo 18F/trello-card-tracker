@@ -1,3 +1,4 @@
+"use strict";
 var TrelloSuper = require("./helpers.js");
 var util = require('util');
 var instadate = require("instadate");
@@ -5,9 +6,9 @@ var moment = require("moment");
 var yaml = require('js-yaml');
 
 class CardRecorder extends TrelloSuper{
-	constructor(){
-		this.Stages = this.getPreAward();
-	}
+
+	this.Stages = super.getPreAward();
+
 	run(callback){
 		this.getUpdateCards().then(function(cards){
 			_un.each(cards, function(card) {

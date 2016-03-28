@@ -1,9 +1,8 @@
-yaml = require('js-yaml');
-fs   = require('fs');
-Trello = require("node-trello");
+"use strict";
+var yaml = require('js-yaml');
+var fs   = require('fs');
+var Trello = require("node-trello");
 
-
-var method = TrelloSuper.prototype;
 
 class TrelloSuper{
   constructor(yaml_file, board) {
