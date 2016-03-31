@@ -1,4 +1,5 @@
 var TrelloSuper = require("./helpers.js");
+var fs = require('fs');
 var util = require('util');
 var yaml = require('js-yaml');
 Q = require('q');
