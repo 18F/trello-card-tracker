@@ -32,7 +32,6 @@ class CardCreator extends MyTrello {
 
         var description = this.descriptionMaker(order),
             cardName = order.project + " - " + order.order,
-            due = order.due || null,
             self = this;
 
         this.getListIDbyName(order.stage).then(function(listID) {
@@ -40,7 +39,7 @@ class CardCreator extends MyTrello {
                 name: cardName,
                 desc: description,
                 idList: listID,
-                due: due
+                due: order.due
             };
             self.t.post('1/cards/', cardInfo, function(err, data) {
                 if (err) return deferred.reject(new Error(err));
