@@ -14,7 +14,7 @@ function TrelloSuper(yaml_file, board) {
 
 method.readYaml = function() {
     try {
-    	var doc = yaml.safeLoad(fs.readFileSync(this.yaml_file, 'utf8'));
+        var doc = yaml.safeLoad(fs.readFileSync(this.yaml_file, 'utf8'));
       return doc;
     } catch (e){
       return null;
@@ -58,7 +58,7 @@ method.getListNameByID = function(listID){
     if(err) {
       return deferred.reject(new Error(err));
     };
-		deferred.resolve(list["name"]);
+        deferred.resolve(list["name"]);
   });
   return deferred.promise;
 }
