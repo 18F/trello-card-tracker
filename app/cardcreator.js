@@ -6,7 +6,6 @@ var Q = require('q');
 var _ = require("underscore");
 
 var MyTrello = require("./my-trello.js");
-require('./utils.js');
 
 
 class CardCreator extends MyTrello {
@@ -51,15 +50,8 @@ class CardCreator extends MyTrello {
     }
 
     descriptionMaker(order) {
-        var result = "Project: {p}\nAgency: {a}\nSubAgency: {sub}\nTrello Board: {tb}".supplant({
-            p: order.project,
-            a: order.agency,
-            sub: order.subagency,
-            tb: order.trello
-        });
-        return result;   
+        return `Project: ${order.project}\nAgency: ${order.agency}\nSubAgency: ${order.subagency}\nTrello Board: ${order.trello}`;
     }
-
 }
 
 

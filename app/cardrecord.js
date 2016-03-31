@@ -7,7 +7,6 @@ var Q = require('q');
 var _ = require("underscore");
 
 var MyTrello = require("./my-trello.js");
-require('./utils.js');
 
 
 class CardRecorder extends MyTrello {
@@ -121,7 +120,7 @@ class CardRecorder extends MyTrello {
         var differenceFromExpected = diffArray[0];
         var timeTaken = diffArray[1];
         var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken);
-        
+
         if (addCommentOpt) {
             this.addComment(comment, cardID).then(callback);
         } else {
@@ -138,15 +137,9 @@ class CardRecorder extends MyTrello {
 
     buildComment(dateDiff, expected, lastMove, recentMove, lastList, actual) {
         var formatDiff = (dateDiff < 0) ? "**" + dateDiff + " days**" : "`+" + dateDiff + " days`";
-        var msg = "**{l} Stage:** {d}. *{f} - {t}*.\n Expected days: {e} days. Actual Days spent: {a}.".supplant({
-            l: lastList,
-            d: formatDiff,
-            e: expected,
-            a: actual,
-            f: moment(lastMove).format("L"),
-            t: moment(recentMove).format("L")
-        });
-        return msg;
+        var fromDate = moment(lastMove).format("L");
+        var toDate = moment(recentMove).format("L");
+        return `**${lastList} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${expected} days. Actual Days spent: ${actual}.`;
     }
 
     addComment(message, cardID) {
