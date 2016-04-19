@@ -3,8 +3,12 @@
 var instadate = require("instadate");
 var yaml = require('js-yaml');
 var moment = require("moment");
+var fedHolidays = require('@18f/us-federal-holidays');
 var Q = require('q');
 var _ = require("underscore");
+
+var d = new Date();
+var holidays = fedHolidays.allForYear(d.getFullYear());
 
 var MyTrello = require("./my-trello.js");
 
@@ -128,10 +132,23 @@ class CardRecorder extends MyTrello {
         }
     }
 
+    findHolidaysBetweenDates(fromDate, toDate){
+      var count = 0;
+      _un.each(holidays, function(holiday){
+        if(moment(holiday.dateString).isBetween(fromDate, toDate, 'day')){
+          count++;
+        }
+      });
+      return count;
+    }
+
+
+
     calculateDateDifference(expected, lastMove, recentMove) {
         var fromDate = new Date(lastMove);
         var toDate = new Date(recentMove);
         var diffDays = instadate.differenceInWorkDays(fromDate, toDate);
+        var diffDays = diffDays - this.findHolidaysBetweenDates(fromDate, toDate);
         return [diffDays - expected, diffDays];
     }
 
