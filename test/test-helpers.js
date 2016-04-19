@@ -45,7 +45,7 @@ module.exports = {
     stage: "CO Review",
     open_date: "",
     close_date: "",
-    owner: "Toni Coltona",
+    owner: "bob-test",
     due: "Tomorrow"
   },
   mockCurrentComment: {
@@ -204,7 +204,7 @@ testCard: { id: 'xxxxx',
   idChecklists: [],
   idLabels: [],
   idList: 'aaaaaa',
-  idMembers: [],
+  idMembers: ['chilly'],
   idShort: 45,
   idAttachmentCover: null,
   manualCoverAttachment: false,

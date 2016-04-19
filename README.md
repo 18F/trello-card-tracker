@@ -46,7 +46,9 @@ Or run the cli.
 
 - -s   Run the stage manager class with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.
 - -r   Run the card recorder with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.   
-- -c   Run the card creator with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.  
+- -c   Run the card creator with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.
+
+- -i To allow the use of a Trello board ID other than the one included in the .env file. 
 
 ##### Coming Soon
 
