@@ -110,4 +110,40 @@ describe 'app.TrelloSuper', ->
 
     return
 
+  describe 'getMember', ->
+        sandbox = undefined
+        stub = undefined
+        error = null
+        result =
+          'id': '4ee7df1be582acdec80000ae'
+          'username': 'test-username'
+          'fullName': 'Username FullName'
+          'url': 'https://trello.com/test-username'
+        testUsername = 'test-username'
+
+        beforeEach ->
+          sandbox = sinon.sandbox.create()
+          stub = sandbox.stub(trello.prototype, 'get').withArgs('/1/members/' + testUsername).yieldsAsync(error, result)
+          return
+
+        afterEach ->
+          sandbox.restore()
+          error = new Error('Test Error')
+          result = null
+          return
+
+        it 'will ping Trello to member data given a member username', (done) ->
+          stageMgr.getMember(testUsername).then (member) ->
+            expect(member).to.eql(result);
+            done()
+            return
+          return
+
+        it 'will survive a Trello error', (done) ->
+          stageMgr.getMember(testUsername).catch (err) ->
+            expect(err).to.eql(error);
+            done()
+            return
+          return
+    return
   return
