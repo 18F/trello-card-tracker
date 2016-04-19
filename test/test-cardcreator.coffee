@@ -40,6 +40,7 @@ describe 'app.CardCreator', ->
     beforeEach ->
       postStub = sandbox.stub(trello.prototype, 'post').yieldsAsync(err, helpers.testCard)
       listStub = sandbox.stub(CC, 'getListIDbyName').withArgs("CO Review").resolves('aaaaaa')
+      memberStub = sandbox.stub(CC, 'getMember').withArgs("bob-test").resolves({"id": "chilly"})
       return
     afterEach ->
       err = new Error('Test Error')

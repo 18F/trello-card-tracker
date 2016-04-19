@@ -33,14 +33,19 @@ class CardCreator extends MyTrello {
             cardName = order.project + " - " + order.order,
             self = this;
 
-        this.getListIDbyName(order.stage).then(function(listID) {
+        Q.all([this.getListIDbyName(order.stage), this.getMember(order.owner)]).then(function(asyncRes) {
+            var listID= asyncRes[0];
+            var memberInfo = asyncRes[1];
             var cardInfo = {
                 name: cardName,
                 desc: description,
                 idList: listID,
-                due: order.due
+                due: order.due,
+                idMembers: memberInfo.id
             };
             self.t.post('1/cards/', cardInfo, function(err, data) {
+              console.log(err);
+              console.log(data);
                 if (err) return deferred.reject(new Error(err));
                 deferred.resolve(data);
             });
