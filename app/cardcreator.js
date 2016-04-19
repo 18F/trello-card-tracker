@@ -41,11 +41,9 @@ class CardCreator extends MyTrello {
                 desc: description,
                 idList: listID,
                 due: order.due,
-                idMembers: memberInfo.id
+                idMembers: [memberInfo.id]
             };
             self.t.post('1/cards/', cardInfo, function(err, data) {
-              console.log(err);
-              console.log(data);
                 if (err) return deferred.reject(new Error(err));
                 deferred.resolve(data);
             });
