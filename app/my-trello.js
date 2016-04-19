@@ -58,6 +58,18 @@ class MyTrello {
 
         return deferred.promise;
     }
+    getMember(usernameOrID){
+      var deferred = Q.defer();
+
+      this.t.get('/1/members/' + usernameOrID, function(e, member) {
+          if (e) return deferred.reject(e);
+
+          deferred.resolve(member);
+      });
+
+      return deferred.promise;
+
+    }
 }
 
 
