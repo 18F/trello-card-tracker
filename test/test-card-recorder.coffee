@@ -205,10 +205,23 @@ describe 'app.CardRecorder', ->
       return
     return
 
+  describe '.findHolidaysBetweenDates', ->
+    it 'will not find a holiday between dates that do not have a holiday between them', ->
+      holidays = CR.findHolidaysBetweenDates('01-04-2016', '01-10-2016')
+      expect(holidays).to.eql 0
+      return
+
+    it 'will find that there are two holidays between 4/5/16 and 7/27/16', ->
+      holidays = CR.findHolidaysBetweenDates("2016-04-05", "2016-07-27")
+      expect(holidays).to.eql 2
+      return
+
+    return
+
   describe '.calculateDateDifference', ->
     it 'calculates the difference between when the card was moved and the expected time', ->
       difference = CR.calculateDateDifference(10, "2016-04-05", "2016-07-27")
-      expect(difference).to.eql [71,81]
+      expect(difference).to.eql [69,79]
       return
     return
 
