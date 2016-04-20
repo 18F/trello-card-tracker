@@ -75,7 +75,7 @@ class CardRecorder extends MyTrello {
         return deferred.promise;
     }
 
-    getUpdateCards(callback) {
+    getUpdateCards() {
         var deferred = Q.defer();
         var url = '/1/boards/' + this.board + '/cards';
 
