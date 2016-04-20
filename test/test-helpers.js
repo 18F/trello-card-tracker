@@ -213,5 +213,163 @@ testCard: { id: 'xxxxx',
   pos: 16384,
   shortUrl: 'https://trello.com/c/xddwxws',
   url: 'https://trello.com/c/xddwxws/34-bpa-project-phase-ii',
-  stickers: [] }
+  stickers: []
+},
+  mockCommentCardObj: {
+    id: "0",
+    badges: {
+      votes: 0,
+      viewingMemberVoted: false,
+      subscribed: true,
+      fogbugz: "",
+      checkItems: 0,
+      checkItemsChecked: 0,
+      comments: 4,
+      attachments: 0,
+      description: true,
+      due: null
+    },
+    checkItemStates: [ ],
+    closed: false,
+    dateLastActivity: "2016-04-19T22:53:02.061Z",
+    desc: "Comment Card Obj ",
+    descData: {
+      emoji: { }
+      },
+    due: null,
+    email: "cool@boards.trello.com",
+    idBoard: "ccc",
+    idChecklists: [ ],
+    idList: "111",
+    idMembers: [
+      "ddd",
+      "ddd3",
+      "efss"
+      ],
+    idMembersVoted: [ ],
+    idShort: 1,
+    idAttachmentCover: null,
+    manualCoverAttachment: false,
+    labels: [ ],
+    idLabels: [ ],
+    name: "Comment Mock Card",
+    pos: 1,
+    shortLink: "9322",
+    shortUrl: "https://trello.com/c/9322",
+    subscribed: true,
+    url: "https://trello.com/c/9322/comment-mock-card",
+    checklists: [ ],
+    members: [
+      {
+      id: "dddd",
+      avatarHash: "dke",
+      bio: "",
+      bioData: null,
+      confirmed: true,
+      fullName: "Bob Tester",
+      idPremOrgsAdmin: [ ],
+      initials: "BT",
+      memberType: "normal",
+      products: [ ],
+      status: "disconnected",
+      url: "https://trello.com/bobtester",
+      username: "bobtester"
+      },
+      {
+      id: "dddd",
+      avatarHash: "dke",
+      bio: "",
+      bioData: null,
+      confirmed: true,
+      fullName: "Bob Tester",
+      idPremOrgsAdmin: [ ],
+      initials: "BT",
+      memberType: "normal",
+      products: [ ],
+      status: "disconnected",
+      url: "https://trello.com/bobtester",
+      username: "bobtester"
+      },
+      {
+      id: "dddd",
+      avatarHash: "dke",
+      bio: "",
+      bioData: null,
+      confirmed: true,
+      fullName: "Bob Tester",
+      idPremOrgsAdmin: [ ],
+      initials: "BT",
+      memberType: "normal",
+      products: [ ],
+      status: "disconnected",
+      url: "https://trello.com/bobtester",
+      username: "bobtester"
+      }
+    ],
+    actions: [
+      {
+      id: "2",
+      idMemberCreator: "ddd",
+      data: {
+      list: {
+      name: "Test List",
+      id: "testlistID"
+      },
+      board: {
+        shortLink: "333",
+        name: "Test Board",
+        id: "testboardID"
+        },
+      card: {
+        shortLink: "sss",
+        idShort: 1,
+        name: "Comment Test Card",
+        id: "322"
+        },
+      text: "**Current Stage:** `+19 days`. *03/21/2016 - 03/08/2016*. Expected days: 2 days. Actual Days spent: 21."
+      },
+      type: "commentCard",
+      date: "2016-03-08T22:53:02.063Z",
+      memberCreator: {
+        id: "asdf9",
+        avatarHash: "adafa",
+        fullName: "Bob Tester",
+        initials: "BT",
+        username: "bobtester"
+        }
+      },
+      {
+        id: "4",
+        idMemberCreator: "ddd",
+        data: {
+        list: {
+        name: "Test List",
+        id: "testlistID"
+        },
+        board: {
+        shortLink: "333",
+        name: "Test Board",
+        id: "testboardID"
+        },
+        card: {
+        shortLink: "0",
+        idShort: 1,
+        name: "Comment Test Card",
+        id: "322"
+        },
+        text: "This is not a current comment."
+        },
+        type: "commentCard",
+        date: "2016-03-08T22:53:02.063Z",
+        memberCreator: {
+        id: "asdf9",
+        avatarHash: "adafa",
+        fullName: "Bob Tester",
+        initials: "BT",
+        username: "bobtester"
+        }
+      }
+
+    ]
+    }
 }

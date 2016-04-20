@@ -25,7 +25,7 @@ describe 'app.CardRecorder', ->
 
     beforeEach ->
       sandbox = sinon.sandbox.create()
-      deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({});
+      deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true});
       sandbox.stub(CR, 'getListNameByID').resolves('list name');
       lastListStub = sandbox.stub(CR, 'getLastList')
       compileStub = sandbox.stub(CR, 'compileCommentArtifact').yieldsAsync();
@@ -39,23 +39,27 @@ describe 'app.CardRecorder', ->
       # Set the action date to less than a day ago
       # to trigger the phase change
       cardActions = helpers.actionListMove
+      cardActions.concat(helpers.mockCommentCardObj.actions)
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
 
       getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: cardActions}])
-      CR.run ->
-        expect(deleteCards.callCount).to.equal 1
-        expect(compileStub.callCount).to.equal 1
+      CR.run().then ->
+        expect(getCards.callCount).to.equal 1
+        # expect(deleteCards.callCount).to.equal 1
+        # expect(compileStub.callCount).to.equal 1
         done()
         return
       return
 
     it 'will run the cardRecorder class for a list that has not moved', (done) ->
-      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove}])
-      CR.run ->
-        expect(deleteCards.callCount).to.equal 1
-        expect(compileStub.callCount).to.equal 1
+      cardActions = helpers.actionListNoMove
+      cardActions.concat(helpers.mockCommentCardObj.actions)
+      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: cardActions}])
+      CR.run().then ->
+        # expect(deleteCards.callCount).to.equal 1
+        # expect(compileStub.callCount).to.equal 1
         done()
         return
       return
@@ -94,28 +98,24 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.deleteCurrentComment(cardID)', ->
+  describe '.deleteCurrentComment(comments)', ->
     runs = 0
     sandbox = undefined
-    getStub = undefined
     delStub = undefined
+    currentComments = undefined
+    notCurrentComments = undefined
     error = new Error('Test Error')
 
     beforeEach ->
-      currentComment = JSON.parse(JSON.stringify(helpers.mockCurrentComment))
-      currentComment.data.text = "**Current Stage:** This comment says current stage."
-      notCurrentComment = JSON.parse(JSON.stringify(helpers.mockCurrentComment))
-      notCurrentComment.data.text = "This comment is not in the current stage."
-      notCurrentComment.id = 'not-current'
+      currentComments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      notCurrentComments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      notCurrentComments[0].data.text = "This comment is not in the current stage."
       sandbox = sinon.sandbox.create()
-      getStub = sandbox.stub(trello.prototype, 'get').withArgs('/1/cards/380/actions').yieldsAsync(null, [ currentComment ]).withArgs('/1/cards/1000/actions').yieldsAsync(null, [ notCurrentComment ])
-      delStub = sandbox.stub(trello.prototype, 'del').withArgs('/1/actions/' + currentComment.id).yieldsAsync(null, {}).withArgs('/1/actions/' + notCurrentComment.id).yieldsAsync(null, "no current comment")
+      delStub = sandbox.stub(trello.prototype, 'del').withArgs('/1/actions/' + currentComments[0].id).yieldsAsync(null, {})
 
       runs++
       if runs == 3
-        getStub.withArgs('/1/cards/380/actions').yieldsAsync(error, null)
-      else if runs == 4
-        delStub.withArgs('/1/actions/' + currentComment.id).yieldsAsync(error, null)
+        delStub.withArgs('/1/actions/' + currentComments[0].id).yieldsAsync(error, null)
       return
 
     afterEach ->
@@ -123,28 +123,23 @@ describe 'app.CardRecorder', ->
       return
 
     it 'will delete a comment if a bolded text saying "Current Stage" appears', (done) ->
-      CR.deleteCurrentComment("380").then (data) ->
-        expect(data).to.eql {};
+      CR.deleteCurrentComment(currentComments).then (data) ->
+        expect(data).to.eql {"currentCommentDeleted": true};
+        expect(delStub.callCount).to.equal 1
         done()
         return
       return
 
     it 'will not delete a comment that does not have a current stage', (done) ->
-      CR.deleteCurrentComment("1000").then (data) ->
-        expect(data).to.eql "no current comment";
-        done()
-        return
-      return
-
-    it 'will survive a trello error fetching cards', (done) ->
-      CR.deleteCurrentComment("380").catch (err) ->
-        expect(err).to.eql error;
+      CR.deleteCurrentComment(notCurrentComments).then (data) ->
+        expect(data).to.eql {"currentCommentDeleted": false};
+        expect(delStub.callCount).to.equal 0
         done()
         return
       return
 
     it 'will survive a trello error deleting a comment', (done) ->
-      CR.deleteCurrentComment("380").catch (err) ->
+      CR.deleteCurrentComment(currentComments).catch (err) ->
         expect(err).to.eql error;
         done()
         return
@@ -152,17 +147,17 @@ describe 'app.CardRecorder', ->
 
     return
 
-  describe '.hasMovedCheck(actionList)', ->
-    it 'will return true if a card has a list of acitons that has not moved', ->
-      hasMoved = CR.hasMovedCheck(helpers.actionListMove)
-      expect(hasMoved).to.be.true
-      return
-
-    it 'will return false if a card has a list of acitons that has not moved', ->
-      hasMoved = CR.hasMovedCheck(helpers.actionListNoMove)
-      expect(hasMoved).to.be.false
-      return
-    return
+  # describe '.hasMovedCheck(actionList)', ->
+  #   it 'will return true if a card has a list of acitons that has not moved', ->
+  #     hasMoved = CR.hasMovedCheck(helpers.actionListMove)
+  #     expect(hasMoved).to.be.true
+  #     return
+  #
+  #   it 'will return false if a card has a list of acitons that has not moved', ->
+  #     hasMoved = CR.hasMovedCheck(helpers.actionListNoMove)
+  #     expect(hasMoved).to.be.false
+  #     return
+  #   return
 
   describe '.getLastList(updateActionID)', ->
     it 'will grab the name of the last list a trello card was part of given that the card has moved', ->

@@ -12,5 +12,5 @@ var j = cron.scheduleJob('0 8 * * *', function(){
   var file  = (argv["f"]) ? argv["f"] : 'data/stages.yaml';
   console.log("Running Card Recorder");
   var CR = new app.CardRecorder(file, board);
-  CR.run();
+  CR.run().then(console.log("Card Recorder Run"));
 });

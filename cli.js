@@ -23,7 +23,7 @@ if ("r" in argv) {
   console.log("--Invoke Card Recorder--");
   var file  = (argv["r"]=== true) ? 'data/stages.yaml' : argv["r"];
   var CR = new app.CardRecorder(file, board);
-  CR.run(console.log("CR Complete"));
+  CR.run().then(console.log("CR Complete"));
 }
 
 if ("c" in argv) {
