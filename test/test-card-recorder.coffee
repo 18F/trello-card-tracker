@@ -22,13 +22,15 @@ describe 'app.CardRecorder', ->
     compileStub = undefined
     getCards = undefined
     lastListStub = undefined
+    findLastStub = undefined
 
     beforeEach ->
       sandbox = sinon.sandbox.create()
       deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true});
       sandbox.stub(CR, 'getListNameByID').resolves('list name');
       lastListStub = sandbox.stub(CR, 'getLastList')
-      compileStub = sandbox.stub(CR, 'compileCommentArtifact').yieldsAsync();
+      findLastStub = sandbox.stub(CR, 'findLastMoveDateFromComments').returns("01/12/2016");
+      compileStub = sandbox.stub(CR, 'compileCommentArtifact').resolves("Compiled Comment");
       return
 
     afterEach ->
@@ -38,28 +40,26 @@ describe 'app.CardRecorder', ->
     it 'will run the cardRecorder class for a list that has moved', (done) ->
       # Set the action date to less than a day ago
       # to trigger the phase change
-      cardActions = helpers.actionListMove
-      cardActions.concat(helpers.mockCommentCardObj.actions)
+      cardActions = helpers.actionListMove.concat(helpers.mockCommentCardObj.actions)
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
 
-      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: cardActions}])
-      CR.run().then ->
+      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}])
+      CR.run().then (resp) ->
         expect(getCards.callCount).to.equal 1
-        # expect(deleteCards.callCount).to.equal 1
-        # expect(compileStub.callCount).to.equal 1
+        expect(deleteCards.callCount).to.equal 1
+        expect(compileStub.callCount).to.equal 1
         done()
         return
       return
 
     it 'will run the cardRecorder class for a list that has not moved', (done) ->
-      cardActions = helpers.actionListNoMove
-      cardActions.concat(helpers.mockCommentCardObj.actions)
-      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: cardActions}])
-      CR.run().then ->
-        # expect(deleteCards.callCount).to.equal 1
-        # expect(compileStub.callCount).to.equal 1
+      cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
+      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}])
+      CR.run().then (resp) ->
+        expect(deleteCards.callCount).to.equal 1
+        expect(compileStub.callCount).to.equal 1
         done()
         return
       return

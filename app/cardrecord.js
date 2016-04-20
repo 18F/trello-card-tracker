@@ -19,7 +19,7 @@ class CardRecorder extends MyTrello {
         this.stages = this.getPreAward();
     }
 
-    run(callback) {
+    run() {
         var self = this;
         var deferred = Q.defer();
         this.getUpdateCards().then(function(cards) {
@@ -32,7 +32,13 @@ class CardRecorder extends MyTrello {
                       var hasMoved = true;
                     }
                     var lastMove = self.findLastMoveDateFromComments(comments);
-                    var daysSinceUpdate = now.diff(moment(lastMove, "MM/DD/YYYY"), 'days');
+                    var fromMove;
+                    if(lastMove){
+                      fromMove = moment(lastMove, "MM/DD/YYYY").format();
+                    } else {
+                      fromMove = moment(updateActions[0].date)
+                    }
+                    var daysSinceUpdate = now.diff(fromMove, 'days');
                     // var hasMoved = self.hasMovedCheck(updateActions);
 
                     if (hasMoved && daysSinceUpdate < 1) {
@@ -43,7 +49,7 @@ class CardRecorder extends MyTrello {
                             lastPhase,
                             lastPhase,
                             updateActions[1].date,
-                            moment(lastMove, "MM/DD/YYYY").format(),
+                            fromMove,
                             true
                         )
                         .then(deferred.resolve);
@@ -54,12 +60,12 @@ class CardRecorder extends MyTrello {
                                 card.id,
                                 listName,
                                 "Current",
-                                moment(lastMove, "MM/DD/YYYY").format(),
+                                fromMove,
                                 now.format(),
                                 true
                             )
                         })
-                        .then(deferred.resolve);
+                        .then(function(resp){deferred.resolve;});
 
                     }
                 });
@@ -113,7 +119,6 @@ class CardRecorder extends MyTrello {
       });
       var commentDateMatch = myRegex.exec(correctComment.data.text);
       var commentDate = commentDateMatch[1];
-      console.log(commentDate);
       return commentDate;
 
     }
@@ -144,7 +149,7 @@ class CardRecorder extends MyTrello {
         var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken);
 
         if (addCommentOpt) {
-            this.addComment(comment, cardID).then(deferred.resolve);
+            this.addComment(comment, cardID).then(function(resp){deferred.resolve});
         } else {
             deferred.resolve(comment);
         }
