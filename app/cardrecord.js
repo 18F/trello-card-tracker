@@ -65,7 +65,7 @@ class CardRecorder extends MyTrello {
                                 true
                             )
                         })
-                        .then(function(resp){deferred.resolve;});
+                        .then(deferred.resolve);
 
                     }
                 });
@@ -149,7 +149,7 @@ class CardRecorder extends MyTrello {
         var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken);
 
         if (addCommentOpt) {
-            this.addComment(comment, cardID).then(function(resp){deferred.resolve});
+            this.addComment(comment, cardID).then(deferred.resolve);
         } else {
             deferred.resolve(comment);
         }
