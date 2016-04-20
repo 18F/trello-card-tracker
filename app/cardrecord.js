@@ -44,9 +44,9 @@ class CardRecorder extends MyTrello {
                             lastPhase,
                             updateActions[1].date,
                             moment(lastMove, "MM/DD/YYYY").format(),
-                            true,
-                            deferred.resolve({})
-                        );
+                            true
+                        )
+                        .then(deferred.resolve);
                     } else {
                         console.log("Write Current Phase: " + card.name);
                         self.getListNameByID(card.idList).then(function(listName) {
@@ -56,10 +56,11 @@ class CardRecorder extends MyTrello {
                                 "Current",
                                 moment(lastMove, "MM/DD/YYYY").format(),
                                 now.format(),
-                                true,
-                                deferred.resolve({})
-                            );
-                        });
+                                true
+                            )
+                        })
+                        .then(deferred.resolve);
+
                     }
                 });
             });
@@ -153,7 +154,7 @@ class CardRecorder extends MyTrello {
     findHolidaysBetweenDates(fromDate, toDate){
       var count = 0;
       _un.each(holidays, function(holiday){
-        if(moment(holiday.dateString).isBetween(fromDate, toDate, 'day')){
+        if(moment(holiday.dateString, "YYYY-M-D").isBetween(fromDate, toDate, 'day')){
           count++;
         }
       });
