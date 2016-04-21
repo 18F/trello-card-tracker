@@ -201,8 +201,7 @@ describe 'app.CardRecorder', ->
         done()
         return
       return
-
-  return
+    return
 
   describe '.findHolidaysBetweenDates', ->
     it 'will not find a holiday between dates that do not have a holiday between them', ->
