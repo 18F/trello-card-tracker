@@ -37,7 +37,7 @@ class CardRecorder extends MyTrello {
                     var daysSinceUpdate = now.diff(lastMove, 'days');
                     if (hasMoved && daysSinceUpdate < 1) {
                         console.log("Write New Phase: " + card.name);
-                        var lastPhase = self.getLastList(card.actions[0]);
+                        var lastPhase = self.getLastList(hasMoved[0]);
                         self.compileCommentArtifact(
                             card.id,
                             lastPhase,
@@ -138,7 +138,7 @@ class CardRecorder extends MyTrello {
         var moves = _.filter(actionList, function(a) {
             return 'listBefore' in a.data;
         });
-        if (moves.length) updated = true;
+        if (moves.length) updated = moves;
         return updated;
     }
 

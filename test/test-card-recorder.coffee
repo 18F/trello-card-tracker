@@ -154,7 +154,7 @@ describe 'app.CardRecorder', ->
   describe '.hasMovedCheck(actionList)', ->
     it 'will return true if a card has a list of acitons that has not moved', ->
       hasMoved = CR.hasMovedCheck(helpers.actionListMove)
-      expect(hasMoved).to.be.true
+      expect(hasMoved).to.eql [helpers.actionListMove[1]]
       return
 
     it 'will return false if a card has a list of acitons that has not moved', ->
