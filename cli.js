@@ -29,8 +29,9 @@ if ("r" in argv) {
 if ("c" in argv) {
   console.log("--Invoke Card Creator--");
   var file  = (argv["c"]=== true) ? 'data/stages.yaml' : argv["c"];
+  var orders  = (argv["o"]=== true) ? 'data/orders.yaml' : argv["o"];
   var CC = new app.CardCreator(file, board);
-  CC.createOrders('data/orders.yaml');
+  CC.createOrders(orders).then(console.log("--Card Creator Complete--"));
 }
 
 if ("b" in argv) {

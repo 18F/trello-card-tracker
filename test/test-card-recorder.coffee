@@ -46,7 +46,7 @@ describe 'app.CardRecorder', ->
         return
 
       getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}])
-      CR.run().then (resp) ->
+      CR.run().then ->
         expect(getCards.callCount).to.equal 1
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
@@ -173,7 +173,7 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.compileCommentArtifact', ->
+  describe '.compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt)', ->
     sandbox = undefined
     addComment = undefined
     beforeEach ->
@@ -185,21 +185,22 @@ describe 'app.CardRecorder', ->
       sandbox.restore()
       return
 
-  it 'will run the date diff functions, build and post a comment', (done) ->
-    CR.compileCommentArtifact('xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', true).then (comment) ->
-      expect(addComment.calledWith('**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.')).to.be.ok
-      expect(addComment.callCount).to.equal 1
-      done()
+    it 'will run the date diff functions, build and post a comment', (done) ->
+      commentPromise = CR.compileCommentArtifact('xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', true)
+      commentPromise.done (resp) ->
+        expect(addComment.calledWith('**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.')).to.be.ok
+        expect(addComment.callCount).to.equal 1
+        done()
+        return
       return
-    return
 
-  it 'will run the date diff functions, but not actually create a comment', (done) ->
-    CR.compileCommentArtifact('xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', false).then (comment) ->
-      expect(comment).to.eql '**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.'
-      expect(addComment.callCount).to.equal 0
-      done()
+    it 'will run the date diff functions, but not actually create a comment', (done) ->
+      CR.compileCommentArtifact('xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', false).then (comment) ->
+        expect(comment).to.eql '**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.'
+        expect(addComment.callCount).to.equal 0
+        done()
+        return
       return
-    return
 
   return
 
