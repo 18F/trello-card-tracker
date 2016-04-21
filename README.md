@@ -48,11 +48,9 @@ Or run the cli.
 - -r   Run the card recorder with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.   
 - -c   Run the card creator with an optional stages file parameter. Without the file it will default to `data/stages.yaml`.
 
-- -i To allow the use of a Trello board ID other than the one included in the .env file. 
+- -i To allow the use of a Trello board ID other than the one included in the .env file.
 
-##### Coming Soon
-
-Soon there will be a server to run the cardrecorder.
+- -b to run the build comment command line utility. Use the following flags -d "Name of List" -f "MM/DD/YYYY" -t "MM/DD/YYYY".
 
 ### Development
 Use the `develop` branch
