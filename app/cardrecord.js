@@ -19,28 +19,34 @@ class CardRecorder extends MyTrello {
         this.stages = this.getPreAward();
     }
 
-    run(callback) {
+    run() {
         var self = this;
-
+        var deferred = Q.defer();
         this.getUpdateCards().then(function(cards) {
             _.each(cards, function(card) {
-                self.deleteCurrentComment(card.id).then(function(d) {
+                var comments = _.filter(card.actions, {type: "commentCard"});
+                self.deleteCurrentComment(comments).then(function(resp) {
+                    var updateActions = _.filter(card.actions, {type: "updateCard"});
+                    var createAction = _.filter(card.actions, {type: "createCard"});
+                    var hasMoved = false;
+                    if(typeof updateActions !== "undefined"){
+                      hasMoved = self.hasMovedCheck(updateActions);
+                    }
+                    var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
                     var now = moment();
-                    var daysSinceUpdate = now.diff(moment(card.actions[0].date), 'days');
-                    var hasMoved = self.hasMovedCheck(card.actions);
-
+                    var daysSinceUpdate = now.diff(lastMove, 'days');
                     if (hasMoved && daysSinceUpdate < 1) {
                         console.log("Write New Phase: " + card.name);
-                        var lastPhase = self.getLastList(card.actions[0]);
+                        var lastPhase = self.getLastList(hasMoved[0]);
                         self.compileCommentArtifact(
                             card.id,
                             lastPhase,
                             lastPhase,
-                            card.actions[1].date,
-                            card.actions[0].date,
-                            true,
-                            callback
-                        );
+                            updateActions[1].date,
+                            lastMove,
+                            true
+                        )
+                        .then(deferred.resolve);
                     } else {
                         console.log("Write Current Phase: " + card.name);
                         self.getListNameByID(card.idList).then(function(listName) {
@@ -48,23 +54,25 @@ class CardRecorder extends MyTrello {
                                 card.id,
                                 listName,
                                 "Current",
-                                card.actions[0].date,
+                                lastMove,
                                 now.format(),
-                                true,
-                                callback
-                            );
-                        });
+                                true
+                            )
+                        })
+                        .then(deferred.resolve);
                     }
                 });
             });
-        });
+        })
+        // .fail(function(err){console.log(err.stack)});
+        return deferred.promise;
     }
 
-    getUpdateCards(callback) {
+    getUpdateCards() {
         var deferred = Q.defer();
         var url = '/1/boards/' + this.board + '/cards';
 
-        this.t.get(url, { actions: ["createCard", "updateCard"] }, function(err, cards) {
+        this.t.get(url, { actions: ["createCard", "updateCard", "commentCard"] }, function(err, cards) {
             if (err) return deferred.reject(err);
             deferred.resolve(cards);
         });
@@ -72,44 +80,65 @@ class CardRecorder extends MyTrello {
         return deferred.promise;
     }
 
-    deleteCurrentComment(cardID) {
-        var deferred = Q.defer();
+    deleteCurrentComment(comments) {
+        var deferred = Q.defer(),
+        currentCommentID = "",
+        self = this;
 
-        var currentCommentID = "",
-            url = '/1/cards/' + cardID + '/actions',
-            self = this;
-
-        this.t.get(url, { filter: 'commentCard' }, function(err, comments) {
-            if (err) return deferred.reject(new Error(err));
-
-            _.each(comments, function(c) {
-                if (c.data.text.indexOf("**Current Stage:**") !== -1) {
-                    currentCommentID = c.id;
-                }
-            });
-
-            if (currentCommentID !== "") {
-                self.t.del('/1/actions/' + currentCommentID, function(err, data) {
-                    if (err) deferred.reject(new Error(err));
-                    return deferred.resolve(data);
-                });
-            } else {
-                return deferred.resolve("no current comment");
+        _.each(comments, function(c) {
+            if (c.data.text.indexOf("**Current Stage:**") !== -1) {
+                currentCommentID = c.id;
             }
         });
+
+        if (currentCommentID !== "") {
+            self.t.del('/1/actions/' + currentCommentID, function(err, data) {
+                if (err) deferred.reject(new Error(err));
+                deferred.resolve({"currentCommentDeleted": true});
+            });
+        } else {
+            deferred.resolve({"currentCommentDeleted": false});
+        }
 
         return deferred.promise;
     }
 
+    findLastMoveDateFromComments(opts){
+      var actionList = opts.actionList;
+      var cardCreationDate = opts.cardCreationDate;
+      var commentList = opts.commentList;
+      // var commentDate = _.find(commentList, function(comment){ return comment.match( /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/ )});
+      var myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/;
+      if(commentList){
+        var correctComment = _.find(commentList, function(comment){
+            var match = myRegex.exec(comment.data.text);
+            return match ? match[1] : false;
+        });
+
+      }
+      if(correctComment){
+        var commentDateMatch = myRegex.exec(correctComment.data.text);
+        var commentDate = commentDateMatch[1];
+        return moment(commentDate, "MM/DD/YYYY").toISOString();
+      } else if(actionList) {
+        if(actionList.length > 1){
+        return actionList[0].date;
+        }
+      } else {
+        if(opts.cardCreationDate){
+          return cardCreationDate;
+        } else {
+          return moment("01/01/2016", "MM/DD/YYYY").toISOString();
+        }
+      }
+    }
+
     hasMovedCheck(actionList) {
         var updated = false;
-        var updates = _.where(actionList, { type: "updateCard" });
-        if (updates.length > 0) {
-            var moves = _.filter(updates, function(a) {
-                return 'listBefore' in a.data;
-            });
-            if (moves.length) updated = true;
-        }
+        var moves = _.filter(actionList, function(a) {
+            return 'listBefore' in a.data;
+        });
+        if (moves.length) updated = moves;
         return updated;
     }
 
@@ -117,7 +146,8 @@ class CardRecorder extends MyTrello {
         return cardAction.data.listBefore.name;
     }
 
-    compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt, callback) {
+    compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt) {
+        var deferred = Q.defer();
         var stage = _.findWhere(this.stages, { name: dateList });
         var expectedTime = stage.expected_time;
         var diffArray = this.calculateDateDifference(expectedTime, fromDate, toDate);
@@ -126,23 +156,22 @@ class CardRecorder extends MyTrello {
         var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken);
 
         if (addCommentOpt) {
-            this.addComment(comment, cardID).then(callback);
+            this.addComment(comment, cardID).then(function(resp){deferred.resolve(resp)});
         } else {
-            callback(comment);
+            deferred.resolve(comment);
         }
+        return deferred.promise;
     }
 
     findHolidaysBetweenDates(fromDate, toDate){
       var count = 0;
       _un.each(holidays, function(holiday){
-        if(moment(holiday.dateString).isBetween(fromDate, toDate, 'day')){
+        if(moment(holiday.dateString, ["YYYY-M-D", "YYYY-MM-DD", "YYYY-MM-D", "YYYY-M-DD"]).isBetween(fromDate, toDate, 'day')){
           count++;
         }
       });
       return count;
     }
-
-
 
     calculateDateDifference(expected, lastMove, recentMove) {
         var fromDate = new Date(lastMove);

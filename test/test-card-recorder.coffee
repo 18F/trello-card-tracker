@@ -5,6 +5,7 @@ helpers = require('./test-helpers.js')
 q = require('q')
 trello = require('node-trello')
 sinon = require('sinon');
+moment = require('moment')
 require('sinon-as-promised');
 
 # sinon.stub::asyncOutcome = (args, asyncResp) ->
@@ -22,29 +23,34 @@ describe 'app.CardRecorder', ->
     compileStub = undefined
     getCards = undefined
     lastListStub = undefined
+    findLastStub = undefined
 
     beforeEach ->
       sandbox = sinon.sandbox.create()
-      deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({});
+      deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true});
       sandbox.stub(CR, 'getListNameByID').resolves('list name');
       lastListStub = sandbox.stub(CR, 'getLastList')
-      compileStub = sandbox.stub(CR, 'compileCommentArtifact').yieldsAsync();
+      compileStub = sandbox.stub(CR, 'compileCommentArtifact').resolves("Compiled Comment");
       return
 
     afterEach ->
       sandbox.restore()
       return
 
-    it 'will run the cardRecorder class for a list that has moved', (done) ->
+    it 'will run the cardRecorder class for a list that has moved recently', (done) ->
       # Set the action date to less than a day ago
       # to trigger the phase change
-      cardActions = helpers.actionListMove
+      cardActions = JSON.parse(JSON.stringify(helpers.actionListMove)) #clone to avoid issues with the tests below
+      commentActions = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      cardActions = cardActions.concat(commentActions)
+      hasMovedStub = sandbox.stub(CR, 'hasMovedCheck').returns(true)
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
-
-      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: cardActions}])
-      CR.run ->
+      findLastStub = sandbox.stub(CR, 'findLastMoveDateFromComments').returns(cardActions[0].date);
+      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}])
+      CR.run().then ->
+        expect(getCards.callCount).to.equal 1
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
         done()
@@ -52,8 +58,10 @@ describe 'app.CardRecorder', ->
       return
 
     it 'will run the cardRecorder class for a list that has not moved', (done) ->
-      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', actions: helpers.actionListNoMove}])
-      CR.run ->
+      cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
+      hasMovedStub = sandbox.stub(CR, 'hasMovedCheck').returns(false)
+      getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}])
+      CR.run().then (resp) ->
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
         done()
@@ -94,28 +102,24 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.deleteCurrentComment(cardID)', ->
+  describe '.deleteCurrentComment(comments)', ->
     runs = 0
     sandbox = undefined
-    getStub = undefined
     delStub = undefined
+    currentComments = undefined
+    notCurrentComments = undefined
     error = new Error('Test Error')
 
     beforeEach ->
-      currentComment = JSON.parse(JSON.stringify(helpers.mockCurrentComment))
-      currentComment.data.text = "**Current Stage:** This comment says current stage."
-      notCurrentComment = JSON.parse(JSON.stringify(helpers.mockCurrentComment))
-      notCurrentComment.data.text = "This comment is not in the current stage."
-      notCurrentComment.id = 'not-current'
+      currentComments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      notCurrentComments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      notCurrentComments[0].data.text = "This comment is not in the current stage."
       sandbox = sinon.sandbox.create()
-      getStub = sandbox.stub(trello.prototype, 'get').withArgs('/1/cards/380/actions').yieldsAsync(null, [ currentComment ]).withArgs('/1/cards/1000/actions').yieldsAsync(null, [ notCurrentComment ])
-      delStub = sandbox.stub(trello.prototype, 'del').withArgs('/1/actions/' + currentComment.id).yieldsAsync(null, {}).withArgs('/1/actions/' + notCurrentComment.id).yieldsAsync(null, "no current comment")
+      delStub = sandbox.stub(trello.prototype, 'del').withArgs('/1/actions/' + currentComments[0].id).yieldsAsync(null, {})
 
       runs++
       if runs == 3
-        getStub.withArgs('/1/cards/380/actions').yieldsAsync(error, null)
-      else if runs == 4
-        delStub.withArgs('/1/actions/' + currentComment.id).yieldsAsync(error, null)
+        delStub.withArgs('/1/actions/' + currentComments[0].id).yieldsAsync(error, null)
       return
 
     afterEach ->
@@ -123,28 +127,23 @@ describe 'app.CardRecorder', ->
       return
 
     it 'will delete a comment if a bolded text saying "Current Stage" appears', (done) ->
-      CR.deleteCurrentComment("380").then (data) ->
-        expect(data).to.eql {};
+      CR.deleteCurrentComment(currentComments).then (data) ->
+        expect(data).to.eql {"currentCommentDeleted": true};
+        expect(delStub.callCount).to.equal 1
         done()
         return
       return
 
     it 'will not delete a comment that does not have a current stage', (done) ->
-      CR.deleteCurrentComment("1000").then (data) ->
-        expect(data).to.eql "no current comment";
-        done()
-        return
-      return
-
-    it 'will survive a trello error fetching cards', (done) ->
-      CR.deleteCurrentComment("380").catch (err) ->
-        expect(err).to.eql error;
+      CR.deleteCurrentComment(notCurrentComments).then (data) ->
+        expect(data).to.eql {"currentCommentDeleted": false};
+        expect(delStub.callCount).to.equal 0
         done()
         return
       return
 
     it 'will survive a trello error deleting a comment', (done) ->
-      CR.deleteCurrentComment("380").catch (err) ->
+      CR.deleteCurrentComment(currentComments).catch (err) ->
         expect(err).to.eql error;
         done()
         return
@@ -155,7 +154,7 @@ describe 'app.CardRecorder', ->
   describe '.hasMovedCheck(actionList)', ->
     it 'will return true if a card has a list of acitons that has not moved', ->
       hasMoved = CR.hasMovedCheck(helpers.actionListMove)
-      expect(hasMoved).to.be.true
+      expect(hasMoved).to.eql [helpers.actionListMove[1]]
       return
 
     it 'will return false if a card has a list of acitons that has not moved', ->
@@ -178,30 +177,64 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.compileCommentArtifact', ->
+  describe '.compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt)', ->
     sandbox = undefined
     addComment = undefined
     beforeEach ->
       sandbox = sinon.sandbox.create()
       addComment = sandbox.stub(CR, 'addComment').resolves();
       calcStub = sandbox.stub(CR, 'calculateDateDifference').returns([103,113]);
+      comments = undefined
       return
     afterEach ->
       sandbox.restore()
       return
+
     it 'will run the date diff functions, build and post a comment', (done) ->
-      CR.compileCommentArtifact 'xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', true, ->
+      commentPromise = CR.compileCommentArtifact('xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', true)
+      commentPromise.done (resp) ->
         expect(addComment.calledWith('**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.')).to.be.ok
         expect(addComment.callCount).to.equal 1
         done()
         return
       return
+
     it 'will run the date diff functions, but not actually create a comment', (done) ->
-      CR.compileCommentArtifact 'xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', false, (comment) ->
+      CR.compileCommentArtifact('xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', false).then (comment) ->
         expect(comment).to.eql '**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113.'
         expect(addComment.callCount).to.equal 0
         done()
         return
+      return
+    return
+
+  describe 'findLastMoveDateFromComments(opts)', ->
+    it 'will return the date if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
+      localMoment = moment("2016-03-21").toISOString(); #to get out of localization of test suite
+      lastMove = CR.findLastMoveDateFromComments({"commentList": helpers.mockCommentCardObj.actions, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
+      expect(lastMove).to.eql localMoment
+      return
+
+    it 'will return the last Action date is there is actionList and there is no date in the commentcard', ->
+      comments = helpers.mockCommentCardObj.actions
+      comments[0].data.text = "This comment has no date."
+      lastMove = CR.findLastMoveDateFromComments({"commentList": comments, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
+      expect(lastMove).to.eql '2016-02-25T22:00:35.866Z'
+      return
+
+    it 'will return the creation date if there is no actionList or no current comment', ->
+      comments = helpers.mockCommentCardObj.actions
+      comments[0].data.text = "This comment has no date."
+      lastMove = CR.findLastMoveDateFromComments({"commentList": comments, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
+      expect(lastMove).to.eql '2016-04-05T10:40:26.100Z'
+      return
+
+    it 'will return "01/01/2016 if there is nothing in the options', ->
+      comments = helpers.mockCommentCardObj.actions
+      comments[0].data.text = "This comment has no date."
+      localMoment = moment("2016-01-01").toISOString()
+      lastMove = CR.findLastMoveDateFromComments({})
+      expect(lastMove).to.eql localMoment
       return
     return
 

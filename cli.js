@@ -23,14 +23,15 @@ if ("r" in argv) {
   console.log("--Invoke Card Recorder--");
   var file  = (argv["r"]=== true) ? 'data/stages.yaml' : argv["r"];
   var CR = new app.CardRecorder(file, board);
-  CR.run(console.log("CR Complete"));
+  CR.run().then(console.log("CR Complete"));
 }
 
 if ("c" in argv) {
   console.log("--Invoke Card Creator--");
   var file  = (argv["c"]=== true) ? 'data/stages.yaml' : argv["c"];
+  var orders  = (argv["o"]=== true) ? 'data/orders.yaml' : argv["o"];
   var CC = new app.CardCreator(file, board);
-  CC.createOrders('data/orders.yaml');
+  CC.createOrders(orders).then(console.log("--Card Creator Complete--"));
 }
 
 if ("b" in argv) {
@@ -38,5 +39,5 @@ if ("b" in argv) {
   console.log("--Build a Comment--");
   var file  = (argv["b"]=== true) ? 'data/stages.yaml' : argv["d"];
   var CR = new app.CardRecorder(file, board);
-  CR.compileCommentArtifact(null, argv.d, argv.d, argv.f, argv.t, false, console.log);
+  CR.compileCommentArtifact(null, argv.d, argv.d, argv.f, argv.t, false).then(function(comment){console.log(comment)});
 }

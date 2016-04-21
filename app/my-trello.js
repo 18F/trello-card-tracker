@@ -30,7 +30,7 @@ class MyTrello {
         return stages ? stages.stages[0].substages : [];
     }
 
-    getListIDbyName(name, callback) {
+    getListIDbyName(name) {
         var deferred = Q.defer();
         var find = Boolean(name);
 
