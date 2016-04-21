@@ -29,7 +29,6 @@ describe 'app.CardRecorder', ->
       deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true});
       sandbox.stub(CR, 'getListNameByID').resolves('list name');
       lastListStub = sandbox.stub(CR, 'getLastList')
-      findLastStub = sandbox.stub(CR, 'findLastMoveDateFromComments').returns("01/12/2016");
       compileStub = sandbox.stub(CR, 'compileCommentArtifact').resolves("Compiled Comment");
       return
 
@@ -37,14 +36,17 @@ describe 'app.CardRecorder', ->
       sandbox.restore()
       return
 
-    it 'will run the cardRecorder class for a list that has moved', (done) ->
+    it 'will run the cardRecorder class for a list that has moved recently', (done) ->
       # Set the action date to less than a day ago
       # to trigger the phase change
-      cardActions = helpers.actionListMove.concat(helpers.mockCommentCardObj.actions)
+      cardActions = JSON.parse(JSON.stringify(helpers.actionListMove)) #clone to avoid issues with the tests below
+      commentActions = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      cardActions = cardActions.concat(commentActions)
+      hasMovedStub = sandbox.stub(CR, 'hasMovedCheck').returns(true)
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
-
+      findLastStub = sandbox.stub(CR, 'findLastMoveDateFromComments').returns(cardActions[0].date);
       getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}])
       CR.run().then ->
         expect(getCards.callCount).to.equal 1
@@ -56,6 +58,7 @@ describe 'app.CardRecorder', ->
 
     it 'will run the cardRecorder class for a list that has not moved', (done) ->
       cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
+      hasMovedStub = sandbox.stub(CR, 'hasMovedCheck').returns(false)
       getCards = sandbox.stub(CR, 'getUpdateCards').resolves([{id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}])
       CR.run().then (resp) ->
         expect(deleteCards.callCount).to.equal 1
@@ -147,17 +150,17 @@ describe 'app.CardRecorder', ->
 
     return
 
-  # describe '.hasMovedCheck(actionList)', ->
-  #   it 'will return true if a card has a list of acitons that has not moved', ->
-  #     hasMoved = CR.hasMovedCheck(helpers.actionListMove)
-  #     expect(hasMoved).to.be.true
-  #     return
-  #
-  #   it 'will return false if a card has a list of acitons that has not moved', ->
-  #     hasMoved = CR.hasMovedCheck(helpers.actionListNoMove)
-  #     expect(hasMoved).to.be.false
-  #     return
-  #   return
+  describe '.hasMovedCheck(actionList)', ->
+    it 'will return true if a card has a list of acitons that has not moved', ->
+      hasMoved = CR.hasMovedCheck(helpers.actionListMove)
+      expect(hasMoved).to.be.true
+      return
+
+    it 'will return false if a card has a list of acitons that has not moved', ->
+      hasMoved = CR.hasMovedCheck(helpers.actionListNoMove)
+      expect(hasMoved).to.be.false
+      return
+    return
 
   describe '.getLastList(updateActionID)', ->
     it 'will grab the name of the last list a trello card was part of given that the card has moved', ->
@@ -180,6 +183,7 @@ describe 'app.CardRecorder', ->
       sandbox = sinon.sandbox.create()
       addComment = sandbox.stub(CR, 'addComment').resolves();
       calcStub = sandbox.stub(CR, 'calculateDateDifference').returns([103,113]);
+      comments = undefined
       return
     afterEach ->
       sandbox.restore()
@@ -203,19 +207,34 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe 'findLastMoveDateFromComments(commentList)', ->
+  describe 'findLastMoveDateFromComments(opts)', ->
     it 'will return the date if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
-      lastMove = CR.findLastMoveDateFromComments(helpers.mockCommentCardObj.actions)
-      expect(lastMove).to.eql '03/21/2016'
+      lastMove = CR.findLastMoveDateFromComments({"commentList": helpers.mockCommentCardObj.actions, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
+      expect(lastMove).to.eql '2016-03-21T00:00:00-04:00'
       return
 
-    it 'will return false if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
+    it 'will return the last Action date is there is actionList and there is no date in the commentcard', ->
       comments = helpers.mockCommentCardObj.actions
       comments[0].data.text = "This comment has no date."
-      lastMove = CR.findLastMoveDateFromComments(comments)
-      expect(lastMove).to.eql false
+      lastMove = CR.findLastMoveDateFromComments({"commentList": comments, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
+      expect(lastMove).to.eql '2016-02-25T22:00:35.866Z'
+      return
+
+    it 'will return the creation date if there is no actionList or no current comment', ->
+      comments = helpers.mockCommentCardObj.actions
+      comments[0].data.text = "This comment has no date."
+      lastMove = CR.findLastMoveDateFromComments({"commentList": comments, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
+      expect(lastMove).to.eql '2016-04-05T10:40:26.100Z'
+      return
+
+    it 'will return "01/01/2016 if there is nothing in the options', ->
+      comments = helpers.mockCommentCardObj.actions
+      comments[0].data.text = "This comment has no date."
+      lastMove = CR.findLastMoveDateFromComments({})
+      expect(lastMove).to.eql '2016-01-01T00:00:00-05:00'
       return
     return
+
   describe '.findHolidaysBetweenDates', ->
     it 'will not find a holiday between dates that do not have a holiday between them', ->
       holidays = CR.findHolidaysBetweenDates('01-04-2016', '01-10-2016')
