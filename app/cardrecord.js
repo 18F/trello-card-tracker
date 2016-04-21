@@ -30,13 +30,20 @@ class CardRecorder extends MyTrello {
                     var updateActions = _.filter(card.actions, {type: "updateCard"});
                     if(updateActions){
                       var hasMoved = true;
+                      if(updateActions.length == 1){
+                        var createAction = _.filter(card.actions, {type: "createCard"});
+                        updateActions.push(createAction)
+                      }
                     }
                     var lastMove = self.findLastMoveDateFromComments(comments);
                     var fromMove;
                     if(lastMove){
                       fromMove = moment(lastMove, "MM/DD/YYYY").format();
-                    } else {
+                    } else if(updateActions){
                       fromMove = moment(updateActions[0].date)
+                    } else {
+                      cardCreation = _.filter(card.actions, {type: "createCard"});
+                      fromMove = moment(cardCreation.date);
                     }
                     var daysSinceUpdate = now.diff(fromMove, 'days');
                     // var hasMoved = self.hasMovedCheck(updateActions);
