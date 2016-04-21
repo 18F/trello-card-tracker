@@ -32,13 +32,9 @@ class CardRecorder extends MyTrello {
                     if(typeof updateActions !== "undefined"){
                       hasMoved = self.hasMovedCheck(updateActions);
                     }
-                    console.log("past updateActions");
                     var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
                     var now = moment();
                     var daysSinceUpdate = now.diff(lastMove, 'days');
-                    console.log(daysSinceUpdate);
-                    // var hasMoved = self.hasMovedCheck(updateActions);
-                    console.log("up to last move");
                     if (hasMoved && daysSinceUpdate < 1) {
                         console.log("Write New Phase: " + card.name);
                         var lastPhase = self.getLastList(card.actions[0]);
@@ -123,7 +119,7 @@ class CardRecorder extends MyTrello {
       if(correctComment){
         var commentDateMatch = myRegex.exec(correctComment.data.text);
         var commentDate = commentDateMatch[1];
-        return moment(commentDate, "MM/DD/YYYY").format();
+        return moment(commentDate, "MM/DD/YYYY").toISOString();
       } else if(actionList) {
         if(actionList.length > 1){
         return actionList[0].date;
@@ -132,7 +128,7 @@ class CardRecorder extends MyTrello {
         if(opts.cardCreationDate){
           return cardCreationDate;
         } else {
-          return moment("01/01/2016", "MM/DD/YYYY").format();
+          return moment("01/01/2016", "MM/DD/YYYY").toISOString();
         }
       }
     }

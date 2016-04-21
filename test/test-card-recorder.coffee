@@ -210,7 +210,7 @@ describe 'app.CardRecorder', ->
   describe 'findLastMoveDateFromComments(opts)', ->
     it 'will return the date if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
       lastMove = CR.findLastMoveDateFromComments({"commentList": helpers.mockCommentCardObj.actions, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
-      expect(lastMove).to.eql '2016-03-21T00:00:00-04:00'
+      expect(lastMove).to.eql '2016-03-21T04:00:00.000Z'
       return
 
     it 'will return the last Action date is there is actionList and there is no date in the commentcard', ->
@@ -231,7 +231,7 @@ describe 'app.CardRecorder', ->
       comments = helpers.mockCommentCardObj.actions
       comments[0].data.text = "This comment has no date."
       lastMove = CR.findLastMoveDateFromComments({})
-      expect(lastMove).to.eql '2016-01-01T00:00:00-05:00'
+      expect(lastMove).to.eql '2016-01-01T05:00:00.000Z'
       return
     return
 
