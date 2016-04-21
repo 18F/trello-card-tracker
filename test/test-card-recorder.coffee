@@ -5,6 +5,7 @@ helpers = require('./test-helpers.js')
 q = require('q')
 trello = require('node-trello')
 sinon = require('sinon');
+moment = require('moment')
 require('sinon-as-promised');
 
 # sinon.stub::asyncOutcome = (args, asyncResp) ->
@@ -209,8 +210,9 @@ describe 'app.CardRecorder', ->
 
   describe 'findLastMoveDateFromComments(opts)', ->
     it 'will return the date if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
+      localMoment = moment("2016-03-21").toISOString(); #to get out of localization of test suite
       lastMove = CR.findLastMoveDateFromComments({"commentList": helpers.mockCommentCardObj.actions, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
-      expect(lastMove).to.eql '2016-03-21T04:00:00.000Z'
+      expect(lastMove).to.eql localMoment
       return
 
     it 'will return the last Action date is there is actionList and there is no date in the commentcard', ->
@@ -230,8 +232,9 @@ describe 'app.CardRecorder', ->
     it 'will return "01/01/2016 if there is nothing in the options', ->
       comments = helpers.mockCommentCardObj.actions
       comments[0].data.text = "This comment has no date."
+      localMoment = moment("2016-01-01").toISOString()
       lastMove = CR.findLastMoveDateFromComments({})
-      expect(lastMove).to.eql '2016-01-01T05:00:00.000Z'
+      expect(lastMove).to.eql localMoment
       return
     return
 
