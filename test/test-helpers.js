@@ -342,22 +342,22 @@ testCard: { id: 'xxxxx',
         id: "4",
         idMemberCreator: "ddd",
         data: {
-        list: {
-        name: "Test List",
-        id: "testlistID"
-        },
-        board: {
-        shortLink: "333",
-        name: "Test Board",
-        id: "testboardID"
-        },
-        card: {
-        shortLink: "0",
-        idShort: 1,
-        name: "Comment Test Card",
-        id: "322"
-        },
-        text: "This is not a current comment."
+          list: {
+          name: "Test List",
+          id: "testlistID"
+          },
+          board: {
+          shortLink: "333",
+          name: "Test Board",
+          id: "testboardID"
+          },
+          card: {
+          shortLink: "0",
+          idShort: 1,
+          name: "Comment Test Card",
+          id: "322"
+          },
+          text: "This is not a current comment."
         },
         type: "commentCard",
         date: "2016-03-08T22:53:02.063Z",

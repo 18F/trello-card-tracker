@@ -115,12 +115,15 @@ class CardRecorder extends MyTrello {
       var myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/;
       var correctComment = _.find(commentList, function(comment){
           var match = myRegex.exec(comment.data.text);
-          return match[1];
+          return match ? match[1] : false;
       });
-      var commentDateMatch = myRegex.exec(correctComment.data.text);
-      var commentDate = commentDateMatch[1];
-      return commentDate;
-
+      if(correctComment){
+        var commentDateMatch = myRegex.exec(correctComment.data.text);
+        var commentDate = commentDateMatch[1];
+        return commentDate;
+      } else {
+        return false
+      }
     }
 
     // hasMovedCheck(actionList) {

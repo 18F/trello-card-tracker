@@ -203,6 +203,19 @@ describe 'app.CardRecorder', ->
       return
     return
 
+  describe 'findLastMoveDateFromComments(commentList)', ->
+    it 'will return the date if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
+      lastMove = CR.findLastMoveDateFromComments(helpers.mockCommentCardObj.actions)
+      expect(lastMove).to.eql '03/21/2016'
+      return
+
+    it 'will return false if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
+      comments = helpers.mockCommentCardObj.actions
+      comments[0].data.text = "This comment has no date."
+      lastMove = CR.findLastMoveDateFromComments(comments)
+      expect(lastMove).to.eql false
+      return
+    return
   describe '.findHolidaysBetweenDates', ->
     it 'will not find a holiday between dates that do not have a holiday between them', ->
       holidays = CR.findHolidaysBetweenDates('01-04-2016', '01-10-2016')
