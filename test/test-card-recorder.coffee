@@ -69,7 +69,7 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.getUpdateCards(callback)', ->
+  describe '.getUpdateCards()', ->
     sandbox = undefined
     stub = undefined
     error = null
