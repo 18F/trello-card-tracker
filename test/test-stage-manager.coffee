@@ -137,13 +137,15 @@ describe 'app.StageManager', ->
 
   describe '.closeUnusedStages', ->
     input = undefined
+    sandbox = undefined
     getListCardsStub = undefined
     closeListStub = undefined
 
     beforeEach ->
       input = [ [], [{ name: 'List', id: 'abc' }] ]
-      getListCardsStub = helpers.trelloStub('get', null, [ ])
-      closeListStub = helpers.trelloStub('put', null, null)
+      sandbox = sinon.sandbox.create()
+      getListCardsStub = sandbox.stub(SM, 'getListCards').resolves([]);
+      closeListStub = sandbox.stub(SM, 'closeList').resolves({});
       return
 
     afterEach ->
@@ -152,21 +154,21 @@ describe 'app.StageManager', ->
       return
 
     it 'gets card info for all lists that are not in the stages', (done) ->
-      SM.closeUnusedStages input, ->
+      SM.closeUnusedStages(input).then ->
         expect(getListCardsStub.callCount).to.eql input[1].length
         done()
         return
       return
 
     it 'calls close on all lists that are not in stages', (done) ->
-      SM.closeUnusedStages input, ->
+      SM.closeUnusedStages(input).then ->
         expect(closeListStub.callCount).to.eql input[1].length
         done()
         return
       return
     return
 
-  describe '.getListCards', ->
+  describe '.getListCards(listID)', ->
     stub = undefined
 
     before ->
@@ -178,7 +180,7 @@ describe 'app.StageManager', ->
       return
 
     it 'gets a list of cards for a given list ID', (done) ->
-      SM.getListCards 'abc123', (data) ->
+      SM.getListCards('abc123').then (data) ->
         expect(stub.callCount).to.eql 1
         done()
         return
@@ -197,7 +199,7 @@ describe 'app.StageManager', ->
       return
 
     it 'asks Trello to close the list', (done) ->
-      SM.closeList [], 'abc123', ->
+      SM.closeList([], 'abc123').then (data) ->
       expect(stub.callCount).to.eql 1
       done()
       return
