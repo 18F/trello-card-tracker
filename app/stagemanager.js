@@ -97,7 +97,8 @@ class StageManager extends MyTrello {
                 self.getListCards(trelloList.id)
                 .then(function(d) {
                     self.closeList(d, trelloList.id).then(deferred.resolve);
-                });
+                })
+                .catch(deferred.reject);
 
             };
         });
