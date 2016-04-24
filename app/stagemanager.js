@@ -87,34 +87,43 @@ class StageManager extends MyTrello {
         return deferred.promise;
     }
 
-    closeUnusedStages(data, callback) {
+    closeUnusedStages(data) {
+      var deferred = Q.defer();
         var stages = _.pluck(data[0], 'name'),
             self = this;
 
         _.each(data[1], function(trelloList) {
             if (!(_.contains(stages, trelloList.name))) {
-                self.getListCards(trelloList.id, function(d) {
-                    self.closeList(d, trelloList.id, callback);
-                });
-            }
+                self.getListCards(trelloList.id)
+                .then(function(d) {
+                    self.closeList(d, trelloList.id).then(deferred.resolve);
+                })
+                .catch(deferred.reject);
+
+            };
         });
+      return deferred.promise;
     }
 
-    getListCards(trelloID, callback) {
+    getListCards(trelloID) {
+        var deferred = Q.defer();
         this.t.get("/1/lists/" + trelloID + "/cards", function(err, data) {
-            if (err) throw err;
-            callback(data);
+          if (err) return deferred.reject(err);
+          deferred.resolve(data);
         });
+        return deferred.promise;
     }
 
-    closeList(listData, trelloID, callback) {
-        if (!listData.length) {
-            var url = "/1/list/" + trelloID + "/closed";
-            this.t.put(url, { value: true }, function(e, success) {
-                if (e) throw e;
-                callback(success);
+    closeList(listData, trelloListID) {
+        var deferred = Q.defer();
+        if (!listData.length || listData.length) {
+            var url = "/1/list/" + trelloListID + "/closed";
+            this.t.put(url, { value: true }, function(err, data) {
+              if (err) return deferred.reject(err);
+              deferred.resolve(data);
             });
-        }   
+        }
+        return deferred.promise;
     }
 
     orderLists(data) {
