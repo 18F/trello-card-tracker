@@ -28,13 +28,14 @@ class CardRecorder extends MyTrello {
                 self.deleteCurrentComment(comments).then(function(resp) {
                     var updateActions = _.filter(card.actions, {type: "updateCard"});
                     var createAction = _.filter(card.actions, {type: "createCard"});
+                    var now = moment();
                     var hasMoved = false;
+                    var daysSinceUpdate = false;
                     if(typeof updateActions !== "undefined"){
                       hasMoved = self.hasMovedCheck(updateActions);
+                      daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
                     }
                     var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
-                    var now = moment();
-                    var daysSinceUpdate = now.diff(lastMove, 'days');
                     if (hasMoved && daysSinceUpdate < 1) {
                         console.log("Write New Phase: " + card.name);
                         var lastPhase = self.getLastList(hasMoved[0]);
@@ -42,8 +43,8 @@ class CardRecorder extends MyTrello {
                             card.id,
                             lastPhase,
                             lastPhase,
-                            updateActions[1].date,
                             lastMove,
+                            updateActions[0].date,
                             true
                         )
                         .then(deferred.resolve);
