@@ -312,8 +312,8 @@ testCard: { id: 'xxxxx',
       idMemberCreator: "ddd",
       data: {
       list: {
-      name: "Test List",
-      id: "testlistID"
+        name: "Test List",
+        id: "testlistID"
       },
       board: {
         shortLink: "333",
