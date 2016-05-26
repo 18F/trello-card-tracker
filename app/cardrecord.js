@@ -166,9 +166,9 @@ class CardRecorder extends MyTrello {
     }
 
     calcTotalDays(commentList, nowMoment){
-        var firstDate = this.checkComments(commentList, false);
+        var firstDate = this.checkCommentsForDates(commentList, false);
         if(firstDate){
-          dayDif = this.calculateDateDifference(10, firstDate, nowMoment)
+          var dayDif = this.calculateDateDifference(10, firstDate, nowMoment)
           //expected not actually needed, in the future could say total days expected
           return dayDif[1];
         } else {

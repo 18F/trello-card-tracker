@@ -16,7 +16,7 @@ CR = new app.CardRecorder(helpers.mockfile, helpers.board)
 # CR.Stages = helpers.expectedStageObject
 
 describe 'app.CardRecorder', ->
-  describe.skip '.run', ->
+  describe '.run', ->
     sandbox = undefined
     deleteCards = undefined
     listStub = undefined
@@ -178,7 +178,24 @@ describe 'app.CardRecorder', ->
     return
 
   describe '.calcTotalDays(commentList, nowMoment)', ->
-    it 'calculates takes a comment list and finds the oldest date and then calculates the total number of days', ->
+    it 'calculates takes a comment list and finds the oldest date and then calculates the total number of business days', ->
+      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions)) #clone to modify
+      oldComment =
+        id: '2'
+        data: text: '**IAA Stage:** `+19 days`. *01/02/2016 - 03/08/2016*. Expected days: 2 days. Actual Days spent: 21.'
+      comments.push oldComment
+      fakeNow = moment("2016-10-10")
+      totalDays = CR.calcTotalDays(comments, fakeNow)
+      expect(totalDays).to.eql 195
+      return
+    return
+
+    it 'will return 0 if the comment list does not have and "MM/DD/YYYY - MM/DD/YYYY" regular expressions in the text', ->
+      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      comments[0].data.text = "This comment has no date."
+      fakeNow = moment("2016-10-10")
+      totalDays = CR.calcTotalDays(comments, fakeNow)
+      expect(totalDays).to.eql 0
       return
     return
 
