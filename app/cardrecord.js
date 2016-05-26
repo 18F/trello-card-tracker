@@ -28,13 +28,16 @@ class CardRecorder extends MyTrello {
                 self.deleteCurrentComment(comments).then(function(resp) {
                     var updateActions = _.filter(card.actions, {type: "updateCard"});
                     var createAction = _.filter(card.actions, {type: "createCard"});
+                    var now = moment();
                     var hasMoved = false;
+                    var daysSinceUpdate = false;
                     if(typeof updateActions !== "undefined"){
                       hasMoved = self.hasMovedCheck(updateActions);
+                      daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
                     }
+                    var totDays = (comments !== "undefined")? self.calcTotalDays(comments, now) : 0;
+                    console.log("total days:"+totDays);
                     var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
-                    var now = moment();
-                    var daysSinceUpdate = now.diff(lastMove, 'days');
                     if (hasMoved && daysSinceUpdate < 1) {
                         console.log("Write New Phase: " + card.name);
                         var lastPhase = self.getLastList(hasMoved[0]);
@@ -42,9 +45,10 @@ class CardRecorder extends MyTrello {
                             card.id,
                             lastPhase,
                             lastPhase,
-                            updateActions[1].date,
                             lastMove,
-                            true
+                            updateActions[0].date,
+                            true,
+                            totDays
                         )
                         .then(deferred.resolve);
                     } else {
@@ -56,7 +60,8 @@ class CardRecorder extends MyTrello {
                                 "Current",
                                 lastMove,
                                 now.format(),
-                                true
+                                true,
+                                totDays
                             )
                         })
                         .then(deferred.resolve);
@@ -103,23 +108,36 @@ class CardRecorder extends MyTrello {
         return deferred.promise;
     }
 
+    checkCommentsForDates(commentList, latest){
+      var myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/; //Find the first date in the comment string
+      if(!latest){
+        // Reverse order to get first comment
+        commentList = commentList.reverse();
+      }
+      var correctComment = _.find(commentList, function(comment){
+          var match = myRegex.exec(comment.data.text);
+          return match ? true : false;
+      });
+      if(correctComment){
+        var commentDateMatch = myRegex.exec(correctComment.data.text);
+        var commentDate = commentDateMatch[1];
+        var commMoment = moment(commentDate, "MM/DD/YYYY").toISOString();
+        return commMoment;
+      } else {
+        return false;
+      }
+    }
+
     findLastMoveDateFromComments(opts){
       var actionList = opts.actionList;
       var cardCreationDate = opts.cardCreationDate;
       var commentList = opts.commentList;
-      // var commentDate = _.find(commentList, function(comment){ return comment.match( /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/ )});
-      var myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/;
+      var correctComment = false;
       if(commentList){
-        var correctComment = _.find(commentList, function(comment){
-            var match = myRegex.exec(comment.data.text);
-            return match ? match[1] : false;
-        });
-
+        var correctComment = this.checkCommentsForDates(commentList, true);
       }
       if(correctComment){
-        var commentDateMatch = myRegex.exec(correctComment.data.text);
-        var commentDate = commentDateMatch[1];
-        return moment(commentDate, "MM/DD/YYYY").toISOString();
+        return correctComment;
       } else if(actionList) {
         if(actionList.length > 1){
         return actionList[0].date;
@@ -146,14 +164,26 @@ class CardRecorder extends MyTrello {
         return cardAction.data.listBefore.name;
     }
 
-    compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt) {
+    calcTotalDays(commentList, nowMoment){
+        var firstDate = this.checkCommentsForDates(commentList, false);
+        if(firstDate){
+          var dayDif = this.calculateDateDifference(10, firstDate, nowMoment)
+          //expected not actually needed, in the future could say total days expected
+          return dayDif[1];
+        } else {
+          return 0;
+        }
+
+    }
+
+    compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt, totDays) {
         var deferred = Q.defer();
         var stage = _.findWhere(this.stages, { name: dateList });
         var expectedTime = stage.expected_time;
         var diffArray = this.calculateDateDifference(expectedTime, fromDate, toDate);
         var differenceFromExpected = diffArray[0];
         var timeTaken = diffArray[1];
-        var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken);
+        var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken, totDays);
 
         if (addCommentOpt) {
             this.addComment(comment, cardID).then(function(resp){deferred.resolve(resp)});
@@ -166,7 +196,7 @@ class CardRecorder extends MyTrello {
     findHolidaysBetweenDates(fromDate, toDate){
       var count = 0;
       _un.each(holidays, function(holiday){
-        if(moment(holiday.dateString, ["YYYY-M-D", "YYYY-MM-DD", "YYYY-MM-D", "YYYY-M-DD"]).isBetween(fromDate, toDate, 'day')){
+        if(moment(holiday.date.toISOString(), ["YYYY-M-D", "YYYY-MM-DD", "YYYY-MM-D", "YYYY-M-DD"]).isBetween(fromDate, toDate, 'day')){
           count++;
         }
       });
@@ -181,11 +211,11 @@ class CardRecorder extends MyTrello {
         return [diffDays - expected, diffDays];
     }
 
-    buildComment(dateDiff, expected, lastMove, recentMove, lastList, actual) {
+    buildComment(dateDiff, expected, lastMove, recentMove, lastList, actual, totalDays) {
         var formatDiff = (dateDiff < 0) ? "**" + dateDiff + " days**" : "`+" + dateDiff + " days`";
         var fromDate = moment(lastMove).format("L");
         var toDate = moment(recentMove).format("L");
-        return `**${lastList} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${expected} days. Actual Days spent: ${actual}.`;
+        return `**${lastList} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${expected} days. Actual Days spent: ${actual}. **Total Project Days: ${totalDays}**`;
     }
 
     addComment(message, cardID) {
