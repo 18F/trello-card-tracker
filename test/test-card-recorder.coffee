@@ -264,10 +264,6 @@ describe 'app.CardRecorder', ->
 
   describe 'findLastMoveDateFromComments(opts)', ->
 
-    afterEach ->
-      localMoment = null
-      return
-
     it 'will return the date if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
       localMoment = moment("2016-03-21").toISOString(); #to get out of localization of test suite
       lastMove = CR.findLastMoveDateFromComments({"commentList": helpers.mockCommentCardObj.actions, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
@@ -288,14 +284,14 @@ describe 'app.CardRecorder', ->
       expect(lastMove).to.eql '2016-04-05T10:40:26.100Z'
       return
 
-    # it 'will return "01/01/2016 if there is nothing in the options', ->
-    #   comments = helpers.mockCommentCardObj.actions
-    #   comments[0].data.text = "This comment has no date."
-    #   localMoment = moment("2016-01-02").toISOString()
-    #   lastMove = CR.findLastMoveDateFromComments({})
-    #   expect(lastMove).to.eql localMoment
-    #   return
-    # return
+    it 'will return "01/01/2016 if there is nothing in the options', ->
+      comments = helpers.mockCommentCardObj.actions
+      comments[0].data.text = "This comment has no date."
+      localMoment = moment("2016-01-01").toISOString()
+      lastMove = CR.findLastMoveDateFromComments({})
+      expect(lastMove).to.eql localMoment
+      return
+    return
 
   describe '.findHolidaysBetweenDates', ->
     it 'will not find a holiday between dates that do not have a holiday between them', ->
