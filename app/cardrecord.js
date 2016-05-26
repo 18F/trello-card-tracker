@@ -122,9 +122,7 @@ class CardRecorder extends MyTrello {
       if(correctComment){
         var commentDateMatch = myRegex.exec(correctComment.data.text);
         var commentDate = commentDateMatch[1];
-        console.log(commentDate);
-        var commMoment = String(moment(commentDate, "MM/DD/YYYY").toISOString());
-        console.log(commMoment);
+        var commMoment = moment(commentDate, "MM/DD/YYYY").toISOString();
         return commMoment;
       } else {
         return false;
@@ -198,8 +196,6 @@ class CardRecorder extends MyTrello {
 
     findHolidaysBetweenDates(fromDate, toDate){
       var count = 0;
-      //var fromD = moment(fromDate, "YYYY-MM-DD");
-      // var toD = moment(toDate , "YYYY-MM-DD");
       _un.each(holidays, function(holiday){
         if(moment(holiday.date.toISOString(), ["YYYY-M-D", "YYYY-MM-DD", "YYYY-MM-D", "YYYY-M-DD"]).isBetween(fromDate, toDate, 'day')){
           count++;
@@ -212,7 +208,6 @@ class CardRecorder extends MyTrello {
         var fromDate = new Date(lastMove);
         var toDate = new Date(recentMove);
         var diffDays = instadate.differenceInWorkDays(fromDate, toDate);
-        console.log(diffDays);
         var diffDays = diffDays - this.findHolidaysBetweenDates(fromDate, toDate);
         return [diffDays - expected, diffDays];
     }

@@ -214,33 +214,36 @@ describe 'app.CardRecorder', ->
     return
 
   describe 'checkCommentsForDates(commentList, latest)', ->
+    beforeEach ->
+      localMoment = undefined
+      return
     afterEach ->
       localMoment = null
       return
 
     it 'will check if a comment has a date and return the lastest date from a comment list', ->
       lastMoment = moment("2016-03-21").toISOString(); #to get out of localization of test suite
-      lastMove = CR.findLastMoveDateFromComments(helpers.mockCommentCardObj.actions, true)
+      lastMove = CR.checkCommentsForDates(helpers.mockCommentCardObj.actions, true)
       expect(lastMove).to.eql lastMoment
       return
 
-    # it 'will check if a comment has a date and return the first date from a comment list', ->
-    #   localMoment = moment("2016-01-02").toISOString(); #to get out of localization of test suite
-    #   commentList = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions)) #clone to modify
-    #   oldComment =
-    #     id: '2'
-    #     data: text: '**IAA Stage:** `+19 days`. *01/02/2016 - 03/08/2016*. Expected days: 2 days. Actual Days spent: 21.'
-    #   commentList.push oldComment
-    #   lastMove = CR.findLastMoveDateFromComments(commentList, false)
-    #   expect(lastMove).to.eql localMoment
-    #   return
-    #
-    # it 'will return false when there is no comment that matches the date string', ->
-    #   comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
-    #   comments[0].data.text = "This comment has no date."
-    #   lastMove = CR.findLastMoveDateFromComments(comments, true)
-    #   expect(lastMove).to.be.false
-    #   return
+    it 'will check if a comment has a date and return the first date from a comment list', ->
+      localMoment = moment("2016-01-02").toISOString(); #to get out of localization of test suite
+      commentList = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions)) #clone to modify
+      oldComment =
+        id: '2'
+        data: text: '**IAA Stage:** `+19 days`. *01/02/2016 - 03/08/2016*. Expected days: 2 days. Actual Days spent: 21.'
+      commentList.push oldComment
+      lastMove = CR.checkCommentsForDates(commentList, false)
+      expect(lastMove).to.eql localMoment
+      return
+
+    it 'will return false when there is no comment that matches the date string', ->
+      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      comments[0].data.text = "This comment has no date."
+      lastMove = CR.checkCommentsForDates(comments, true)
+      expect(lastMove).to.be.false
+      return
     return
 
   describe 'findLastMoveDateFromComments(opts)', ->
