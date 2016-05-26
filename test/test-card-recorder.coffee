@@ -188,7 +188,6 @@ describe 'app.CardRecorder', ->
       totalDays = CR.calcTotalDays(comments, fakeNow)
       expect(totalDays).to.eql 195
       return
-    return
 
     it 'will return 0 if the comment list does not have and "MM/DD/YYYY - MM/DD/YYYY" regular expressions in the text', ->
       comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
