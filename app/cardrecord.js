@@ -116,9 +116,8 @@ class CardRecorder extends MyTrello {
       }
       var correctComment = _.find(commentList, function(comment){
           var match = myRegex.exec(comment.data.text);
-          return match ? match[1] : false;
+          return match ? true : false;
       });
-      // console.log(correctComment);
       if(correctComment){
         var commentDateMatch = myRegex.exec(correctComment.data.text);
         var commentDate = commentDateMatch[1];
