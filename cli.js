@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-_un = require("underscore");
 var app = require('./app');
 var argv = require('minimist')(process.argv.slice(2));
 

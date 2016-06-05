@@ -1,9 +1,7 @@
 "use strict";
 
 var Q = require('q');
-var _ = require("underscore");
 var util = require('util');
-
 var MyTrello = require("./my-trello.js");
 
 
@@ -41,12 +39,12 @@ class StageManager extends MyTrello {
 
     checkLists(data) {
         var checked = [];
-        var lists = _.pluck(data[1], 'name');
+        var lists = data[1].map(value => value['name']);
 
-        _.each(data[0], function(stage) {
+        data[0].forEach(function(stage) {
             checked.push({
                 stage: stage.name,
-                built: _.contains(lists, stage.name)
+                built: lists.includes(stage.name)
             });
         });
 
@@ -60,7 +58,7 @@ class StageManager extends MyTrello {
             newLists = [],
             self = this;
 
-        _.each(checkedList, function(list, i) {
+        checkedList.forEach(function(list, i) {
             var listDefer = Q.defer();
             all.push(listDefer.promise);
 
@@ -89,11 +87,11 @@ class StageManager extends MyTrello {
 
     closeUnusedStages(data) {
       var deferred = Q.defer();
-        var stages = _.pluck(data[0], 'name'),
+        var stages = data[0].map(value => value['name']),
             self = this;
 
-        _.each(data[1], function(trelloList) {
-            if (!(_.contains(stages, trelloList.name))) {
+        data[1].forEach(function(trelloList) {
+            if (!(stages.includes(trelloList.name))) {
                 self.getListCards(trelloList.id)
                 .then(function(d) {
                     self.closeList(d, trelloList.id).then(deferred.resolve);
@@ -129,9 +127,10 @@ class StageManager extends MyTrello {
     orderLists(data) {
         var position = 0,
             self = this;
-
-        _.each(data[0], function(stage, i) {
-            var appropriateList = _.findWhere(data[1], { name: stage.name });
+        data[0].forEach(function(stage, i) {
+            var appropriateList = data[1].find(function(list){
+              return list.name == stage.name;
+            });
             if (appropriateList) {
                 var url = "1/lists/" + appropriateList.id + "/pos";
                 self.t.put(url, { value: position }, function(e, data) {

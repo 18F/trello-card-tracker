@@ -3,7 +3,6 @@
 var fs = require('fs');
 var yaml = require('js-yaml');
 var Q = require('q');
-var _ = require("underscore");
 
 var MyTrello = require("./my-trello.js");
 
@@ -19,7 +18,7 @@ class CardCreator extends MyTrello {
             promises = [],
             self = this;
 
-        _.each(orders.orders, function(order) {
+        orders.orders.forEach(function(order) {
             promises.push(self.createCard(order));
         });
 
