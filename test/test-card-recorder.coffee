@@ -1,5 +1,4 @@
 expect = require('chai').expect
-_un = require("underscore")
 app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')

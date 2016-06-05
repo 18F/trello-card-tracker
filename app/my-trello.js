@@ -4,7 +4,6 @@ var fs = require('fs');
 var yaml = require('js-yaml');
 var Trello = require("node-trello");
 var Q = require('q');
-var _ = require('underscore');
 
 var env = process.env;
 
@@ -33,14 +32,17 @@ class MyTrello {
     getListIDbyName(name) {
         var deferred = Q.defer();
         var find = Boolean(name);
-
         this.t.get(this.lists_url, function(e, data) {
             if (e) return deferred.reject(e);
 
             var list;
-            if (find) list = _.findWhere(data, { "name": name });
+            //console.log(data);
+            if (find){
+              list = data.find(function(getList){
+                return getList.name == name;
+              });
+            }
             if (!list) list = data[0];
-
             deferred.resolve(list.id);
         });
 

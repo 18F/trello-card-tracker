@@ -1,5 +1,4 @@
 expect = require('chai').expect
-_un = require("underscore")
 app = require('../app')
 sinon = require("sinon");
 trello = require("node-trello");
