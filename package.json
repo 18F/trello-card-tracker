@@ -34,8 +34,7 @@
     "node-schedule": "^1.0.0",
     "node-trello": "^1.1.2",
     "q": "^1.4.1",
-    "request": "^2.69.0",
-    "underscore": "~1.8.3"
+    "request": "^2.69.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
