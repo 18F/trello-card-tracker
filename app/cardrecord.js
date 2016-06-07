@@ -5,7 +5,6 @@ var yaml = require('js-yaml');
 var moment = require("moment");
 var fedHolidays = require('@18f/us-federal-holidays');
 var Q = require('q');
-var _ = require("underscore");
 
 var d = new Date();
 var holidays = fedHolidays.allForYear(d.getFullYear());
@@ -23,11 +22,17 @@ class CardRecorder extends MyTrello {
         var self = this;
         var deferred = Q.defer();
         this.getUpdateCards().then(function(cards) {
-            _.each(cards, function(card) {
-                var comments = _.filter(card.actions, {type: "commentCard"});
+            cards.forEach(function(card){
+                var comments = card.actions.filter(function(action){
+                  return action.type == 'commentCard';
+                });
                 self.deleteCurrentComment(comments).then(function(resp) {
-                    var updateActions = _.filter(card.actions, {type: "updateCard"});
-                    var createAction = _.filter(card.actions, {type: "createCard"});
+                    var updateActions = card.actions.filter(function(action){
+                      return action.type == 'updateCard';
+                    });
+                    var createAction = card.actions.filter(function(action){
+                      return action.type =='createCard';
+                    });
                     var now = moment();
                     var hasMoved = false;
                     var daysSinceUpdate = false;
@@ -36,11 +41,12 @@ class CardRecorder extends MyTrello {
                       daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
                     }
                     var totDays = (comments !== "undefined")? self.calcTotalDays(comments, now) : 0;
-                    console.log("total days:"+totDays);
+                    //console.log("total days:"+totDays);
                     var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
                     if (hasMoved && daysSinceUpdate < 1) {
                         console.log("Write New Phase: " + card.name);
                         var lastPhase = self.getLastList(hasMoved[0]);
+                        //console.log(card.id+" lastPhase: "+lastPhase+" lastMove: "+lastMove+" updateMove: "+updateActions[0].date+" totDays: "+totDays)
                         self.compileCommentArtifact(
                             card.id,
                             lastPhase,
@@ -90,7 +96,7 @@ class CardRecorder extends MyTrello {
         currentCommentID = "",
         self = this;
 
-        _.each(comments, function(c) {
+        comments.forEach(function(c) {
             if (c.data.text.indexOf("**Current Stage:**") !== -1) {
                 currentCommentID = c.id;
             }
@@ -111,10 +117,10 @@ class CardRecorder extends MyTrello {
     checkCommentsForDates(commentList, latest){
       var myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/; //Find the first date in the comment string
       if(!latest){
-        // Reverse order to get first comment
-        commentList = commentList.reverse();
+        // Reverse order to get first comment but create a shallow copy to not break integration
+        commentList = commentList.slice(0).reverse();
       }
-      var correctComment = _.find(commentList, function(comment){
+      var correctComment = commentList.find(function(comment){
           var match = myRegex.exec(comment.data.text);
           return match ? true : false;
       });
@@ -153,7 +159,7 @@ class CardRecorder extends MyTrello {
 
     hasMovedCheck(actionList) {
         var updated = false;
-        var moves = _.filter(actionList, function(a) {
+        var moves = actionList.filter(function(a) {
             return 'listBefore' in a.data;
         });
         if (moves.length) updated = moves;
@@ -178,7 +184,9 @@ class CardRecorder extends MyTrello {
 
     compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt, totDays) {
         var deferred = Q.defer();
-        var stage = _.findWhere(this.stages, { name: dateList });
+        var stage = this.stages.find(function(stage){
+          return stage.name == dateList;
+        });
         var expectedTime = stage.expected_time;
         var diffArray = this.calculateDateDifference(expectedTime, fromDate, toDate);
         var differenceFromExpected = diffArray[0];
@@ -195,7 +203,7 @@ class CardRecorder extends MyTrello {
 
     findHolidaysBetweenDates(fromDate, toDate){
       var count = 0;
-      _un.each(holidays, function(holiday){
+      holidays.forEach(function(holiday){
         if(moment(holiday.date.toISOString(), ["YYYY-M-D", "YYYY-MM-DD", "YYYY-MM-D", "YYYY-M-DD"]).isBetween(fromDate, toDate, 'day')){
           count++;
         }

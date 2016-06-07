@@ -1,5 +1,4 @@
 expect = require('chai').expect
-_un = require("underscore")
 app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
@@ -29,7 +28,7 @@ describe 'app.CardRecorder', ->
       sandbox = sinon.sandbox.create()
       deleteCards = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true});
       sandbox.stub(CR, 'getListNameByID').resolves('list name');
-      lastListStub = sandbox.stub(CR, 'getLastList')
+      lastListStub = sandbox.stub(CR, 'getLastList').returns("Last List")
       compileStub = sandbox.stub(CR, 'compileCommentArtifact').resolves("Compiled Comment");
       return
 
@@ -53,6 +52,7 @@ describe 'app.CardRecorder', ->
         expect(getCards.callCount).to.equal 1
         expect(deleteCards.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
+        # expect(compileStub.calledWith('cccc', lastListStub, lastListStub, findLastStub, findLastStub, true, 55)).to.be.ok
         done()
         return
       return
