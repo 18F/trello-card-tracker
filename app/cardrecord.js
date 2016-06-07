@@ -116,8 +116,8 @@ class CardRecorder extends MyTrello {
     checkCommentsForDates(commentList, latest){
       var myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/; //Find the first date in the comment string
       if(!latest){
-        // Reverse order to get first comment
-        commentList = commentList.reverse();
+        // Reverse order to get first comment but create a shallow copy to not break integration
+        commentList = commentList.slice(0).reverse();
       }
       var correctComment = commentList.find(function(comment){
           var match = myRegex.exec(comment.data.text);
