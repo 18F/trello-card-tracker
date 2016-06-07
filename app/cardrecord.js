@@ -41,11 +41,12 @@ class CardRecorder extends MyTrello {
                       daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
                     }
                     var totDays = (comments !== "undefined")? self.calcTotalDays(comments, now) : 0;
-                    console.log("total days:"+totDays);
+                    //console.log("total days:"+totDays);
                     var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
                     if (hasMoved && daysSinceUpdate < 1) {
                         console.log("Write New Phase: " + card.name);
                         var lastPhase = self.getLastList(hasMoved[0]);
+                        //console.log(card.id+" lastPhase: "+lastPhase+" lastMove: "+lastMove+" updateMove: "+updateActions[0].date+" totDays: "+totDays)
                         self.compileCommentArtifact(
                             card.id,
                             lastPhase,

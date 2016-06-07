@@ -21,6 +21,10 @@
     "url": "https://github.com/18f/bpa-trello-dashboard/issues"
   },
   "homepage": "https://github.com/18f/bpa-trello-dashboard#readme",
+  "engines": {
+  "node": "^6.1.0",
+  "npm": "^3.8.6"
+  },
   "dependencies": {
     "@18f/us-federal-holidays": "^1.1.0",
     "async": "^1.5.2",
