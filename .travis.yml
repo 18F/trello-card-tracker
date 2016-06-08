@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-- '6.1.0'
+- 6.1.0
 install:
 - npm install --dev
 script:
@@ -9,9 +9,9 @@ deploy:
   edge: true
   provider: cloudfoundry
   api: https://api.cloud.gov
-  username: laura.gerhardt@gsa.gov
+  username: 18f-acq_deployer
   password:
-    secure: XW/RlGRxWp/G0CtMQzmrgKOo3cJgvnbObW9PK7sLcRZ/qFsZWrqGfGKdvWLxB6G0RLrD8ZXnS7aNlSRLBig+T9HmC5N4aHroq42W3a2ONNfDwCTKq8oDRqvCfdVEwBsNvY/02/9yWb+T3wvCdOa6xY3u5q272YRCX00aiTnuscsufTZvA9C01w/g4VCzoSFk4TquUbPhmFA5guYAJEE7V6Az5+zGYrFwi/303OQr4SgqaFeJPpeENE4zRr4zhKkvmOsBtnRvswBbR7meYh2POKMltQ+Px+Jq+hivNEN2p8yx3IPqi/HEj+0ryBAMh5m+G3m9C5iqWlJS3SkyQsAT8U9JXMMdxc9d4RvKy1QHO4UvhLnWqaQTlR5A7G46ozpJheeRiNPLoUKwsjslNl8spzI5czBTHMPLpR6g1twhpNms/izwSmvzx9Uo4/QnEHfhTZFfehlqhwsChsk9B255b6g8dlk09boRody1w9dvjd5+E980ZO1SlQogkG++WIT6oGCjRSq7LDO4n3cTeI/5to4VfGTwjrGJLOqcfZDgn47VLqpbPPAapmHt1dXqNghD27ssjYg6vvbYaWk7TGsiF8/hkFn64ZhtNmA3q6ZgUIB/xA93SHvqjJQnfbi0a1mM/vJN1eFLCtxkRkcpoe7yfLbQzSNSX3T2ecYDbYxKqT4=
+    secure: Je8/GJwMpnIvaW40rv9ADHkhOyLoGWLGvwp6uHQx1TOEg4lLzE2/anH4/xQ/mX2yUtlwqCEW9TK74XVmiTN74H0yqoIbpXBvST5kTRmlxNqEmq/OERe5PfaFJFYfF+0TmTWSBnhNUSk9OYjVuGhhWHISDmoWAd8P8UMtoO41j2G7fynwIinZktg22+7l9o5pW2kkiAeLt0TAKUHUT0E9IQCUnOtUMe5ZMAIGmVUmhbksQ7gC4l2K6veRpCW3HDsNk0xyHFrEscV1hEmKnogFvg486Cr9SX1+jxa07/mwMRdA1Uwz1jeHBwl0OEyybPa5ONXxQhxm2QldAit7jkmEj6/xNPaUHUkMmGKi9Hr3TY2s1h2T6lF8dLvv6jDDfC0kdoJE4R7VeSGGjmdUtPqQDumwVyjjE6GBhDvelOKqspAkpjwIjCW7UbvmpUanyY6V4rPrzdEELatvz1Ij0dw09iD58qMjVeXBtK/xIZ0eBRiatjtyYul5hyZ1FCTNc2CjmtqrImwqcJ/YMvZ2Dz8mhrG5wnxU8OPLpWSQ8UhbMlb/cEkMTnfzU4fqbGGUYcscxNbeNDspVZersMtCrLhwMsVcnmLQRH4cXG4S543UNEVYzqemfZirXXXtaIAtJ+5SzyGTqaqfrO+6JNMahEWmhX60kgmPJUWux6qBKX+WlQc=
   organization: 18F-acq
   space: tools
   on:
