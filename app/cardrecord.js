@@ -36,17 +36,14 @@ class CardRecorder extends MyTrello {
                     var now = moment();
                     var hasMoved = false;
                     var daysSinceUpdate = false;
-                    if(typeof updateActions !== "undefined"){
+                    if(updateActions.length > 0){
                       hasMoved = self.hasMovedCheck(updateActions);
                       daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
                     }
-                    var totDays = (comments !== "undefined")? self.calcTotalDays(comments, now) : 0;
-                    //console.log("total days:"+totDays);
+                    var totDays = (comments.length > 0)? self.calcTotalDays(comments, now) : 0;
                     var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
                     if (hasMoved && daysSinceUpdate < 1) {
-                        console.log("Write New Phase: " + card.name);
                         var lastPhase = self.getLastList(hasMoved[0]);
-                        //console.log(card.id+" lastPhase: "+lastPhase+" lastMove: "+lastMove+" updateMove: "+updateActions[0].date+" totDays: "+totDays)
                         self.compileCommentArtifact(
                             card.id,
                             lastPhase,
@@ -192,7 +189,6 @@ class CardRecorder extends MyTrello {
         var differenceFromExpected = diffArray[0];
         var timeTaken = diffArray[1];
         var comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken, totDays);
-
         if (addCommentOpt) {
             this.addComment(comment, cardID).then(function(resp){deferred.resolve(resp)});
         } else {
