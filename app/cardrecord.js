@@ -20,61 +20,53 @@ class CardRecorder extends MyTrello {
 
     run() {
         var self = this;
-        var deferred = Q.defer();
-        this.getUpdateCards().then(function(cards) {
-            cards.forEach(function(card){
-                var comments = card.actions.filter(function(action){
-                  return action.type == 'commentCard';
-                });
-                self.deleteCurrentComment(comments).then(function(resp) {
-                    var updateActions = card.actions.filter(function(action){
-                      return action.type == 'updateCard';
-                    });
-                    var createAction = card.actions.filter(function(action){
-                      return action.type =='createCard';
-                    });
-                    var now = moment();
-                    var hasMoved = false;
-                    var daysSinceUpdate = false;
-                    if(updateActions.length > 0){
-                      hasMoved = self.hasMovedCheck(updateActions);
-                      daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
-                    }
-                    var totDays = (comments.length > 0)? self.calcTotalDays(comments, now) : 0;
-                    var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
-                    if (hasMoved && daysSinceUpdate < 1) {
-                        var lastPhase = self.getLastList(hasMoved[0]);
-                        self.compileCommentArtifact(
-                            card.id,
-                            lastPhase,
-                            lastPhase,
-                            lastMove,
-                            updateActions[0].date,
-                            true,
-                            totDays
-                        )
-                        .then(deferred.resolve);
-                    } else {
-                        console.log("Write Current Phase: " + card.name);
-                        self.getListNameByID(card.idList).then(function(listName) {
-                            self.compileCommentArtifact(
-                                card.id,
-                                listName,
-                                "Current",
-                                lastMove,
-                                now.format(),
-                                true,
-                                totDays
-                            )
-                        })
-                        .then(deferred.resolve);
-                    }
-                });
-            });
-        })
-        // .fail(function(err){console.log(err.stack)});
-        return deferred.promise;
+        return self.getUpdateCards().then(function(cards) {
+          return Q.all(cards.map(function(card) {
+            return self.cardRecordFunctions(card);
+          })
+        );
+        });
+      //  //.fail(function(err){console.log(err.stack)});
     }
+
+    cardRecordFunctions(card){
+      var self = this,
+          deferred = Q.defer();
+      var comments = card.actions.filter(function(action){
+        return action.type == 'commentCard';
+      });
+      var updateActions = card.actions.filter(function(action){
+        return action.type == 'updateCard';
+      });
+      var createAction = card.actions.filter(function(action){
+        return action.type =='createCard';
+      });
+      self.deleteCurrentComment(comments)
+      .then(function(resp) {
+          var now = moment();
+          var hasMoved = false;
+          var daysSinceUpdate = false;
+          if(updateActions.length > 0){
+            hasMoved = self.hasMovedCheck(updateActions);
+            daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
+          }
+          var totDays = (comments.length > 0)? self.calcTotalDays(comments, now) : 0;
+          var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
+          self.inFinalList(card.idList)
+          .then(function(finalList){
+            self.decideCommentType(card,
+              finalList,
+              daysSinceUpdate,
+              hasMoved,
+              lastMove,
+              updateActions,
+              totDays,
+              now)
+            .then(function(resp){deferred.resolve});
+          });
+      });
+    return deferred.promise;
+  }
 
     getUpdateCards() {
         var deferred = Q.defer();
@@ -154,6 +146,20 @@ class CardRecorder extends MyTrello {
       }
     }
 
+    inFinalList(listID){
+      var deferred = Q.defer();
+      var self = this;
+      self.getListNameByID(listID).then(function(listName){
+          var lastList = false;
+          var lastStage = self.stages[self.stages.length - 1].name;
+        if (listName == lastStage){
+          lastList = true;
+        }
+        deferred.resolve(lastList);
+      });
+      return deferred.promise;
+    }
+
     hasMovedCheck(actionList) {
         var updated = false;
         var moves = actionList.filter(function(a) {
@@ -177,6 +183,44 @@ class CardRecorder extends MyTrello {
           return 0;
         }
 
+    }
+
+    decideCommentType(card, finalList, daysSinceUpdate, hasMoved, lastMove, updateActions, totalDays, nowMoment){
+      var self = this;
+      var deferred = Q.defer();
+      if (finalList && daysSinceUpdate > 1){
+        // not totals
+        console.log("final phase no record");
+        //self.postAwardComments(card.id, lastMove, )
+      } else if (hasMoved && daysSinceUpdate < 1) {
+        console.log("Write New Phase: " + card.name);
+          var lastPhase = self.getLastList(hasMoved[0]);
+          self.compileCommentArtifact(
+              card.id,
+              lastPhase,
+              lastPhase,
+              lastMove,
+              updateActions[0].date,
+              true,
+              totalDays
+          )
+          .then(function(resp){deferred.resolve(resp);});
+      } else {
+          console.log("Write Current Phase: " + card.name);
+          self.getListNameByID(card.idList).then(function(listName) {
+              self.compileCommentArtifact(
+                  card.id,
+                  listName,
+                  "Current",
+                  lastMove,
+                  nowMoment.format(),
+                  true,
+                  totalDays
+              )
+          })
+          .then(function(resp){deferred.resolve(resp);});
+      }
+      return deferred.promise;
     }
 
     compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt, totDays) {

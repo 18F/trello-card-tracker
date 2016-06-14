@@ -15,14 +15,14 @@ if ("s" in argv){
   console.log("--Invoke Stage Manager--");
   var file  = (argv["s"]=== true) ? 'data/stages.yaml' : argv["s"];
   var SM = new app.StageManager(file, board);
-  SM.run().then(console.log("Stage Manager Complete"));
+  SM.run().then(function(resp){console.log("Stage Manager Complete")});
 }
 
 if ("r" in argv) {
   console.log("--Invoke Card Recorder--");
   var file  = (argv["r"]=== true) ? 'data/stages.yaml' : argv["r"];
   var CR = new app.CardRecorder(file, board);
-  CR.run().then(console.log("CR Complete"));
+  CR.run().then(function(resp){console.log("--Card Recorder Complete--")});
 }
 
 if ("c" in argv) {
@@ -30,7 +30,8 @@ if ("c" in argv) {
   var file  = (argv["c"]=== true) ? 'data/stages.yaml' : argv["c"];
   var orders  = (argv["o"]=== true) ? 'data/orders.yaml' : argv["o"];
   var CC = new app.CardCreator(file, board);
-  CC.createOrders(orders).then(console.log("--Card Creator Complete--"));
+  CC.createOrders(orders).then(function(resp){
+    console.log("--Card Creator Complete--");});
 }
 
 if ("b" in argv) {
