@@ -20,13 +20,25 @@ class CardRecorder extends MyTrello {
 
     run() {
         var self = this;
-        return self.getUpdateCards().then(function(cards) {
+        return self.getCards().then(function(cards) {
           return Q.all(cards.map(function(card) {
             return self.cardRecordFunctions(card);
-          })
-        );
+            })
+          );
         });
       //  //.fail(function(err){console.log(err.stack)});
+    }
+
+    getCards() {
+        var deferred = Q.defer();
+        var url = '/1/boards/' + this.board + '/cards';
+
+        this.t.get(url, { actions: ["createCard", "updateCard", "commentCard"] }, function(err, cards) {
+            if (err) return deferred.reject(err);
+            deferred.resolve(cards);
+        });
+
+        return deferred.promise;
     }
 
     cardRecordFunctions(card){
@@ -51,34 +63,22 @@ class CardRecorder extends MyTrello {
             daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
           }
           var totDays = (comments.length > 0)? self.calcTotalDays(comments, now) : 0;
-          var lastMove = self.findLastMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
+          var prevMove = self.findPrevMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
           self.inFinalList(card.idList)
           .then(function(finalList){
             self.decideCommentType(card,
               finalList,
               daysSinceUpdate,
               hasMoved,
-              lastMove,
+              prevMove,
               updateActions,
               totDays,
               now)
-            .then(function(resp){deferred.resolve});
+            .then(function(resp){deferred.resolve(resp);});
           });
       });
     return deferred.promise;
   }
-
-    getUpdateCards() {
-        var deferred = Q.defer();
-        var url = '/1/boards/' + this.board + '/cards';
-
-        this.t.get(url, { actions: ["createCard", "updateCard", "commentCard"] }, function(err, cards) {
-            if (err) return deferred.reject(err);
-            deferred.resolve(cards);
-        });
-
-        return deferred.promise;
-    }
 
     deleteCurrentComment(comments) {
         var deferred = Q.defer(),
@@ -123,7 +123,7 @@ class CardRecorder extends MyTrello {
       }
     }
 
-    findLastMoveDateFromComments(opts){
+    findPrevMoveDateFromComments(opts){
       var actionList = opts.actionList;
       var cardCreationDate = opts.cardCreationDate;
       var commentList = opts.commentList;
@@ -169,7 +169,7 @@ class CardRecorder extends MyTrello {
         return updated;
     }
 
-    getLastList(cardAction) {
+    getPreviousList(cardAction) {
         return cardAction.data.listBefore.name;
     }
 
@@ -185,21 +185,21 @@ class CardRecorder extends MyTrello {
 
     }
 
-    decideCommentType(card, finalList, daysSinceUpdate, hasMoved, lastMove, updateActions, totalDays, nowMoment){
+    decideCommentType(card, finalList, daysSinceUpdate, hasMoved, prevMove, updateActions, totalDays, nowMoment){
       var self = this;
       var deferred = Q.defer();
       if (finalList && daysSinceUpdate > 1){
         // not totals
         console.log("final phase no record");
-        //self.postAwardComments(card.id, lastMove, )
+        //self.postAwardComments(card.id, prevMove, )
       } else if (hasMoved && daysSinceUpdate < 1) {
         console.log("Write New Phase: " + card.name);
-          var lastPhase = self.getLastList(hasMoved[0]);
+          var prevPhase = self.getPreviousList(hasMoved[0]);
           self.compileCommentArtifact(
               card.id,
-              lastPhase,
-              lastPhase,
-              lastMove,
+              prevPhase,
+              prevPhase,
+              prevMove,
               updateActions[0].date,
               true,
               totalDays
@@ -212,7 +212,7 @@ class CardRecorder extends MyTrello {
                   card.id,
                   listName,
                   "Current",
-                  lastMove,
+                  prevMove,
                   nowMoment.format(),
                   true,
                   totalDays
@@ -251,17 +251,17 @@ class CardRecorder extends MyTrello {
       return count;
     }
 
-    calculateDateDifference(expected, lastMove, recentMove) {
-        var fromDate = new Date(lastMove);
+    calculateDateDifference(expected, prevMove, recentMove) {
+        var fromDate = new Date(prevMove);
         var toDate = new Date(recentMove);
         var diffDays = instadate.differenceInWorkDays(fromDate, toDate);
         var diffDays = diffDays - this.findHolidaysBetweenDates(fromDate, toDate);
         return [diffDays - expected, diffDays];
     }
 
-    buildComment(dateDiff, expected, lastMove, recentMove, lastList, actual, totalDays) {
+    buildComment(dateDiff, expected, prevMove, recentMove, lastList, actual, totalDays) {
         var formatDiff = (dateDiff < 0) ? "**" + dateDiff + " days**" : "`+" + dateDiff + " days`";
-        var fromDate = moment(lastMove).format("L");
+        var fromDate = moment(prevMove).format("L");
         var toDate = moment(recentMove).format("L");
         return `**${lastList} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${expected} days. Actual Days spent: ${actual}. **Total Project Days: ${totalDays}**`;
     }
