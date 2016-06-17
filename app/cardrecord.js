@@ -26,7 +26,7 @@ class CardRecorder extends MyTrello {
             })
           );
         });
-      //  //.fail(function(err){console.log(err.stack)});
+      //.fail(function(err){console.log(err.stack)});
     }
 
     getCards() {
@@ -44,26 +44,18 @@ class CardRecorder extends MyTrello {
     cardRecordFunctions(card){
       var self = this,
           deferred = Q.defer();
-      var comments = card.actions.filter(function(action){
-        return action.type == 'commentCard';
-      });
-      var updateActions = card.actions.filter(function(action){
-        return action.type == 'updateCard';
-      });
-      var createAction = card.actions.filter(function(action){
-        return action.type =='createCard';
-      });
-      self.deleteCurrentComment(comments)
+      var cardActions = self.cardFilters(card.actions, [{"name": "comments", "type": "commentCard"}, {"name": "updates", "type": "updateCard"}, {"name": "created", "type": "createCard"}]);
+      self.deleteCurrentComment(cardActions.comments)
       .then(function(resp) {
           var now = moment();
           var hasMoved = false;
           var daysSinceUpdate = false;
-          if(updateActions.length > 0){
-            hasMoved = self.hasMovedCheck(updateActions);
-            daysSinceUpdate = now.diff(moment(updateActions[0].date), 'days');
+          if(cardActions.updates.length > 0){
+            hasMoved = self.hasMovedCheck(cardActions.updates);
+            daysSinceUpdate = now.diff(moment(cardActions.updates[0].date), 'days');
           }
-          var totDays = (comments.length > 0)? self.calcTotalDays(comments, now) : 0;
-          var prevMove = self.findPrevMoveDateFromComments({commentList: comments, "actionList": updateActions, "createActionDate": createAction.date});
+          var totDays = (cardActions.comments.length > 0)? self.calcTotalDays(cardActions.comments, now) : 0;
+          var prevMove = self.findPrevMoveDateFromComments({commentList: cardActions.comments, "actionList": cardActions.updates, "createActionDate": cardActions.created.date});
           self.inFinalList(card.idList)
           .then(function(finalList){
             self.decideCommentType(card,
@@ -71,13 +63,35 @@ class CardRecorder extends MyTrello {
               daysSinceUpdate,
               hasMoved,
               prevMove,
-              updateActions,
+              cardActions.updates,
               totDays,
               now)
-            .then(function(resp){deferred.resolve(resp);});
+            .then(function(resp){
+              deferred.resolve(resp);});
           });
       });
     return deferred.promise;
+  }
+
+  cardFilters(cardActions, actionTypeArray){
+    var actions = {};
+    actionTypeArray.forEach(function(actionType){
+      actions[actionType.name] = cardActions.filter(function(action){
+        return action.type == actionType.type;
+      });
+    });
+    return actions;
+
+    // var comments = cardActions.filter(function(action){
+    //   return action.type == 'commentCard';
+    // });
+    // var updateActions = cardActions.filter(function(action){
+    //   return action.type == 'updateCard';
+    // });
+    // var createAction = cardActions.filter(function(action){
+    //   return action.type =='createCard';
+    // });
+    // return {"comments": comments, "updates": updateActions, "created": createAction}
   }
 
     deleteCurrentComment(comments) {
@@ -189,9 +203,7 @@ class CardRecorder extends MyTrello {
       var self = this;
       var deferred = Q.defer();
       if (finalList && daysSinceUpdate > 1){
-        // not totals
-        console.log("final phase no record");
-        //self.postAwardComments(card.id, prevMove, )
+        deferred.resolve({"final phase": true});
       } else if (hasMoved && daysSinceUpdate < 1) {
         console.log("Write New Phase: " + card.name);
           var prevPhase = self.getPreviousList(hasMoved[0]);
