@@ -12,7 +12,6 @@ require('sinon-as-promised');
 #   this
 
 CR = new app.CardRecorder(helpers.mockfile, helpers.board)
-DCH = new app.DateCommentHelpers()
 # CR.Stages = helpers.expectedStageObject
 
 describe 'app.CardRecorder', ->
@@ -31,10 +30,10 @@ describe 'app.CardRecorder', ->
 
     beforeEach ->
       cardRecordStub = sandbox.stub(CR, 'cardRecordFunctions').resolves()
-      getCardsStub = sandbox.stub(CR, 'getCards').resolves([helpers.mockCommentCardObj])
       return
 
     it 'will card record for every card on the board', (done) ->
+      getCardsStub = sandbox.stub(CR, 'getCards').resolves([helpers.mockCommentCardObj])
       CR.run().then (resp) ->
         expect(cardRecordStub.callCount).to.eql 1
         expect(cardRecordStub.calledWith(helpers.mockCommentCardObj)).to.be.ok
@@ -44,6 +43,7 @@ describe 'app.CardRecorder', ->
       return
 
     it.skip 'survives a trello error', (done) ->
+      getCardsStub = sandbox.stub(CR, 'getCards').rejects(new Error('foo'))
       CR.run().catch (err) ->
         expect(getCardsStub.callCount).to.eql 1
         expect(err).to.eql error
@@ -94,20 +94,20 @@ describe 'app.CardRecorder', ->
 
     beforeEach ->
       deleteStub = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true})
-      hasMovedStub = sandbox.stub(DCH, 'hasMovedCheck').returns(false)
-      calcTotalStub = sandbox.stub(DCH, 'calcTotalDays').returns(55)
-      decideStub = sandbox.stub(CR, 'decideCommentType').resolves({"pastDecide": true})
+      hasMovedStub = sandbox.stub(app.DateCommentHelpers.prototype, 'hasMovedCheck').returns(true)
+      calcTotalStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calcTotalDays').returns(55)
       finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false);
       cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
       cardMock = {id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
-      findPrevStub = sandbox.stub(DCH, 'findPrevMoveDateFromComments').returns(cardActions[0].date);
+      findPrevStub = sandbox.stub(app.DateCommentHelpers.prototype, 'findPrevMoveDateFromComments').returns(cardActions[0].date);
       return
 
 
     it 'runs the card record for a single card', (done) ->
+      decideStub = sandbox.stub(CR, 'decideCommentType').resolves({"pastDecide": true})
       CR.cardRecordFunctions(cardMock).then (resp) ->
         expect(deleteStub.callCount).to.equal 1
         expect(calcTotalStub.callCount).to.equal 1
@@ -117,6 +117,7 @@ describe 'app.CardRecorder', ->
       return
 
     it.skip 'will survive a trello error', (done) ->
+      decideStub = sandbox.stub(CR, 'decideCommentType').rejects(new Error)
       CR.cardRecordFunctions(cardMock).catch (err) ->
         # expect(stub.callCount).to.eql 1
         expect(err).to.eql error
@@ -242,12 +243,6 @@ describe 'app.CardRecorder', ->
         expect(compileStub.callCount).to.equal 1
         done()
       return
-
-    it.skip 'survives a trello error', (done) ->
-      CR.decideCommentType(card, false, 0, false, prevMove, updateActions, 10, now).catch (err) ->
-        expect(err).to.eql error
-        done()
-      return
     return
 
   describe '.compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt)', ->
@@ -255,7 +250,7 @@ describe 'app.CardRecorder', ->
 
     beforeEach ->
       addComment = sandbox.stub(CR, 'addComment').resolves();
-      calcStub = sandbox.stub(DCH, 'calculateDateDifference').returns([103,113]);
+      calcStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calculateDateDifference').returns([103,113]);
       comments = undefined
       return
 

@@ -61,9 +61,10 @@ class CardRecorder extends MyTrello {
               cardActions.updates,
               totDays,
               now)
-            .then(function(resp){
-              deferred.resolve(resp);});
-          });
+            .then(function(resp){deferred.resolve(resp);});
+          })
+          .catch(function(err){console.log(err.stack);
+          deferred.reject(err);});
       });
     return deferred.promise;
     }
