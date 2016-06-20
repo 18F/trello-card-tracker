@@ -42,7 +42,7 @@ class DateCommentHelpers {
     var commentList = opts.commentList;
     var correctComment = false;
     if(commentList){
-      var correctComment = this.checkCommentsForDates(commentList, true);
+      correctComment = this.checkCommentsForDates(commentList, true);
     }
     if(correctComment){
       return correctComment;
@@ -74,7 +74,7 @@ class DateCommentHelpers {
       var fromDate = new Date(prevMove);
       var toDate = new Date(recentMove);
       var diffDays = instadate.differenceInWorkDays(fromDate, toDate);
-      var diffDays = diffDays - this.findHolidaysBetweenDates(fromDate, toDate);
+      diffDays = diffDays - this.findHolidaysBetweenDates(fromDate, toDate);
       return [diffDays - expected, diffDays];
   }
 
