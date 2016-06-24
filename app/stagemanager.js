@@ -1,145 +1,156 @@
-"use strict";
+'use strict';
 
-var Q = require('q');
-var util = require('util');
-var MyTrello = require("./my-trello.js");
-
+const Q = require('q');
+const MyTrello = require('./my-trello.js');
 
 class StageManager extends MyTrello {
-    constructor(yaml_file, board) {
-        super(yaml_file, board);
-        this.stages = this.getPreAward();
-    }
+  constructor(yamlFile, board) {
+    super(yamlFile, board);
+    this.stages = this.getPreAward();
+  }
 
-    run() {
-        var deferred = Q.defer();
+  run() {
+    const deferred = Q.defer();
 
-        this.getStageandBoard()
-            .then(this.checkLists)
-            .then(this.makeAdditionalLists)
-            .then(this.getStageandBoard().then(this.closeUnusedStages))
-            .then(this.getStageandBoard().then(this.orderLists))
-            .then(function() { deferred.resolve("complete"); })
-            .catch(function(e) { deferred.reject(e); });
+    this.getStageandBoard()
+      .then(this.checkLists)
+      .then(this.makeAdditionalLists)
+      .then(this.getStageandBoard().then(this.closeUnusedStages))
+      .then(this.getStageandBoard().then(this.orderLists))
+      .then(() => { deferred.resolve('complete'); })
+      .catch(e => { deferred.reject(e); });
 
-        return deferred.promise;
-    }
+    return deferred.promise;
+  }
 
-    getStageandBoard() {
-        var deferred = Q.defer();
-        var self = this;
+  getStageandBoard() {
+    const deferred = Q.defer();
+    const self = this;
 
-        this.t.get(this.lists_url, function(err, data) {
-        if (err) deferred.reject(new Error(err));
-            deferred.resolve([self.stages, data]);
+    this.t.get(this.lists_url, (err, data) => {
+      if (err) {
+        deferred.reject(new Error(err));
+      } else {
+        deferred.resolve([self.stages, data]);
+      }
+    });
+
+    return deferred.promise;
+  }
+
+  checkLists(data) {
+    const checked = [];
+    const lists = data[1].map(value => value.name);
+
+    data[0].forEach(stage => {
+      checked.push({
+        stage: stage.name,
+        built: lists.includes(stage.name)
+      });
+    });
+
+    return checked;
+  }
+
+  makeAdditionalLists(checkedList) {
+    const deferred = Q.defer();
+
+    const all = [];
+    const newLists = [];
+    const self = this;
+
+    checkedList.forEach((list, i) => {
+      const listDefer = Q.defer();
+      all.push(listDefer.promise);
+
+      if (!list.built) {
+        const postList = {
+          name: list.stage,
+          idBoard: self.board,
+          pos: i + 1
+        };
+        self.t.post('1/lists', postList, (err, data) => {
+          if (err) {
+            listDefer.reject(err);
+          } else {
+            newLists.push(data);
+            listDefer.resolve();
+          }
         });
+      }
+    });
 
-        return deferred.promise;
-    }
+    Q.all(all).then(() => {
+      deferred.resolve(newLists);
+    }).catch(e => {
+      deferred.reject(e);
+    });
 
-    checkLists(data) {
-        var checked = [];
-        var lists = data[1].map(value => value['name']);
+    return deferred.promise;
+  }
 
-        data[0].forEach(function(stage) {
-            checked.push({
-                stage: stage.name,
-                built: lists.includes(stage.name)
-            });
-        });
+  closeUnusedStages(data) {
+    const deferred = Q.defer();
+    const stages = data[0].map(value => value.name);
+    const self = this;
 
-        return checked;
-    }
+    data[1].forEach(trelloList => {
+      if (!(stages.includes(trelloList.name))) {
+        self.getListCards(trelloList.id)
+          .then(d => {
+            self.closeList(d, trelloList.id).then(deferred.resolve);
+          })
+          .catch(deferred.reject);
+      }
+    });
 
-    makeAdditionalLists(checkedList) {
-        var deferred = Q.defer();
+    return deferred.promise;
+  }
 
-        var all = [],
-            newLists = [],
-            self = this;
+  getListCards(trelloID) {
+    const deferred = Q.defer();
+    this.t.get(`/1/lists/${trelloID}/cards`, (err, data) => {
+      if (err) {
+        deferred.reject(err);
+      } else {
+        deferred.resolve(data);
+      }
+    });
+    return deferred.promise;
+  }
 
-        checkedList.forEach(function(list, i) {
-            var listDefer = Q.defer();
-            all.push(listDefer.promise);
-
-            if (!list.built) {
-                var postList = {
-                    name: list.stage,
-                    idBoard: self.board,
-                    pos: i + 1
-                };
-                self.t.post("1/lists", postList, function(err, data) {
-                    if (err) listDefer.reject(err);
-                    newLists.push(data);
-                    listDefer.resolve();
-                });
-            }
-        });
-
-        Q.all(all).then(function() {
-            deferred.resolve(newLists);
-        }).catch(function(e) {
-            deferred.reject(e);
-        });
-
-        return deferred.promise;
-    }
-
-    closeUnusedStages(data) {
-      var deferred = Q.defer();
-        var stages = data[0].map(value => value['name']),
-            self = this;
-
-        data[1].forEach(function(trelloList) {
-            if (!(stages.includes(trelloList.name))) {
-                self.getListCards(trelloList.id)
-                .then(function(d) {
-                    self.closeList(d, trelloList.id).then(deferred.resolve);
-                })
-                .catch(deferred.reject);
-
-            };
-        });
-      return deferred.promise;
-    }
-
-    getListCards(trelloID) {
-        var deferred = Q.defer();
-        this.t.get("/1/lists/" + trelloID + "/cards", function(err, data) {
-          if (err) return deferred.reject(err);
+  closeList(listData, trelloListID) {
+    const deferred = Q.defer();
+    if (!listData.length || listData.length) {
+      const url = `/1/list/${trelloListID}/closed`;
+      this.t.put(url, { value: true }, (err, data) => {
+        if (err) {
+          deferred.reject(err);
+        } else {
           deferred.resolve(data);
-        });
-        return deferred.promise;
-    }
-
-    closeList(listData, trelloListID) {
-        var deferred = Q.defer();
-        if (!listData.length || listData.length) {
-            var url = "/1/list/" + trelloListID + "/closed";
-            this.t.put(url, { value: true }, function(err, data) {
-              if (err) return deferred.reject(err);
-              deferred.resolve(data);
-            });
         }
-        return deferred.promise;
+      });
     }
+    return deferred.promise;
+  }
 
-    orderLists(data) {
-        var position = 0,
-            self = this;
-        data[0].forEach(function(stage, i) {
-            var appropriateList = data[1].find(function(list){
-              return list.name == stage.name;
-            });
-            if (appropriateList) {
-                var url = "1/lists/" + appropriateList.id + "/pos";
-                self.t.put(url, { value: position }, function(e, data) {
-                    if (e) throw e;
-                });
-                position++;
-            }
+  orderLists(data) {
+    let position = 0;
+    const self = this;
+
+    data[0].forEach(stage => {
+      const appropriateList = data[1].find(list => list.name === stage.name);
+      if (appropriateList) {
+        const url = `1/lists/${appropriateList.id}/pos`;
+        self.t.put(url, { value: position }, e => {
+          if (e) {
+            throw e;
+          }
         });
-    }
+        position++;
+      }
+    });
+  }
 }
 
 
