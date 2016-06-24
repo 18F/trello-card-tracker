@@ -21,3 +21,5 @@ stages:
     expected_time: 1
   - name: "Post-Award Kick-off"
     expected_time: 5
+  - name: "Post-Award Management"
+    expected_time: 43
