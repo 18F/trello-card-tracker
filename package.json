@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "lint": "eslint --fix '**/*.js'",
-    "test": "istanbul cover _mocha -- -R spec --compilers coffee:coffee-script/register && codecov"
+    "test": "npm run lint && istanbul cover _mocha -- -R spec --compilers coffee:coffee-script/register && codecov"
   },
   "repository": {
     "type": "git",
