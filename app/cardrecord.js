@@ -14,13 +14,18 @@ class CardRecorder extends MyTrello {
     }
 
     run() {
-        var self = this;
-        return self.getCards().then(function(cards) {
-          return Q.all(cards.map(function(card) {
+        var self = this,
+            deferred = Q.defer();
+
+        self.getCards().then(function(cards) {
+          Q.all(cards.map(function(card) {
             return self.cardRecordFunctions(card);
-            })
-          );
-        });
+          })).then(deferred.resolve)
+        }).catch(function(err) {
+          deferred.reject(err);
+        })
+
+        return deferred.promise;
       //.fail(function(err){console.log(err.stack)});
     }
 

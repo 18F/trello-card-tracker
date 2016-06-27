@@ -42,8 +42,9 @@ describe 'app.CardRecorder', ->
         return
       return
 
-    it.skip 'survives a trello error', (done) ->
-      getCardsStub = sandbox.stub(CR, 'getCards').rejects(new Error('foo'))
+    it 'survives a getCards error', (done) ->
+      error = new Error('foo')
+      getCardsStub = sandbox.stub(CR, 'getCards').rejects(error)
       CR.run().catch (err) ->
         expect(getCardsStub.callCount).to.eql 1
         expect(err).to.eql error
