@@ -42,8 +42,9 @@ describe 'app.CardRecorder', ->
         return
       return
 
-    it.skip 'survives a trello error', (done) ->
-      getCardsStub = sandbox.stub(CR, 'getCards').rejects(new Error('foo'))
+    it 'survives a getCards error', (done) ->
+      error = new Error('foo')
+      getCardsStub = sandbox.stub(CR, 'getCards').rejects(error)
       CR.run().catch (err) ->
         expect(getCardsStub.callCount).to.eql 1
         expect(err).to.eql error
@@ -116,10 +117,11 @@ describe 'app.CardRecorder', ->
         done()
       return
 
-    it.skip 'will survive a trello error', (done) ->
-      decideStub = sandbox.stub(CR, 'decideCommentType').rejects(new Error)
+    it 'will survive a trello error', (done) ->
+      error = new Error('Test Error');
+      decideStub = sandbox.stub(CR, 'decideCommentType').rejects(error)
       CR.cardRecordFunctions(cardMock).catch (err) ->
-        # expect(stub.callCount).to.eql 1
+        expect(decideStub.callCount).to.eql 1
         expect(err).to.eql error
         done()
         return
