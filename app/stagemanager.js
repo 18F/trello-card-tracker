@@ -88,7 +88,6 @@ class StageManager extends MyTrello {
     closeUnusedStages(data) {
       var deferred = Q.defer(),
           stages = data[0].map(value => value['name']),
-          self = this,
           closing = [];
 
         data[1].forEach(function(trelloList) {
@@ -98,7 +97,7 @@ class StageManager extends MyTrello {
                 self.getListCards(trelloList.id)
                 .then(function(d) {
                     self.closeList(d, trelloList.id).then(listDefer.resolve);
-                })
+                }).fail(function(err){console.log(err.stack)})
                 .catch(listDefer.reject);
             };
         });
@@ -113,7 +112,8 @@ class StageManager extends MyTrello {
     }
 
     getListCards(trelloID) {
-        var deferred = Q.defer();
+        var deferred = Q.defer(),
+            self = this;
         self.t.get("/1/lists/" + trelloID + "/cards", function(err, data) {
           if (err) return deferred.reject(err);
           deferred.resolve(data);
@@ -123,7 +123,8 @@ class StageManager extends MyTrello {
 
     closeList(listData, trelloListID) {
         var deferred = Q.defer();
-        if (!listData.length || listData.length) {
+        console.log(listData);
+        if (!listData.length || listData.length == 0) {
             var url = "/1/list/" + trelloListID + "/closed";
             self.t.put(url, { value: true }, function(err, data) {
               if (err) return deferred.reject(err);
