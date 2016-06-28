@@ -4,15 +4,17 @@ var Q = require('q');
 var util = require('util');
 var MyTrello = require("./my-trello.js");
 
-
+var self;
 class StageManager extends MyTrello {
     constructor(yaml_file, board) {
         super(yaml_file, board);
         this.stages = this.getPreAward();
+        self = this;
     }
 
     run() {
         var deferred = Q.defer();
+        var self = this;
 
         this.getStageandBoard()
             .then(this.checkLists)
@@ -29,7 +31,7 @@ class StageManager extends MyTrello {
         var deferred = Q.defer();
         var self = this;
 
-        this.t.get(this.lists_url, function(err, data) {
+        self.t.get(self.lists_url, function(err, data) {
         if (err) deferred.reject(new Error(err));
             deferred.resolve([self.stages, data]);
         });
@@ -52,11 +54,9 @@ class StageManager extends MyTrello {
     }
 
     makeAdditionalLists(checkedList) {
-        var deferred = Q.defer();
-
-        var all = [],
-            newLists = [],
-            self = this;
+        var deferred = Q.defer(),
+            all = [],
+            newLists = [];
 
         checkedList.forEach(function(list, i) {
             var listDefer = Q.defer();
@@ -86,26 +86,35 @@ class StageManager extends MyTrello {
     }
 
     closeUnusedStages(data) {
-      var deferred = Q.defer();
-        var stages = data[0].map(value => value['name']),
-            self = this;
+      var deferred = Q.defer(),
+          stages = data[0].map(value => value['name']),
+          closing = [];
 
         data[1].forEach(function(trelloList) {
+          var listDefer = Q.defer();
+          closing.push(listDefer.promise);
             if (!(stages.includes(trelloList.name))) {
                 self.getListCards(trelloList.id)
                 .then(function(d) {
-                    self.closeList(d, trelloList.id).then(deferred.resolve);
-                })
-                .catch(deferred.reject);
-
+                    self.closeList(d, trelloList.id).then(listDefer.resolve);
+                }).fail(function(err){console.log(err.stack)})
+                .catch(listDefer.reject);
             };
         });
-      return deferred.promise;
+
+        Q.all(closing).then(function() {
+            deferred.resolve();
+        })
+        .catch(function(e) {
+            deferred.reject(e);
+        });
+        return deferred.promise;
     }
 
     getListCards(trelloID) {
-        var deferred = Q.defer();
-        this.t.get("/1/lists/" + trelloID + "/cards", function(err, data) {
+        var deferred = Q.defer(),
+            self = this;
+        self.t.get("/1/lists/" + trelloID + "/cards", function(err, data) {
           if (err) return deferred.reject(err);
           deferred.resolve(data);
         });
@@ -114,9 +123,10 @@ class StageManager extends MyTrello {
 
     closeList(listData, trelloListID) {
         var deferred = Q.defer();
-        if (!listData.length || listData.length) {
+        console.log(listData);
+        if (!listData.length || listData.length == 0) {
             var url = "/1/list/" + trelloListID + "/closed";
-            this.t.put(url, { value: true }, function(err, data) {
+            self.t.put(url, { value: true }, function(err, data) {
               if (err) return deferred.reject(err);
               deferred.resolve(data);
             });
@@ -125,21 +135,41 @@ class StageManager extends MyTrello {
     }
 
     orderLists(data) {
-        var position = 0,
-            self = this;
+      var deferred = Q.defer(),
+          position = 0,
+          ordering = [];
+
         data[0].forEach(function(stage, i) {
+          var stageDefer = Q.defer();
+          ordering.push(stageDefer.promise);
             var appropriateList = data[1].find(function(list){
               return list.name == stage.name;
             });
             if (appropriateList) {
                 var url = "1/lists/" + appropriateList.id + "/pos";
-                self.t.put(url, { value: position }, function(e, data) {
-                    if (e) throw e;
+                self.t.put(url, { value: position }, function(err, data) {
+                  if (err) stageDefer.reject(err);
+                  stageDefer.resolve();
                 });
                 position++;
             }
         });
+        promiseWaterfall(ordering).then(function() {
+            deferred.resolve(newLists);
+        }).catch(function(e) {
+            deferred.reject(e);
+        });
+
+        return deferred.promise;
     }
+}
+
+function promiseWaterfall(tasks) {
+    var finalTaskPromise = tasks.reduce(function(prevTaskPromise, task) {
+        return prevTaskPromise.then(task);
+    });  // initial value
+
+    return finalTaskPromise;
 }
 
 
