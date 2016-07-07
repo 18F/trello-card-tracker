@@ -85,15 +85,16 @@ class StageManager extends MyTrello {
           closing = [];
 
         data[1].forEach(function(trelloList) {
-          var listDefer = Q.defer();
-          closing.push(listDefer.promise);
             if (!(stages.includes(trelloList.name))) {
+              var listDefer = Q.defer();
+              closing.push(listDefer.promise);
                 self.getListCards(trelloList.id)
                 .then(function(d) {
-                    self.closeList(d, trelloList.id).then(listDefer.resolve);
-                }).fail(function(err){console.log(err.stack)})
+                  return self.closeList(d, trelloList.id);
+                })
+                .then(listDefer.resolve)
                 .catch(listDefer.reject);
-            };
+            }
         });
 
         return Q.all(closing);
@@ -118,6 +119,8 @@ class StageManager extends MyTrello {
               if (err) return deferred.reject(err);
               deferred.resolve(data);
             });
+        } else {
+          deferred.resolve("no list to close");
         }
         return deferred.promise;
     }
