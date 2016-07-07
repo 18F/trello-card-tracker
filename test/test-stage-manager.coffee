@@ -137,24 +137,25 @@ describe 'app.StageManager', ->
   describe '.closeUnusedStages', ->
     input = undefined
     sandbox = undefined
-    getListCardsStub = undefined
+    # getListCardsStub = undefined
     closeListStub = undefined
+    getStub = undefined
 
     beforeEach ->
       input = [ [], [{ name: 'List', id: 'abc' }] ]
       sandbox = sinon.sandbox.create()
-      getListCardsStub = sandbox.stub(SM, 'getListCards').resolves([]);
-      closeListStub = sandbox.stub(SM, 'closeList').resolves({});
+      # getListCardsStub = sandbox.stub(SM, 'getListCards').resolves([]);
+      closeListStub = sandbox.stub(app.StageManager.prototype, 'closeList').resolves({});
+      getStub = sandbox.stub(trello.prototype, 'get').yieldsAsync(null, [])
       return
 
     afterEach ->
-      getListCardsStub.restore()
-      closeListStub.restore()
+      sandbox.restore()
       return
 
     it 'gets card info for all lists that are not in the stages', (done) ->
       SM.closeUnusedStages(input).then ->
-        expect(getListCardsStub.callCount).to.eql input[1].length
+        expect(closeListStub.callCount).to.eql input[1].length
         done()
         return
       return
@@ -227,9 +228,9 @@ describe 'app.StageManager', ->
     it 'updates the positions of appropriate number of lists', (done) ->
       # First argument: all stages
       # Second argument: all lists on the board
-      SM.orderLists([stages, lists])
-      expect(stub.callCount).to.eql 1
-      done()
-      return
+      SM.orderLists([stages, lists]).then () ->
+        expect(stub.callCount).to.eql 1
+        done()
+        return
 
     return
