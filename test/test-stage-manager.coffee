@@ -145,7 +145,7 @@ describe 'app.StageManager', ->
       input = [ [], [{ name: 'List', id: 'abc' }] ]
       sandbox = sinon.sandbox.create()
       # getListCardsStub = sandbox.stub(SM, 'getListCards').resolves([]);
-      closeListStub = sandbox.stub(SM, 'closeList').resolves({});
+      closeListStub = sandbox.stub(app.StageManager.prototype, 'closeList').resolves({});
       getStub = sandbox.stub(trello.prototype, 'get').yieldsAsync(null, [])
       return
 
@@ -153,14 +153,14 @@ describe 'app.StageManager', ->
       sandbox.restore()
       return
 
-    it.skip 'gets card info for all lists that are not in the stages', (done) ->
+    it 'gets card info for all lists that are not in the stages', (done) ->
       SM.closeUnusedStages(input).then ->
-        expect(getListCardsStub.callCount).to.eql input[1].length
+        expect(closeListStub.callCount).to.eql input[1].length
         done()
         return
       return
 
-    it.skip 'calls close on all lists that are not in stages', (done) ->
+    it 'calls close on all lists that are not in stages', (done) ->
       SM.closeUnusedStages(input).then ->
         expect(closeListStub.callCount).to.eql input[1].length
         done()
