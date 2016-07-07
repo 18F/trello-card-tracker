@@ -228,9 +228,9 @@ describe 'app.StageManager', ->
     it 'updates the positions of appropriate number of lists', (done) ->
       # First argument: all stages
       # Second argument: all lists on the board
-      SM.orderLists([stages, lists])
-      expect(stub.callCount).to.eql 1
-      done()
-      return
+      SM.orderLists([stages, lists]).then () ->
+        expect(stub.callCount).to.eql 1
+        done()
+        return
 
     return

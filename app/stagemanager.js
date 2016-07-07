@@ -76,13 +76,7 @@ class StageManager extends MyTrello {
             }
         });
 
-        Q.all(all).then(function() {
-            deferred.resolve(newLists);
-        }).catch(function(e) {
-            deferred.reject(e);
-        });
-
-        return deferred.promise;
+        return Q.all(all);
     }
 
     closeUnusedStages(data) {
@@ -102,13 +96,7 @@ class StageManager extends MyTrello {
             };
         });
 
-        Q.all(closing).then(function() {
-            deferred.resolve();
-        })
-        .catch(function(e) {
-            deferred.reject(e);
-        });
-        return deferred.promise;
+        return Q.all(closing);
     }
 
     getListCards(trelloID) {
@@ -135,42 +123,28 @@ class StageManager extends MyTrello {
     }
 
     orderLists(data) {
-      var deferred = Q.defer(),
-          position = 0,
-          ordering = [];
+      var sequencedPromise = Q(),
+          position = 0;
 
-        data[0].forEach(function(stage, i) {
-          var stageDefer = Q.defer();
-          ordering.push(stageDefer.promise);
-            var appropriateList = data[1].find(function(list){
-              return list.name == stage.name;
+      data[0].forEach(function(stage, i) {
+        var appropriateList = data[1].find(function(list){
+          return list.name == stage.name;
+        });
+        if (appropriateList) {
+          sequencedPromise = sequencedPromise.then(function() {
+            var stageDefer = Q.defer();
+            var url = "1/lists/" + appropriateList.id + "/pos";
+            self.t.put(url, { value: position }, function(err, data) {
+              if (err) stageDefer.reject(err);
+              stageDefer.resolve();
             });
-            if (appropriateList) {
-                var url = "1/lists/" + appropriateList.id + "/pos";
-                self.t.put(url, { value: position }, function(err, data) {
-                  if (err) stageDefer.reject(err);
-                  stageDefer.resolve();
-                });
-                position++;
-            }
-        });
-        promiseWaterfall(ordering).then(function() {
-            deferred.resolve(newLists);
-        }).catch(function(e) {
-            deferred.reject(e);
-        });
-
-        return deferred.promise;
+            position++;
+            return stageDefer;
+          });
+        }
+      });
+      return sequencedPromise;
     }
 }
-
-function promiseWaterfall(tasks) {
-    var finalTaskPromise = tasks.reduce(function(prevTaskPromise, task) {
-        return prevTaskPromise.then(task);
-    });  // initial value
-
-    return finalTaskPromise;
-}
-
 
 module.exports = StageManager;
