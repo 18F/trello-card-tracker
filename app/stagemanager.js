@@ -1,16 +1,20 @@
 'use strict';
 
-const Q = require('q');
-const MyTrello = require('./my-trello.js');
+var Q = require('q');
+var util = require('util');
+var MyTrello = require("./my-trello.js");
 
+var self;
 class StageManager extends MyTrello {
-  constructor(yamlFile, board) {
-    super(yamlFile, board);
-    this.stages = this.getPreAward();
-  }
+    constructor(yaml_file, board) {
+        super(yaml_file, board);
+        this.stages = this.getPreAward();
+        self = this;
+    }
 
-  run() {
-    const deferred = Q.defer();
+    run() {
+        var deferred = Q.defer();
+        var self = this;
 
     this.getStageandBoard()
       .then(this.checkLists)
@@ -27,13 +31,10 @@ class StageManager extends MyTrello {
     const deferred = Q.defer();
     const self = this;
 
-    this.t.get(this.lists_url, (err, data) => {
-      if (err) {
-        deferred.reject(new Error(err));
-      } else {
-        deferred.resolve([self.stages, data]);
-      }
-    });
+        self.t.get(self.lists_url, function(err, data) {
+        if (err) deferred.reject(new Error(err));
+            deferred.resolve([self.stages, data]);
+        });
 
     return deferred.promise;
   }
@@ -52,16 +53,14 @@ class StageManager extends MyTrello {
     return checked;
   }
 
-  makeAdditionalLists(checkedList) {
-    const deferred = Q.defer();
+    makeAdditionalLists(checkedList) {
+        var deferred = Q.defer(),
+            all = [],
+            newLists = [];
 
-    const all = [];
-    const newLists = [];
-    const self = this;
-
-    checkedList.forEach((list, i) => {
-      const listDefer = Q.defer();
-      all.push(listDefer.promise);
+        checkedList.forEach(function(list, i) {
+            var listDefer = Q.defer();
+            all.push(listDefer.promise);
 
       if (!list.built) {
         const postList = {
@@ -80,78 +79,78 @@ class StageManager extends MyTrello {
       }
     });
 
-    Q.all(all).then(() => {
-      deferred.resolve(newLists);
-    }).catch(e => {
-      deferred.reject(e);
-    });
+        return Q.all(all);
+    }
 
-    return deferred.promise;
-  }
+    closeUnusedStages(data) {
+      var deferred = Q.defer(),
+          stages = data[0].map(value => value['name']),
+          closing = [];
 
-  closeUnusedStages(data) {
-    const deferred = Q.defer();
-    const stages = data[0].map(value => value.name);
-    const self = this;
+        data[1].forEach(function(trelloList) {
+            if (!(stages.includes(trelloList.name))) {
+              var listDefer = Q.defer();
+              closing.push(listDefer.promise);
+                self.getListCards(trelloList.id)
+                .then(function(d) {
+                  return self.closeList(d, trelloList.id);
+                })
+                .then(listDefer.resolve)
+                .catch(listDefer.reject);
+            }
+        });
 
-    data[1].forEach(trelloList => {
-      if (!(stages.includes(trelloList.name))) {
-        self.getListCards(trelloList.id)
-          .then(d => {
-            self.closeList(d, trelloList.id).then(deferred.resolve);
-          })
-          .catch(deferred.reject);
-      }
-    });
+        return Q.all(closing);
+    }
 
-    return deferred.promise;
-  }
-
-  getListCards(trelloID) {
-    const deferred = Q.defer();
-    this.t.get(`/1/lists/${trelloID}/cards`, (err, data) => {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        deferred.resolve(data);
-      }
-    });
-    return deferred.promise;
-  }
-
-  closeList(listData, trelloListID) {
-    const deferred = Q.defer();
-    if (!listData.length || listData.length) {
-      const url = `/1/list/${trelloListID}/closed`;
-      this.t.put(url, { value: true }, (err, data) => {
-        if (err) {
-          deferred.reject(err);
-        } else {
+    getListCards(trelloID) {
+        var deferred = Q.defer(),
+            self = this;
+        self.t.get("/1/lists/" + trelloID + "/cards", function(err, data) {
+          if (err) return deferred.reject(err);
           deferred.resolve(data);
+        });
+        return deferred.promise;
+    }
+
+    closeList(listData, trelloListID) {
+        var deferred = Q.defer();
+        console.log(listData);
+        if (!listData.length || listData.length == 0) {
+            var url = "/1/list/" + trelloListID + "/closed";
+            self.t.put(url, { value: true }, function(err, data) {
+              if (err) return deferred.reject(err);
+              deferred.resolve(data);
+            });
+        } else {
+          deferred.resolve("no list to close");
+        }
+        return deferred.promise;
+    }
+
+    orderLists(data) {
+      var sequencedPromise = Q(),
+          position = 0;
+
+      data[0].forEach(function(stage, i) {
+        var appropriateList = data[1].find(function(list){
+          return list.name == stage.name;
+        });
+        if (appropriateList) {
+          sequencedPromise = sequencedPromise.then(function() {
+            var stageDefer = Q.defer();
+            var url = "1/lists/" + appropriateList.id + "/pos";
+            self.t.put(url, { value: position }, function(err, data) {
+              if (err) stageDefer.reject(err);
+              stageDefer.resolve();
+            });
+            position++;
+            return stageDefer;
+          });
         }
       });
+      return sequencedPromise;
     }
-    return deferred.promise;
-  }
-
-  orderLists(data) {
-    let position = 0;
-    const self = this;
-
-    data[0].forEach(stage => {
-      const appropriateList = data[1].find(list => list.name === stage.name);
-      if (appropriateList) {
-        const url = `1/lists/${appropriateList.id}/pos`;
-        self.t.put(url, { value: position }, e => {
-          if (e) {
-            throw e;
-          }
-        });
-        position++;
-      }
-    });
-  }
 }
-
 
 module.exports = StageManager;
