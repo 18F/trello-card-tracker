@@ -1,59 +1,59 @@
-"use strict";
+'use strict';
 
-var fs = require('fs');
-var yaml = require('js-yaml');
-var Q = require('q');
-
-var MyTrello = require("./my-trello.js");
-
+const fs = require('fs');
+const yaml = require('js-yaml');
+const Q = require('q');
+const MyTrello = require('./my-trello.js');
 
 class CardCreator extends MyTrello {
-    constructor(yaml_file, board) {
-        super(yaml_file, board);
-        this.stages = this.getPreAward();
-    }
+  constructor(yamlFile, board) {
+    super(yamlFile, board);
+    this.stages = this.getPreAward();
+  }
 
-    createOrders(orderFile) {
-        var orders = yaml.safeLoad(fs.readFileSync(orderFile, 'utf8')),
-            promises = [],
-            self = this;
+  createOrders(orderFile) {
+    const orders = yaml.safeLoad(fs.readFileSync(orderFile, 'utf8'));
+    const promises = [];
+    const self = this;
 
-        orders.orders.forEach(function(order) {
-            promises.push(self.createCard(order));
-        });
+    orders.orders.forEach(order => {
+      promises.push(self.createCard(order));
+    });
 
-        return Q.all(promises);
-    }
+    return Q.all(promises);
+  }
 
-    createCard(order) {
-        var deferred = Q.defer();
+  createCard(order) {
+    const deferred = Q.defer();
 
-        var description = this.descriptionMaker(order),
-            cardName = order.project + " - " + order.order,
-            self = this;
+    const description = this.descriptionMaker(order);
+    const cardName = `${order.project} - ${order.order}`;
+    const self = this;
 
-        Q.all([this.getListIDbyName(order.stage), this.getMember(order.owner)]).then(function(asyncRes) {
-            var listID= asyncRes[0];
-            var memberInfo = asyncRes[1];
-            var cardInfo = {
-                name: cardName,
-                desc: description,
-                idList: listID,
-                due: order.due,
-                idMembers: [memberInfo.id]
-            };
-            self.t.post('1/cards/', cardInfo, function(err, data) {
-                if (err) return deferred.reject(new Error(err));
-                deferred.resolve(data);
-            });
-        });
+    Q.all([this.getListIDbyName(order.stage), this.getMember(order.owner)]).then(asyncRes => {
+      const listID = asyncRes[0];
+      const memberInfo = asyncRes[1];
+      const cardInfo = {
+        name: cardName,
+        desc: description,
+        idList: listID,
+        due: order.due,
+        idMembers: [memberInfo.id]
+      };
+      self.t.post('1/cards/', cardInfo, (err, data) => {
+        if (err) {
+          return deferred.reject(new Error(err));
+        }
+        return deferred.resolve(data);
+      });
+    });
 
-        return deferred.promise;
-    }
+    return deferred.promise;
+  }
 
-    descriptionMaker(order) {
-        return `Project: ${order.project}\nAgency: ${order.agency}\nSubAgency: ${order.subagency}\nTrello Board: ${order.trello}`;
-    }
+  descriptionMaker(order) {
+    return `Project: ${order.project}\nAgency: ${order.agency}\nSubAgency: ${order.subagency}\nTrello Board: ${order.trello}`;
+  }
 }
 
 

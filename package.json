@@ -5,7 +5,8 @@
   "main": "cli.js",
   "scripts": {
     "start": "node server.js",
-    "test": "istanbul cover _mocha -- -R spec --compilers coffee:coffee-script/register && codecov"
+    "lint": "eslint --fix '**/*.js'",
+    "test": "npm run lint && istanbul cover _mocha -- -R spec --compilers coffee:coffee-script/register && codecov"
   },
   "repository": {
     "type": "git",
@@ -22,8 +23,8 @@
   },
   "homepage": "https://github.com/18f/bpa-trello-dashboard#readme",
   "engines": {
-  "node": "^6.1.0",
-  "npm": "^3.8.6"
+    "node": "^6.1.0",
+    "npm": "^3.8.6"
   },
   "dependencies": {
     "@18f/us-federal-holidays": "^1.1.0",
@@ -44,6 +45,11 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^5.2.0",
     "codecov": "^1.0.1",
+    "eslint": "^2.13.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.9.2",
+    "eslint-plugin-jsx-a11y": "^1.5.3",
+    "eslint-plugin-react": "^5.2.2",
     "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
