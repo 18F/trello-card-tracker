@@ -16,8 +16,11 @@ class DateCommentHelpers {
     return updated;
   }
 
-  checkCommentsForDates(commentList, latest) {
-    const myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/; // Find the first date in the comment string
+  checkCommentsForDates(commentList, latest, findEndDate) {
+    let myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/; // Find the first date in the comment string
+    if (findEndDate) {
+      myRegex = /\d\d\/\d\d\/201\d - (\d\d\/\d\d\/201\d)/;
+    }
 
     let realList = commentList;
     if (!latest) {
@@ -43,7 +46,7 @@ class DateCommentHelpers {
     const commentList = opts.commentList;
     let correctComment = false;
     if (commentList) {
-      correctComment = this.checkCommentsForDates(commentList, true);
+      correctComment = this.checkCommentsForDates(commentList, true, false);
     }
     if (correctComment) {
       return correctComment;
@@ -61,7 +64,7 @@ class DateCommentHelpers {
   }
 
   calcTotalDays(commentList, nowMoment) {
-    const firstDate = this.checkCommentsForDates(commentList, false);
+    const firstDate = this.checkCommentsForDates(commentList, false, false);
     if (firstDate) {
       const dayDif = this.calculateDateDifference(10, firstDate, nowMoment);
         // expected not actually needed, in the future could say total days expected

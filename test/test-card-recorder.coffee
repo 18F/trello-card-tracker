@@ -198,7 +198,6 @@ describe 'app.CardRecorder', ->
   describe '.decideCommentType(card, finalList, daysSinceUpdate, hasMoved, prevMove, updateActions, totalDays, nowMoment)', ->
     card = undefined
     prevMove = undefined
-    updateActions = undefined
     now = undefined
     cardActions = undefined
     compileStub = undefined
@@ -214,7 +213,7 @@ describe 'app.CardRecorder', ->
       getPreviousStub = sandbox.stub(CR, 'getPreviousList').resolves("Previous List")
 
     it 'chooses that a comment should be written to last list phase', (done) ->
-      CR.decideCommentType(card, true, 10, helpers.actionListMove[1], prevMove, updateActions, 10, now).then (resp) ->
+      CR.decideCommentType(card, true, 10, helpers.actionListMove[1], prevMove, cardActions, 10, now).then (resp) ->
         expect(getPreviousStub.callCount).to.equal 0
         expect(compileStub.callCount).to.equal 0
         expect(getListStub.callCount).to.equal 0
@@ -222,8 +221,9 @@ describe 'app.CardRecorder', ->
       return
 
     it 'chooses that a comment should be written to a new phase', (done) ->
-      updateActions = [{"date": now}]
-      CR.decideCommentType(card, false, 0, helpers.actionListMove[1], prevMove, updateActions, 10, now).then (resp) ->
+      cardActions.updates = [{"date": now}]
+      cardActions.comments = helpers.mockCommentCardObj.actions
+      CR.decideCommentType(card, false, 0, helpers.actionListMove[1], prevMove, cardActions, 10, now).then (resp) ->
         expect(getPreviousStub.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
         expect(getListStub.callCount).to.equal 0
@@ -231,7 +231,7 @@ describe 'app.CardRecorder', ->
       return
 
     it 'chooses that a comment should be written to a current phase that has moved because it was updated over a day ago', (done) ->
-      CR.decideCommentType(card, false, 4, helpers.actionListMove[1], prevMove, updateActions, 10, now).then (resp) ->
+      CR.decideCommentType(card, false, 4, helpers.actionListMove[1], prevMove, cardActions, 10, now).then (resp) ->
         expect(getPreviousStub.callCount).to.equal 0
         expect(compileStub.callCount).to.equal 1
         expect(getListStub.callCount).to.equal 1
@@ -239,7 +239,7 @@ describe 'app.CardRecorder', ->
       return
 
     it 'chooses that a comment should be written to a current phase that has not moved', (done) ->
-      CR.decideCommentType(card, false, 0, false, prevMove, updateActions, 10, now).then (resp) ->
+      CR.decideCommentType(card, false, 0, false, prevMove, cardActions, 10, now).then (resp) ->
         expect(getPreviousStub.callCount).to.equal 0
         expect(getListStub.callCount).to.equal 1
         expect(compileStub.callCount).to.equal 1
