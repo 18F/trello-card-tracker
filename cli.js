@@ -40,12 +40,17 @@ const cliCommands = [
                   .then(() => { console.log(`--${tN} Complete--`); }); }
   },
   {// Print out a comment to the command line
-    // Required Flags: -l ListName, -d Iso string of from date, -t Isostring of to date, -o total days
+    // Required Flags: -l list name of what the stage will be called, -d Optional what list to look for number of days
+    // -f Isostring of from date, -t Isostring of to date -o total days
     flag: 'b',
     task: 'Build Comment',
     command(file) {
       const BuildCR = new app.CardRecorder(file, board);
-      BuildCR.compileCommentArtifact(null, argv.l, argv.d, argv.f, argv.t, false, argv.o)
+      let dateList = argv.l;
+      if (argv.d) {
+        dateList = argv.d;
+      }
+      BuildCR.compileCommentArtifact(null, argv.l, dateList, argv.f, argv.t, false, argv.o)
                   .then(comment => { console.log(comment); });
     }
   }
