@@ -50,7 +50,7 @@ Or run the cli.
 
 - -i To allow the use of a Trello board ID other than the one included in the .env file.
 
-- -b to run the build comment command line utility. Use the following flags -d "Name of List" -f "MM/DD/YYYY" -t "MM/DD/YYYY".
+- -b to run the build comment command line utility. Use the following flags -l "Name of List" -f "MM/DD/YYYY" -t "MM/DD/YYYY" -o totalDays, -d (Optional) Name of list if would like to use another list to calculate the expected time.
 
 ### Development
 Use the `develop` branch
