@@ -13,8 +13,10 @@ stages:
     expected_time: 7
   - name: "Client Review"
     expected_time: 2
-  - name: "RFP Posted, Proposal and Evaluation Process"
-    expected_time: 21
+  - name: "RFP Posted"
+    expected_time: 10
+  - name: "Evaluation"
+    expected_time: 15
   - name: "CO Review of Award Documentation"
     expected_time: 7
   - name: "Award"
