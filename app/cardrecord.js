@@ -57,7 +57,7 @@ class CardRecorder extends MyTrello {
               daysSinceUpdate,
               hasMoved,
               prevMove,
-              cardActions.updates,
+              cardActions,
               totDays,
               now)
             .then(resp => { deferred.resolve(resp); })
@@ -120,7 +120,7 @@ class CardRecorder extends MyTrello {
     return cardAction.data.listBefore.name;
   }
 
-  decideCommentType(card, finalList, daysSinceUpdate, hasMoved, prevMove, updateActions, totalDays, nowMoment) {
+  decideCommentType(card, finalList, daysSinceUpdate, hasMoved, prevMove, cardActions, totalDays, nowMoment) {
     const self = this;
     const deferred = Q.defer();
     if (finalList && daysSinceUpdate > 1) {
@@ -128,12 +128,13 @@ class CardRecorder extends MyTrello {
     } else if (hasMoved && daysSinceUpdate < 1) {
       console.log(`Write New Phase: ${card.name}`);
       const prevPhase = self.getPreviousList(hasMoved[0]);
+      const endLastPhaseDate = DCH.checkCommentsForDates(cardActions.comments, true, true);
       self.compileCommentArtifact(
               card.id,
               prevPhase,
               prevPhase,
-              prevMove,
-              updateActions[0].date,
+              endLastPhaseDate,
+              cardActions.updates[0].date,
               true,
               totalDays
           )

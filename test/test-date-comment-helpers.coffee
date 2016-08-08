@@ -21,7 +21,7 @@ describe 'app.DateCommentHelpers', ->
       return
     return
 
-  describe 'checkCommentsForDates(commentList, latest)', ->
+  describe 'checkCommentsForDates(commentList, latest, findEndDate)', ->
     beforeEach ->
       localMoment = undefined
       return
@@ -29,9 +29,15 @@ describe 'app.DateCommentHelpers', ->
       localMoment = null
       return
 
-    it 'will check if a comment has a date and return the lastest date from a comment list', ->
+    it 'will check if a comment has a date and return the first date in the lattest comment from a comment list', ->
       lastMoment = moment("2016-03-21").toISOString(); #to get out of localization of test suite
-      prevMove = DateCommentHelpers.checkCommentsForDates(helpers.mockCommentCardObj.actions, true)
+      prevMove = DateCommentHelpers.checkCommentsForDates(helpers.mockCommentCardObj.actions, true, false)
+      expect(prevMove).to.eql lastMoment
+      return
+
+    it 'will check if a comment has a date and return the seconde date in the lattest comment from a comment list', ->
+      lastMoment = moment("2016-03-08").toISOString(); #to get out of localization of test suite
+      prevMove = DateCommentHelpers.checkCommentsForDates(helpers.mockCommentCardObj.actions, true, true)
       expect(prevMove).to.eql lastMoment
       return
 
@@ -42,14 +48,14 @@ describe 'app.DateCommentHelpers', ->
         id: '2'
         data: text: '**IAA Stage:** `+19 days`. *01/02/2016 - 03/08/2016*. Expected days: 2 days. Actual Days spent: 21.'
       commentList.push oldComment
-      prevMove = DateCommentHelpers.checkCommentsForDates(commentList, false)
+      prevMove = DateCommentHelpers.checkCommentsForDates(commentList, false, false)
       expect(prevMove).to.eql localMoment
       return
 
     it 'will return false when there is no comment that matches the date string', ->
       comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
       comments[0].data.text = "This comment has no date."
-      prevMove = DateCommentHelpers.checkCommentsForDates(comments, true)
+      prevMove = DateCommentHelpers.checkCommentsForDates(comments, true, false)
       expect(prevMove).to.be.false
       return
     return
