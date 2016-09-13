@@ -40,7 +40,8 @@ class CardRecorder extends MyTrello {
     const cardActions = self.cardFilters(card.actions, [{ name: 'comments', type: 'commentCard' }, { name: 'updates', type: 'updateCard' }, { name: 'created', type: 'createCard' }]);
 
     self.deleteCurrentComment(cardActions.comments)
-      .then(() => {
+      .then(deletedCommentResp => {
+        console.log(deletedCommentResp);
         const now = moment();
         let hasMoved = false;
         let daysSinceUpdate = false;
@@ -49,14 +50,14 @@ class CardRecorder extends MyTrello {
           daysSinceUpdate = now.diff(moment(cardActions.updates[0].date), 'days');
         }
         const totDays = (cardActions.comments.length > 0) ? DCH.calcTotalDays(cardActions.comments, now) : 0;
-        const prevMove = DCH.findPrevMoveDateFromComments({ commentList: cardActions.comments, actionList: cardActions.updates, createActionDate: cardActions.created.date });
+        const fromDate = DCH.extractNewCommentFromDate({ commentList: cardActions.comments, actionList: cardActions.updates, createActionDate: cardActions.created.date });
         self.inFinalList(card.idList)
           .then(finalList => {
             self.decideCommentType(card,
               finalList,
               daysSinceUpdate,
               hasMoved,
-              prevMove,
+              fromDate,
               cardActions,
               totDays,
               now)

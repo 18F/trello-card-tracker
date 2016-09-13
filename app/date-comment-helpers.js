@@ -40,7 +40,7 @@ class DateCommentHelpers {
     return false;
   }
 
-  findPrevMoveDateFromComments(opts) {
+  extractNewCommentFromDate(opts) {
     const actionList = opts.actionList;
     const cardCreationDate = opts.cardCreationDate;
     const commentList = opts.commentList;
