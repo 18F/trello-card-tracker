@@ -51,7 +51,10 @@ class CardRecorder extends MyTrello {
            const commentStats = self.generateNewCommentStats(cardActions.comments, deletedComment.currentCommentDeleted, now, commentListName);
            const comment = self.buildComment(recentlyMoved, commentListName, commentStats);
            self.addComment(comment, card.id)
-           .then(resp => { deferred.resolve(resp); })
+           .then(resp => {
+             console.log('past add');
+             deferred.resolve(resp);
+           })
            .catch(deferred.reject);
          });
     });

@@ -86,30 +86,33 @@ describe 'app.CardRecorder', ->
     decideStub = undefined
     cardMock = undefined
     cardActions = undefined
-    addComment = undefined
+    addCommentStub = undefined
+    now = undefined
 
 
     beforeEach ->
+      now = moment()
       deleteStub = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true})
       hasMovedStub = sandbox.stub(CR, 'checkRecentMove').returns(true)
-      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false);
+      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false)
       cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
       cardMock = {id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
-      cardStatsStub = sandbox.stub(CR, 'generateNewCommentStats').resolves({"fromDate": cardActions[0].date})
+      cardStatsStub = sandbox.stub(CR, 'generateNewCommentStats').returns({ fromDate: moment(cardActions[0].date), toDate: now, totalDays: 10, timeTaken: 8, expectedTime: 2, dateDelta: 6 })
+
 
       return
 
 
     it 'runs the card record for a single card', (done) ->
-      addComment = sandbox.stub(CR, 'addComment').resolves();
+      addCommentStub = sandbox.stub(CR, 'addComment').resolves({"comment": true});
       CR.cardRecordFunctions(cardMock).then (resp) ->
         expect(finalListStub.callCount).to.equal 1
         expect(deleteStub.callCount).to.equal 1
         expect(cardStatsStub.callCount).to.equal 1
-        expect(addComment.callCount).to.equal 1
+        expect(addCommentStub.callCount).to.equal 1
         done()
       return
 
@@ -117,7 +120,7 @@ describe 'app.CardRecorder', ->
       error = new Error('Test Error');
       addComment = sandbox.stub(CR, 'addComment').rejects(error)
       CR.cardRecordFunctions(cardMock).catch (err) ->
-        expect(decideStub.callCount).to.eql 1
+        expect(addCommentStub.callCount).to.eql 1
         expect(err).to.eql error
         done()
         return
@@ -234,23 +237,25 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe.skip '.generateNewCommentStats(comments, deletedNewComment, currentTime, listName)', ->
+  describe '.generateNewCommentStats(comments, deletedNewComment, currentTime, listName)', ->
     now = undefined
     dateDifferenceStub = undefined
     stage = undefined
     stageMock = undefined
+    calcTotalMock = undefined
 
     before ->
       now = moment()
       dateDifferenceStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calculateDateDifference').returns([6, 8])
+      calcTotalDays = sandbox.stub(app.DateCommentHelpers.prototype, 'calcTotalDays').returns(10)
 
-    after ->
+    afterEach ->
       sandbox.restore()
 
 
     it 'returns an object with all of the dates and time differentials from the DCH object', ->
       commentStats = CR.generateNewCommentStats([], true, now, 'Workshop')
-      expected = { fromDate: moment("2016-04-05T10:40:26.100Z"), toDate: now, totalDays, timeTaken: 8, expectedTime: 2, dateDelta: 6 }
+      expected = { fromDate: moment("2016-04-05T10:40:26.100Z"), toDate: now, totalDays: 10, timeTaken: 8, expectedTime: 2, dateDelta: 6 }
       expect(commentStats).to.eq(expected)
       return
     return
