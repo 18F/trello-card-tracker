@@ -40,19 +40,22 @@ class DateCommentHelpers {
     return false;
   }
 
-  getNewCommentFromDate(deletedNewComment, comments) {
+  getNewCommentFromDate(deletedNewComment, comments, altToDate) {
+    if (altToDate) {
+      return altToDate;
+    }
     const useLastFromDate = !deletedNewComment;
     return moment(this.checkCommentsForDates(comments, true, useLastFromDate));
   }
 
-  getNewCommentToDate(comments, currentTime) {
+  differentToDate(comments, currentTime) {
     const mostRecentToDate = this.checkCommentsForDates(comments, true, true);
     const recentToMoment = moment(mostRecentToDate);
     const differenceFromLastComment = currentTime.diff(recentToMoment, 'days');
     if (differenceFromLastComment > 2) {
       return recentToMoment;
     }
-    return currentTime; // Default to returning today
+    return false; // Default to returning today
   }
 
   calcTotalDays(commentList, nowMoment) {

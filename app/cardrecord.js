@@ -128,15 +128,13 @@ class CardRecorder extends MyTrello {
 
   generateNewCommentStats(comments, deletedNewComment, currentTime, listName) {
     const deferred = Q.defer();
-    const fromDate = DCH.getNewCommentFromDate(deletedNewComment, comments);
-    const toDate = DCH.getNewCommentToDate(comments, currentTime);
+    const altToDate = DCH.differentToDate(comments, currentTime);
+    const fromDate = DCH.getNewCommentFromDate(deletedNewComment, comments, altToDate);
     const totalDays = (comments.length > 0) ? DCH.calcTotalDays(comments, currentTime) : 0;
     const stage = this.stages.find(s => s.name === listName);
-    console.log(fromDate.toDate());
-    console.log(toDate.toDate());
-    const diffArray = DCH.calculateDateDifference(stage.expected_time, fromDate, toDate);
+    const diffArray = DCH.calculateDateDifference(stage.expected_time, fromDate, currentTime);
     console.log(diffArray);
-    deferred.resolve({ fromDate, toDate, totalDays, timeTaken: diffArray[1], expectedTime: stage.expected_time, dateDelta: diffArray[0] });
+    deferred.resolve({ fromDate, toDate: currentTime, totalDays, timeTaken: diffArray[1], expectedTime: stage.expected_time, dateDelta: diffArray[0] });
     return deferred.promise;
   }
 
