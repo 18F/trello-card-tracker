@@ -234,16 +234,23 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.generateNewCommentStats(comments, deletedNewComment, currentTime, listName)', ->
+  describe.skip '.generateNewCommentStats(comments, deletedNewComment, currentTime, listName)', ->
     now = undefined
     dateDifferenceStub = undefined
+    stage = undefined
+    stageMock = undefined
+
     before ->
       now = moment()
       dateDifferenceStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calculateDateDifference').returns([6, 8])
 
+    after ->
+      sandbox.restore()
+
+
     it 'returns an object with all of the dates and time differentials from the DCH object', ->
       commentStats = CR.generateNewCommentStats([], true, now, 'Workshop')
-      expected = { fromDate, toDate: now, totalDays, timeTaken: 8, expectedTime: 2, dateDelta: 6 }
+      expected = { fromDate: moment("2016-04-05T10:40:26.100Z"), toDate: now, totalDays, timeTaken: 8, expectedTime: 2, dateDelta: 6 }
       expect(commentStats).to.eq(expected)
       return
     return

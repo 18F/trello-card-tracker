@@ -42,7 +42,7 @@ class DateCommentHelpers {
 
   getNewCommentFromDate(deletedNewComment, comments, altToDate) {
     if (altToDate) {
-      return altToDate;
+      return moment(this.checkCommentsForDates(comments, true, true));
     }
     const useLastFromDate = !deletedNewComment;
     return moment(this.checkCommentsForDates(comments, true, useLastFromDate));

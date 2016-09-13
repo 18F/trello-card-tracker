@@ -30,13 +30,13 @@ describe 'app.DateCommentHelpers', ->
       return
 
     it 'will check if a comment has a date and return the first date in the lattest comment from a comment list', ->
-      lastMoment = moment("2016-03-21").toISOString(); #to get out of localization of test suite
+      lastMoment = moment("2016-03-08").toISOString(); #to get out of localization of test suite
       prevMove = DateCommentHelpers.checkCommentsForDates(helpers.mockCommentCardObj.actions, true, false)
       expect(prevMove).to.eql lastMoment
       return
 
     it 'will check if a comment has a date and return the seconde date in the lattest comment from a comment list', ->
-      lastMoment = moment("2016-03-08").toISOString(); #to get out of localization of test suite
+      lastMoment = moment("2016-03-21").toISOString(); #to get out of localization of test suite
       prevMove = DateCommentHelpers.checkCommentsForDates(helpers.mockCommentCardObj.actions, true, true)
       expect(prevMove).to.eql lastMoment
       return
@@ -60,26 +60,50 @@ describe 'app.DateCommentHelpers', ->
       return
     return
 
-  describe.skip 'getNewCommentFromDate(deletedNewComment, comments, altToDate)', ->
+  describe 'getNewCommentFromDate(deletedNewComment, comments, altToDate)', ->
+    comments = undefined
+
+    before ->
+      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions)) #clone to modify
+
     it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string in it if the to date has been edited', ->
-      comments = []
-      testMoment = moment("2016-01-08")
+      testMoment = moment("2016-03-21T04:00:00.000Z")
       fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, true)
       expect(fromDate).to.eql(testMoment)
       return
 
     it 'returns the from date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for over a day (there was a current comment deleted)', ->
-      comments = []
-      testMoment = moment("2016-01-08")
-      fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, false)
+      testMoment = moment("2016-03-08T05:00:00.000Z")
+      fromDate = DateCommentHelpers.getNewCommentFromDate(true, comments, false)
       expect(fromDate).to.eql(testMoment)
       return
 
-    it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for less than a day (there was a current comment not deleted)', ->
-      comments = []
-      testMoment = moment("2016-01-08")
+    it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for less than a day (there was not a current comment deleted)', ->
+      testMoment = moment("2016-03-21T04:00:00.000Z")
       fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, false)
       expect(fromDate).to.eql(testMoment)
+      return
+    return
+
+  describe '.differentToDate(comments, currentTime)', ->
+    now = undefined
+    comments = undefined
+
+    before ->
+      now = moment()
+      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+
+    it 'returns the most recent to date in a comment if it is greater than 2 days', ->
+      diffToDate = DateCommentHelpers.differentToDate(comments, now)
+      expectedDate = moment("2016-03-21T04:00:00.000Z")
+      expect(diffToDate).to.eql expectedDate
+      return
+
+    it 'returns false if the most recent to date in a comment is within 2 days of today than today', ->
+      nowString = now.format('L')
+      comments[0].data.text = "**IAA Stage:** **+19 days**. *01/02/2016 - #{nowString}*. Expected days: 2 days. Actual Days spent: 21."
+      diffToDate = DateCommentHelpers.differentToDate(comments, now)
+      expect(diffToDate).to.eql false
       return
     return
 
