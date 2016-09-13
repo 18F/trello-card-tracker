@@ -1,0 +1,51 @@
+digraph CardRecorder {
+  {
+    start [label="run card recorder";shape="Mdiamond"]
+    done [label="done";shape="Mdiamond"]
+
+    a1 [label="Comment starts with...";shape=box]
+    a2 [label="Card moved?";shape=ellipse]
+    a3 [label="Name of last list";shape=box]
+    a4 [label="Current";shape=box]
+
+    b1 [label="From date is...";shape=box]
+    b2 [label="Already has a current comment?";shape=ellipse]
+    b3 [label="from date of most recent comment";shape=box]
+    b4 [label="to date of most recent comment";shape=box]
+
+    c1 [label="To date is...";shape=box]
+    c2 [label="Is 'to date' of previous comment today or yesterday?";shape=ellipse]
+    c3 [label="Yesterday";shape=box]
+    c4 [label="'To date' of previous comment'";shape=box]
+  }
+
+  subgraph cluster_card_name {
+    # label = "Get card name"
+    a1 -> a2
+    a2 -> a3 [label=yes]
+    a2 -> a4 [label=no]
+    color=black
+  }
+
+  subgraph cluster_from_date {
+    b1 -> b2
+    b2 -> b3 [label=yes]
+    b2 -> b4 [label=no]
+    color=black
+  }
+
+  subgraph cluster_to_date {
+    c1 -> c2
+    c2 -> c3 [label=yes]
+    c2 -> c4 [label=no]
+    color=black
+  }
+
+  start -> a1
+  a3 -> b1
+  a4 -> b1
+  b3 -> c1
+  b4 -> c1
+  c3 -> done
+  c4 -> done
+}
