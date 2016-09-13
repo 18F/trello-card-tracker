@@ -67,21 +67,21 @@ describe 'app.DateCommentHelpers', ->
       comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions)) #clone to modify
 
     it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string in it if the to date has been edited', ->
-      testMoment = moment("2016-03-21T04:00:00.000Z")
+      testMoment = moment("2016-03-21")
       fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, true)
-      expect(fromDate).to.eql(testMoment)
+      expect(fromDate.toISOString()).to.eql(testMoment.toISOString())
       return
 
     it 'returns the from date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for over a day (there was a current comment deleted)', ->
-      testMoment = moment("2016-03-08T05:00:00.000Z")
+      testMoment = moment("2016-03-08")
       fromDate = DateCommentHelpers.getNewCommentFromDate(true, comments, false)
-      expect(fromDate).to.eql(testMoment)
+      expect(fromDate.toISOString()).to.eql(testMoment.toISOString())
       return
 
     it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for less than a day (there was not a current comment deleted)', ->
-      testMoment = moment("2016-03-21T04:00:00.000Z")
+      testMoment = moment("2016-03-21")
       fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, false)
-      expect(fromDate).to.eql(testMoment)
+      expect(fromDate.toISOString()).to.eql(testMoment.toISOString())
       return
     return
 
