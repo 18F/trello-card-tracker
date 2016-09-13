@@ -103,7 +103,7 @@ describe 'app.CardRecorder', ->
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
-      findPrevStub = sandbox.stub(app.DateCommentHelpers.prototype, 'findPrevMoveDateFromComments').returns(cardActions[0].date);
+      findPrevStub = sandbox.stub(app.DateCommentHelpers.prototype, 'extractNewCommentFromDate').returns(cardActions[0].date);
       return
 
 

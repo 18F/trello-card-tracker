@@ -38,33 +38,25 @@ class CardRecorder extends MyTrello {
     const self = this;
     const deferred = Q.defer();
     const cardActions = self.cardFilters(card.actions, [{ name: 'comments', type: 'commentCard' }, { name: 'updates', type: 'updateCard' }, { name: 'created', type: 'createCard' }]);
-
-    self.deleteCurrentComment(cardActions.comments)
-      .then(deletedCommentResp => {
-        console.log(deletedCommentResp);
-        const now = moment();
-        let hasMoved = false;
-        let daysSinceUpdate = false;
-        if (cardActions.updates.length > 0) {
-          hasMoved = DCH.hasMovedCheck(cardActions.updates);
-          daysSinceUpdate = now.diff(moment(cardActions.updates[0].date), 'days');
-        }
-        const totDays = (cardActions.comments.length > 0) ? DCH.calcTotalDays(cardActions.comments, now) : 0;
-        const fromDate = DCH.extractNewCommentFromDate({ commentList: cardActions.comments, actionList: cardActions.updates, createActionDate: cardActions.created.date });
-        self.inFinalList(card.idList)
-          .then(finalList => {
-            self.decideCommentType(card,
-              finalList,
-              daysSinceUpdate,
-              hasMoved,
-              fromDate,
-              cardActions,
-              totDays,
-              now)
-            .then(resp => { deferred.resolve(resp); })
-            .catch(deferred.reject);
-          });
-      });
+    const now = moment();
+    const recentlyMoved = self.checkRecentMove(cardActions.updates, now);
+    self.inFinalList(card.idList)
+    .then(finalList => {
+      if (finalList && !recentlyMoved) {
+        deferred.resolve({ 'final phase': true });
+      }
+      const commentListName = cardActions.comments[0].data.list.name;
+      self.deleteCurrentComment(cardActions.comments)
+         .then(deletedComment => {
+           self.generateNewCommentStats(cardActions.comments, deletedComment.currentCommentDeleted, now, commentListName)
+           .then(commentStats => {
+             const comment = self.buildComment(recentlyMoved, commentListName, commentStats);
+             self.addComment(comment, card.id)
+             .then(resp => { deferred.resolve(resp); })
+             .catch(deferred.reject);
+           });
+         });
+    });
     return deferred.promise;
   }
 
@@ -76,6 +68,37 @@ class CardRecorder extends MyTrello {
       );
     });
     return actions;
+  }
+
+  checkRecentMove(updates, currentTime) {
+    let moves = false;
+    let daysSinceUpdate = false;
+    if (updates.length > 0) {
+      moves = DCH.hasMovedCheck(updates);
+      let lastUpdate = updates[0].date;
+      if (moves.length > 0) {
+        lastUpdate = moves[0].date;
+      }
+      daysSinceUpdate = currentTime.diff(moment(lastUpdate), 'days');
+    }
+    if (moves && daysSinceUpdate < 1) {
+      return true;
+    }
+    return false;
+  }
+
+  inFinalList(listID) {
+    const deferred = Q.defer();
+    const self = this;
+    self.getListNameByID(listID).then(listName => {
+      let lastList = false;
+      const lastStage = self.stages[self.stages.length - 1].name;
+      if (listName === lastStage) {
+        lastList = true;
+      }
+      deferred.resolve(lastList);
+    });
+    return deferred.promise;
   }
 
   deleteCurrentComment(comments) {
@@ -103,82 +126,29 @@ class CardRecorder extends MyTrello {
     return deferred.promise;
   }
 
-  inFinalList(listID) {
+  generateNewCommentStats(comments, deletedNewComment, currentTime, listName) {
     const deferred = Q.defer();
-    const self = this;
-    self.getListNameByID(listID).then(listName => {
-      let lastList = false;
-      const lastStage = self.stages[self.stages.length - 1].name;
-      if (listName === lastStage) {
-        lastList = true;
-      }
-      deferred.resolve(lastList);
-    });
+    const fromDate = DCH.getNewCommentFromDate(deletedNewComment, comments);
+    const toDate = DCH.getNewCommentToDate(comments, currentTime);
+    const totalDays = (comments.length > 0) ? DCH.calcTotalDays(comments, currentTime) : 0;
+    const stage = this.stages.find(s => s.name === listName);
+    console.log(fromDate.toDate());
+    console.log(toDate.toDate());
+    const diffArray = DCH.calculateDateDifference(stage.expected_time, fromDate, toDate);
+    console.log(diffArray);
+    deferred.resolve({ fromDate, toDate, totalDays, timeTaken: diffArray[1], expectedTime: stage.expected_time, dateDelta: diffArray[0] });
     return deferred.promise;
   }
 
-  getPreviousList(cardAction) {
-    return cardAction.data.listBefore.name;
-  }
-
-  decideCommentType(card, finalList, daysSinceUpdate, hasMoved, prevMove, cardActions, totalDays, nowMoment) {
-    const self = this;
-    const deferred = Q.defer();
-    if (finalList && daysSinceUpdate > 1) {
-      deferred.resolve({ 'final phase': true });
-    } else if (hasMoved && daysSinceUpdate < 1) {
-      console.log(`Write New Phase: ${card.name}`);
-      const prevPhase = self.getPreviousList(hasMoved[0]);
-      const endLastPhaseDate = DCH.checkCommentsForDates(cardActions.comments, true, true);
-      self.compileCommentArtifact(
-              card.id,
-              prevPhase,
-              prevPhase,
-              endLastPhaseDate,
-              cardActions.updates[0].date,
-              true,
-              totalDays
-          )
-          .then(resp => { deferred.resolve(resp); });
-    } else {
-      console.log(`Write Current Phase: ${card.name}`);
-      self.getListNameByID(card.idList).then(listName => {
-        self.compileCommentArtifact(
-                  card.id,
-                  listName,
-                  'Current',
-                  prevMove,
-                  nowMoment.format(),
-                  true,
-                  totalDays
-              );
-      })
-      .then(resp => { deferred.resolve(resp); });
+  buildComment(recentlyMoved, commentListName, commentStats) {
+    let listName = 'Current';
+    if (recentlyMoved) {
+      listName = commentListName;
     }
-    return deferred.promise;
-  }
-
-  compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt, totDays) {
-    const deferred = Q.defer();
-    const stage = this.stages.find(s => s.name === dateList);
-    const expectedTime = stage.expected_time;
-    const diffArray = DCH.calculateDateDifference(expectedTime, fromDate, toDate);
-    const differenceFromExpected = diffArray[0];
-    const timeTaken = diffArray[1];
-    const comment = this.buildComment(differenceFromExpected, expectedTime, fromDate, toDate, nameList, timeTaken, totDays);
-    if (addCommentOpt) {
-      this.addComment(comment, cardID).then(resp => { deferred.resolve(resp); });
-    } else {
-      deferred.resolve(comment);
-    }
-    return deferred.promise;
-  }
-
-  buildComment(dateDiff, expected, prevMove, recentMove, lastList, actual, totalDays) {
-    const formatDiff = (dateDiff < 0) ? `**${dateDiff} days**` : `\`+${dateDiff} days\``;
-    const fromDate = moment(prevMove).format('L');
-    const toDate = moment(recentMove).format('L');
-    return `**${lastList} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${expected} days. Actual Days spent: ${actual}. **Total Project Days: ${totalDays}**`;
+    const formatDiff = (commentStats.dateDelta < 0) ? `**${commentStats.dateDelta} days**` : `\`+${commentStats.dateDelta} days\``;
+    const fromDate = commentStats.fromDate.format('L');
+    const toDate = commentStats.toDate.format('L');
+    return `**${listName} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${commentStats.expectedTime} days. Actual Days spent: ${commentStats.timeTaken}. **Total Project Days: ${commentStats.totalDays}**`;
   }
 
   addComment(message, cardID) {

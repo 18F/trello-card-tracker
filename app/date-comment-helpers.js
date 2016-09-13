@@ -16,9 +16,9 @@ class DateCommentHelpers {
     return updated;
   }
 
-  checkCommentsForDates(commentList, latest, findEndDate) {
+  checkCommentsForDates(commentList, latest, findToDate) {
     let myRegex = /(\d\d\/\d\d\/201\d) - \d\d\/\d\d\/201\d/; // Find the first date in the comment string
-    if (findEndDate) {
+    if (findToDate) {
       myRegex = /\d\d\/\d\d\/201\d - (\d\d\/\d\d\/201\d)/;
     }
 
@@ -34,50 +34,43 @@ class DateCommentHelpers {
     if (correctComment) {
       const commentDateMatch = myRegex.exec(correctComment.data.text);
       const commentDate = commentDateMatch[1];
-      const commMoment = moment(commentDate, 'MM/DD/YYYY').toISOString();
-      return commMoment;
+      const isoDate = moment(commentDate, 'MM/DD/YYYY').toISOString();
+      return isoDate;
     }
     return false;
   }
 
-  extractNewCommentFromDate(opts) {
-    const actionList = opts.actionList;
-    const cardCreationDate = opts.cardCreationDate;
-    const commentList = opts.commentList;
-    let correctComment = false;
-    if (commentList) {
-      correctComment = this.checkCommentsForDates(commentList, true, false);
-    }
-    if (correctComment) {
-      return correctComment;
-    } else if (actionList) {
-      if (actionList.length > 1) {
-        return actionList[0].date;
-      }
-    }
+  getNewCommentFromDate(deletedNewComment, comments) {
+    const useLastFromDate = !deletedNewComment;
+    return moment(this.checkCommentsForDates(comments, true, useLastFromDate));
+  }
 
-    if (opts.cardCreationDate) {
-      return cardCreationDate;
+  getNewCommentToDate(comments, currentTime) {
+    const mostRecentToDate = this.checkCommentsForDates(comments, true, true);
+    const recentToMoment = moment(mostRecentToDate);
+    const differenceFromLastComment = currentTime.diff(recentToMoment, 'days');
+    if (differenceFromLastComment > 2) {
+      return recentToMoment;
     }
-
-    return moment('01/01/2016', 'MM/DD/YYYY').toISOString();
+    return currentTime; // Default to returning today
   }
 
   calcTotalDays(commentList, nowMoment) {
     const firstDate = this.checkCommentsForDates(commentList, false, false);
     if (firstDate) {
-      const dayDif = this.calculateDateDifference(10, firstDate, nowMoment);
+      const dayDif = this.calculateDateDifference(10, moment(firstDate), nowMoment);
         // expected not actually needed, in the future could say total days expected
       return dayDif[1];
     }
     return 0;
   }
 
-  calculateDateDifference(expected, prevMove, recentMove) {
-    const fromDate = new Date(prevMove);
-    const toDate = new Date(recentMove);
-    let diffDays = instadate.differenceInWorkDays(fromDate, toDate);
-    diffDays = diffDays - this.findHolidaysBetweenDates(fromDate, toDate);
+  calculateDateDifference(expected, fromMomentObj, toMomentObj) {
+    console.log(fromMomentObj.toDate());
+    console.log(toMomentObj.toDate());
+    let diffDays = instadate.differenceInWorkDays(fromMomentObj.toDate(), toMomentObj.toDate());
+    diffDays = diffDays - this.findHolidaysBetweenDates(fromMomentObj.toDate(), toMomentObj.toDate());
+    console.log(diffDays);
     return [diffDays - expected, diffDays];
   }
 
