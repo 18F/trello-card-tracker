@@ -60,34 +60,26 @@ describe 'app.DateCommentHelpers', ->
       return
     return
 
-  describe 'extractNewCommentFromDate(opts)', ->
-
-    it 'will return the date if list of comments includes text with the dates in the MM/DD/YYYY -MM/DD/YYYY format ', ->
-      localMoment = moment("2016-03-21").toISOString(); #to get out of localization of test suite
-      prevMove = DateCommentHelpers.extractNewCommentFromDate({"commentList": helpers.mockCommentCardObj.actions, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
-      expect(prevMove).to.eql localMoment
+  describe.skip 'getNewCommentFromDate(deletedNewComment, comments, altToDate)', ->
+    it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string in it if the to date has been edited', ->
+      comments = []
+      testMoment = moment("2016-01-08")
+      fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, true)
+      expect(fromDate).to.eql(testMoment)
       return
 
-    it 'will return the last Action date is there is actionList and there is no date in the commentcard', ->
-      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
-      comments[0].data.text = "This comment has no date."
-      prevMove = DateCommentHelpers.extractNewCommentFromDate({"commentList": comments, "actionList": helpers.actionListMove, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
-      expect(prevMove).to.eql '2016-02-25T22:00:35.866Z'
+    it 'returns the from date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for over a day (there was a current comment deleted)', ->
+      comments = []
+      testMoment = moment("2016-01-08")
+      fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, false)
+      expect(fromDate).to.eql(testMoment)
       return
 
-    it 'will return the creation date if there is no actionList or no current comment', ->
-      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
-      comments[0].data.text = "This comment has no date."
-      prevMove = DateCommentHelpers.extractNewCommentFromDate({"commentList": comments, "cardCreationDate": '2016-04-05T10:40:26.100Z'})
-      expect(prevMove).to.eql '2016-04-05T10:40:26.100Z'
-      return
-
-    it 'will return "01/01/2016 if there is nothing in the options', ->
-      comments = helpers.mockCommentCardObj.actions
-      comments[0].data.text = "This comment has no date."
-      localMoment = moment("2016-01-01").toISOString()
-      prevMove = DateCommentHelpers.extractNewCommentFromDate({})
-      expect(prevMove).to.eql localMoment
+    it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for less than a day (there was a current comment not deleted)', ->
+      comments = []
+      testMoment = moment("2016-01-08")
+      fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, false)
+      expect(fromDate).to.eql(testMoment)
       return
     return
 
@@ -114,7 +106,7 @@ describe 'app.DateCommentHelpers', ->
 
   describe '.calculateDateDifference', ->
     it 'calculates the difference between when the card was moved and the expected time', ->
-      difference = DateCommentHelpers.calculateDateDifference(10, "2016-04-05", "2016-07-27")
+      difference = DateCommentHelpers.calculateDateDifference(10, moment("2016-04-05"), moment("2016-07-27"))
       expect(difference).to.eql [69,79]
       return
     return

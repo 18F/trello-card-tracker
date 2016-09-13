@@ -69,11 +69,8 @@ class DateCommentHelpers {
   }
 
   calculateDateDifference(expected, fromMomentObj, toMomentObj) {
-    console.log(fromMomentObj.toDate());
-    console.log(toMomentObj.toDate());
     let diffDays = instadate.differenceInWorkDays(fromMomentObj.toDate(), toMomentObj.toDate());
     diffDays = diffDays - this.findHolidaysBetweenDates(fromMomentObj.toDate(), toMomentObj.toDate());
-    console.log(diffDays);
     return [diffDays - expected, diffDays];
   }
 
