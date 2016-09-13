@@ -52,7 +52,6 @@ class CardRecorder extends MyTrello {
            const comment = self.buildComment(recentlyMoved, commentListName, commentStats);
            self.addComment(comment, card.id)
            .then(resp => {
-             console.log('past add');
              deferred.resolve(resp);
            })
            .catch(deferred.reject);
@@ -133,7 +132,6 @@ class CardRecorder extends MyTrello {
     const totalDays = (comments.length > 0) ? DCH.calcTotalDays(comments, currentTime) : 0;
     const stage = this.stages.find(s => s.name === listName);
     const diffArray = DCH.calculateDateDifference(stage.expected_time, fromDate, currentTime);
-    console.log(diffArray);
     return { fromDate, toDate: currentTime, totalDays, timeTaken: diffArray[1], expectedTime: stage.expected_time, dateDelta: diffArray[0] };
   }
 

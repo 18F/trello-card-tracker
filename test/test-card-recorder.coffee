@@ -96,13 +96,11 @@ describe 'app.CardRecorder', ->
       hasMovedStub = sandbox.stub(CR, 'checkRecentMove').returns(true)
       finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false)
       cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
-      cardMock = {id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}
+      cardMock = {id: 'cccc', idList: 'testlistID', name: 'BPA Project - Phase II', actions: cardActions}
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
       cardStatsStub = sandbox.stub(CR, 'generateNewCommentStats').returns({ fromDate: moment(cardActions[0].date), toDate: now, totalDays: 10, timeTaken: 8, expectedTime: 2, dateDelta: 6 })
-
-
       return
 
 
@@ -111,7 +109,6 @@ describe 'app.CardRecorder', ->
       CR.cardRecordFunctions(cardMock).then (resp) ->
         expect(finalListStub.callCount).to.equal 1
         expect(deleteStub.callCount).to.equal 1
-        expect(cardStatsStub.callCount).to.equal 1
         expect(addCommentStub.callCount).to.equal 1
         done()
       return
@@ -239,30 +236,33 @@ describe 'app.CardRecorder', ->
 
   describe '.generateNewCommentStats(comments, deletedNewComment, currentTime, listName)', ->
     now = undefined
+    comments = undefined
     dateDifferenceStub = undefined
-    stage = undefined
-    stageMock = undefined
-    calcTotalMock = undefined
+    calcTotalDaysStub = undefined
 
     before ->
       now = moment()
+      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
       dateDifferenceStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calculateDateDifference').returns([6, 8])
-      calcTotalDays = sandbox.stub(app.DateCommentHelpers.prototype, 'calcTotalDays').returns(10)
+      calcTotalDaysStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calcTotalDays').returns(10)
 
-    afterEach ->
-      sandbox.restore()
-
+    after ->
+      dateDifferenceStub.restore()
+      calcTotalDaysStub.restore()
+      return
 
     it 'returns an object with all of the dates and time differentials from the DCH object', ->
-      commentStats = CR.generateNewCommentStats([], true, now, 'Workshop')
-      expected = { fromDate: moment("2016-04-05T10:40:26.100Z"), toDate: now, totalDays: 10, timeTaken: 8, expectedTime: 2, dateDelta: 6 }
-      expect(commentStats).to.eq(expected)
+      commentStats = CR.generateNewCommentStats(comments, true, now, 'Workshop Prep')
+      commentStats.fromDate = commentStats.fromDate.format('L') # Convert back to date to avoid moment deep copy issues
+      commentStats.toDate = commentStats.toDate.format('L') # Convert back to date to avoid moment deep copy issues
+      expected = { fromDate: "03/21/2016", toDate: now.format('L'), totalDays: 10, timeTaken: 8, expectedTime: 10, dateDelta: 6 }
+      expect(commentStats).to.eql expected
       return
     return
 
   describe '.buildComment(recentlyMoved, commentListName, commentStats)', ->
     it 'constructs a comment string for the last phase', ->
-      msg = CR.buildComment(true, 'Workshop', { fromDate: moment("2016-04-05T10:40:26.100Z"), toDate: moment("2016-07-27T10:40:26.100Z"), totalDays: 0, timeTaken: 113, expectedTime: 10, dateDelta: 103 })
+      msg = CR.buildComment(true, 'Workshop', { fromDate: moment("2016-04-05"), toDate: moment("2016-07-27T10:40:26.100Z"), totalDays: 0, timeTaken: 113, expectedTime: 10, dateDelta: 103 })
       expect(msg).to.eql("**Workshop Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113. **Total Project Days: 0**")
       return
 
