@@ -95,8 +95,8 @@ describe 'app.DateCommentHelpers', ->
 
     it 'returns the most recent to date in a comment if it is greater than 2 days', ->
       diffToDate = DateCommentHelpers.differentToDate(comments, now)
-      expectedDate = moment("2016-03-21T04:00:00.000Z")
-      expect(diffToDate).to.eql expectedDate
+      expectedDate = moment("2016-03-21").toISOString()
+      expect(diffToDate.toISOString()).to.eql expectedDate
       return
 
     it 'returns false if the most recent to date in a comment is within 2 days of today than today', ->
