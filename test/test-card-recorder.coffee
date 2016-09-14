@@ -93,7 +93,6 @@ describe 'app.CardRecorder', ->
     beforeEach ->
       now = moment()
       deleteStub = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true})
-      hasMovedStub = sandbox.stub(CR, 'checkRecentMove').returns(true)
       cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
       cardMock = {id: 'cccc', idList: 'testlistID', name: 'BPA Project - Phase II', actions: cardActions}
       cardActions.forEach (action) ->
@@ -106,6 +105,7 @@ describe 'app.CardRecorder', ->
     it 'runs the card record for a single card not in final list', (done) ->
       addCommentStub = sandbox.stub(CR, 'addComment').resolves({"comment": true})
       finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false)
+      hasMovedStub = sandbox.stub(CR, 'checkRecentMove').returns(true)
       CR.cardRecordFunctions(cardMock).then (resp) ->
         expect(finalListStub.callCount).to.equal 1
         expect(deleteStub.callCount).to.equal 1
@@ -116,6 +116,7 @@ describe 'app.CardRecorder', ->
     it 'runs the card record for a single card in the final list of the board', (done) ->
       addCommentStub = sandbox.stub(CR, 'addComment').resolves({"comment": true})
       finalListStub = sandbox.stub(CR, 'inFinalList').resolves(true)
+      hasMovedStub = sandbox.stub(CR, 'checkRecentMove').returns(false)
       CR.cardRecordFunctions(cardMock).then (resp) ->
         expect(finalListStub.callCount).to.equal 1
         done()
