@@ -94,7 +94,6 @@ describe 'app.CardRecorder', ->
       now = moment()
       deleteStub = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true})
       hasMovedStub = sandbox.stub(CR, 'checkRecentMove').returns(true)
-      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false)
       cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
       cardMock = {id: 'cccc', idList: 'testlistID', name: 'BPA Project - Phase II', actions: cardActions}
       cardActions.forEach (action) ->
@@ -104,8 +103,9 @@ describe 'app.CardRecorder', ->
       return
 
 
-    it 'runs the card record for a single card', (done) ->
-      addCommentStub = sandbox.stub(CR, 'addComment').resolves({"comment": true});
+    it 'runs the card record for a single card not in final list', (done) ->
+      addCommentStub = sandbox.stub(CR, 'addComment').resolves({"comment": true})
+      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false)
       CR.cardRecordFunctions(cardMock).then (resp) ->
         expect(finalListStub.callCount).to.equal 1
         expect(deleteStub.callCount).to.equal 1
@@ -113,9 +113,18 @@ describe 'app.CardRecorder', ->
         done()
       return
 
+    it 'runs the card record for a single card in the final list of the board', (done) ->
+      addCommentStub = sandbox.stub(CR, 'addComment').resolves({"comment": true})
+      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(true)
+      CR.cardRecordFunctions(cardMock).then (resp) ->
+        expect(finalListStub.callCount).to.equal 1
+        done()
+      return
+
     it 'will survive a trello error', (done) ->
       error = new Error('Test Error');
       addComment = sandbox.stub(CR, 'addComment').rejects(error)
+      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false)
       CR.cardRecordFunctions(cardMock).catch (err) ->
         expect(addCommentStub.callCount).to.eql 1
         expect(err).to.eql error
@@ -198,10 +207,10 @@ describe 'app.CardRecorder', ->
       return
 
     it 'returns true if the most move was less than a day ago', ->
-      updates = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
-      updates[0].date = now
+      updates = JSON.parse(JSON.stringify(helpers.actionListMove))
+      updates[1].date = now.toISOString()
       recentlyMoved = CR.checkRecentMove(updates, now)
-      expect(recentlyMoved).to.eql false
+      expect(recentlyMoved).to.eql true
       return
     return
 
