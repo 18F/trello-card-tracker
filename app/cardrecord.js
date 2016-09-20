@@ -128,7 +128,7 @@ class CardRecorder extends MyTrello {
 
   generateNewCommentStats(comments, deletedNewComment, currentTime, listName) {
     const altToDate = DCH.differentToDate(comments, currentTime);
-    const fromDate = DCH.getNewCommentFromDate(deletedNewComment, comments, altToDate);
+    const fromDate = DCH.generateFromDateForNewComment(deletedNewComment, comments, altToDate);
     const totalDays = (comments.length > 0) ? DCH.calcTotalDays(comments, currentTime) : 0;
     const stage = this.stages.find(s => s.name === listName);
     const diffArray = DCH.calculateDateDifference(stage.expected_time, fromDate, currentTime);

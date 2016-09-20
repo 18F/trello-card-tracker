@@ -40,9 +40,9 @@ class DateCommentHelpers {
     return false;
   }
 
-  getNewCommentFromDate(deletedNewComment, comments, altToDate) {
+  generateFromDateForNewComment(deletedNewComment, comments, altToDate) {
     if (altToDate) {
-      return moment(this.checkCommentsForDates(comments, true, true));
+      return altToDate;
     }
     return moment(this.checkCommentsForDates(comments, true, !deletedNewComment));
   }
@@ -52,7 +52,7 @@ class DateCommentHelpers {
     const recentToMoment = moment(mostRecentToDate);
     const differenceFromLastComment = currentTime.diff(recentToMoment, 'days');
     if (differenceFromLastComment > 2) {
-      return true;
+      return recentToMoment;
     }
     return false; // Default to returning today
   }

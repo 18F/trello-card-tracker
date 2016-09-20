@@ -60,7 +60,7 @@ describe 'app.DateCommentHelpers', ->
       return
     return
 
-  describe 'getNewCommentFromDate(deletedNewComment, comments, altToDate)', ->
+  describe 'generateFromDateForNewComment(deletedNewComment, comments, altToDate)', ->
     comments = undefined
 
     before ->
@@ -68,19 +68,19 @@ describe 'app.DateCommentHelpers', ->
 
     it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string in it if the to date has been edited', ->
       testMoment = moment("2016-03-21")
-      fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, true)
+      fromDate = DateCommentHelpers.generateFromDateForNewComment(false, comments, testMoment)
       expect(fromDate.toISOString()).to.eql(testMoment.toISOString())
       return
 
     it 'returns the from date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for over a day (there was a current comment deleted)', ->
       testMoment = moment("2016-03-08")
-      fromDate = DateCommentHelpers.getNewCommentFromDate(true, comments, false)
+      fromDate = DateCommentHelpers.generateFromDateForNewComment(true, comments, false)
       expect(fromDate.toISOString()).to.eql(testMoment.toISOString())
       return
 
     it 'returns the to date of the most recent comment with a MM/DD/YYYY -MM/DD/YYYY date string if the card was in the same list for less than a day (there was not a current comment deleted)', ->
       testMoment = moment("2016-03-21")
-      fromDate = DateCommentHelpers.getNewCommentFromDate(false, comments, false)
+      fromDate = DateCommentHelpers.generateFromDateForNewComment(false, comments, false)
       expect(fromDate.toISOString()).to.eql(testMoment.toISOString())
       return
     return
