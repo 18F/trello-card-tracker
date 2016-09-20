@@ -44,8 +44,7 @@ class DateCommentHelpers {
     if (altToDate) {
       return moment(this.checkCommentsForDates(comments, true, true));
     }
-    const useLastFromDate = !deletedNewComment;
-    return moment(this.checkCommentsForDates(comments, true, useLastFromDate));
+    return moment(this.checkCommentsForDates(comments, true, !deletedNewComment));
   }
 
   differentToDate(comments, currentTime) {
@@ -53,7 +52,7 @@ class DateCommentHelpers {
     const recentToMoment = moment(mostRecentToDate);
     const differenceFromLastComment = currentTime.diff(recentToMoment, 'days');
     if (differenceFromLastComment > 2) {
-      return recentToMoment;
+      return true;
     }
     return false; // Default to returning today
   }

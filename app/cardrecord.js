@@ -45,9 +45,9 @@ class CardRecorder extends MyTrello {
       if (finalList && !recentlyMoved) {
         deferred.resolve({ 'final phase': true });
       }
-      const commentListName = cardActions.comments[0].data.list.name;
       self.deleteCurrentComment(cardActions.comments)
          .then(deletedComment => {
+           const commentListName = cardActions.comments[0].data.list.name;
            const commentStats = self.generateNewCommentStats(cardActions.comments, deletedComment.currentCommentDeleted, now, commentListName);
            const comment = self.buildComment(recentlyMoved, commentListName, commentStats);
            self.addComment(comment, card.id)
@@ -71,8 +71,8 @@ class CardRecorder extends MyTrello {
   }
 
   checkRecentMove(updates, currentTime) {
-    let moves = false;
-    let daysSinceUpdate = false;
+    let moves = null;
+    let daysSinceUpdate = null;
     if (updates.length > 0) {
       moves = DCH.hasMovedCheck(updates);
       let lastUpdate = updates[0].date;
