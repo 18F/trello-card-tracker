@@ -323,7 +323,7 @@ module.exports = {
             name: 'Comment Test Card',
             id: '322'
           },
-          text: '**Current Stage:** `+19 days`. *03/21/2016 - 03/08/2016*. Expected days: 2 days. Actual Days spent: 21.'
+          text: '**Current Stage:** `+19 days`. *03/08/2016 - 03/21/2016*. Expected days: 2 days. Actual Days spent: 21.'
         },
         type: 'commentCard',
         date: '2016-03-08T22:53:02.063Z',

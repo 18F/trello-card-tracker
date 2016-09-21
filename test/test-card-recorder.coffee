@@ -7,12 +7,7 @@ sinon = require('sinon');
 moment = require('moment')
 require('sinon-as-promised');
 
-# sinon.stub::asyncOutcome = (args, asyncResp) ->
-#   @withArgs(args).yieldsAsync(asyncResp)
-#   this
-
 CR = new app.CardRecorder(helpers.mockfile, helpers.board)
-# CR.Stages = helpers.expectedStageObject
 
 describe 'app.CardRecorder', ->
   sandbox = undefined
@@ -86,42 +81,53 @@ describe 'app.CardRecorder', ->
     deleteStub = undefined
     hasMovedStub = undefined
     calcTotalStub = undefined
-    findPrevStub = undefined
+    cardStats = undefined
     finalListStub = undefined
     decideStub = undefined
     cardMock = undefined
     cardActions = undefined
+    addCommentStub = undefined
+    now = undefined
 
 
     beforeEach ->
+      now = moment()
       deleteStub = sandbox.stub(CR, 'deleteCurrentComment').resolves({"currentCommentDeleted": true})
-      hasMovedStub = sandbox.stub(app.DateCommentHelpers.prototype, 'hasMovedCheck').returns(true)
-      calcTotalStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calcTotalDays').returns(55)
-      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false);
       cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
-      cardMock = {id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}
+      cardMock = {id: 'cccc', idList: 'testlistID', name: 'BPA Project - Phase II', actions: cardActions}
       cardActions.forEach (action) ->
         action.date = (new Date(Date.now() - 21600000)).toISOString();
         return
-      findPrevStub = sandbox.stub(app.DateCommentHelpers.prototype, 'findPrevMoveDateFromComments').returns(cardActions[0].date);
+      cardStatsStub = sandbox.stub(CR, 'generateNewCommentStats').returns({ fromDate: moment(cardActions[0].date), toDate: now, totalDays: 10, timeTaken: 8, expectedTime: 2, dateDelta: 6 })
       return
 
 
-    it 'runs the card record for a single card', (done) ->
-      decideStub = sandbox.stub(CR, 'decideCommentType').resolves({"pastDecide": true})
+    it 'runs the card record for a single card not in final list', (done) ->
+      addCommentStub = sandbox.stub(CR, 'addComment').resolves({"comment": true})
+      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false)
+      hasMovedStub = sandbox.stub(CR, 'checkRecentMove').returns(true)
       CR.cardRecordFunctions(cardMock).then (resp) ->
+        expect(finalListStub.callCount).to.equal 1
         expect(deleteStub.callCount).to.equal 1
-        expect(calcTotalStub.callCount).to.equal 1
-        expect(decideStub.callCount).to.equal 1
+        expect(addCommentStub.callCount).to.equal 1
+        done()
+      return
+
+    it 'runs the card record for a single card in the final list of the board', (done) ->
+      addCommentStub = sandbox.stub(CR, 'addComment').resolves({"comment": true})
+      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(true)
+      hasMovedStub = sandbox.stub(CR, 'checkRecentMove').returns(false)
+      CR.cardRecordFunctions(cardMock).then (resp) ->
         expect(finalListStub.callCount).to.equal 1
         done()
       return
 
     it 'will survive a trello error', (done) ->
       error = new Error('Test Error');
-      decideStub = sandbox.stub(CR, 'decideCommentType').rejects(error)
+      addComment = sandbox.stub(CR, 'addComment').rejects(error)
+      finalListStub = sandbox.stub(CR, 'inFinalList').resolves(false)
       CR.cardRecordFunctions(cardMock).catch (err) ->
-        expect(decideStub.callCount).to.eql 1
+        expect(addCommentStub.callCount).to.eql 1
         expect(err).to.eql error
         done()
         return
@@ -175,102 +181,37 @@ describe 'app.CardRecorder', ->
 
     it 'will survive a trello error deleting a comment', (done) ->
       CR.deleteCurrentComment(currentComments).catch (err) ->
-        expect(err).to.eql error;
+        expect(err).to.eql error
         done()
         return
       return
     return
 
-  describe '.getPreviousList(updateActionID)', ->
-    it 'will grab the name of the last list a trello card was part of given that the card has moved', ->
-      listName = CR.getPreviousList helpers.actionListMove[1]
-      expect(listName).to.equal("Old List")
-      return
-
-    # get this should be undefined
-    it 'will return an error if the action does not have a list before', ->
-      expect(->
-        CR.ggetPreviousList helpers.actionListMove[0]
-      ).to.throw Error
-      return
-    return
-
-  describe '.decideCommentType(card, finalList, daysSinceUpdate, hasMoved, prevMove, updateActions, totalDays, nowMoment)', ->
-    card = undefined
-    prevMove = undefined
+  describe '.checkRecentMove(updates, currentTime)', ->
     now = undefined
-    cardActions = undefined
-    compileStub = undefined
-    getPreviousStub = undefined
-    getListStub = undefined
-
-    beforeEach ->
+    before ->
       now = moment()
-      cardActions = helpers.actionListNoMove.concat(helpers.mockCommentCardObj.actions)
-      card = {id: 'cccc', idList: 'vvv', name: 'BPA Project - Phase II', actions: cardActions}
-      compileStub = sandbox.stub(CR, 'compileCommentArtifact').resolves({"compiled": true})
-      getListStub = sandbox.stub(CR, 'getListNameByID').resolves("Stubbed List Name")
-      getPreviousStub = sandbox.stub(CR, 'getPreviousList').resolves("Previous List")
 
-    it 'chooses that a comment should be written to last list phase', (done) ->
-      CR.decideCommentType(card, true, 10, helpers.actionListMove[1], prevMove, cardActions, 10, now).then (resp) ->
-        expect(getPreviousStub.callCount).to.equal 0
-        expect(compileStub.callCount).to.equal 0
-        expect(getListStub.callCount).to.equal 0
-        done()
+    it 'returns false if there are no updates ', ->
+      recentlyMoved = CR.checkRecentMove([], now)
+      expect(recentlyMoved).to.eql false
       return
 
-    it 'chooses that a comment should be written to a new phase', (done) ->
-      cardActions.updates = [{"date": now}]
-      cardActions.comments = helpers.mockCommentCardObj.actions
-      CR.decideCommentType(card, false, 0, helpers.actionListMove[1], prevMove, cardActions, 10, now).then (resp) ->
-        expect(getPreviousStub.callCount).to.equal 1
-        expect(compileStub.callCount).to.equal 1
-        expect(getListStub.callCount).to.equal 0
-        done()
+    it 'returns false if the card has not moved', ->
+      recentlyMoved = CR.checkRecentMove(helpers.actionListNoMove, now)
+      expect(recentlyMoved).to.eql false
       return
 
-    it 'chooses that a comment should be written to a current phase that has moved because it was updated over a day ago', (done) ->
-      CR.decideCommentType(card, false, 4, helpers.actionListMove[1], prevMove, cardActions, 10, now).then (resp) ->
-        expect(getPreviousStub.callCount).to.equal 0
-        expect(compileStub.callCount).to.equal 1
-        expect(getListStub.callCount).to.equal 1
-        done()
+    it 'returns false if the most move was over a day ago', ->
+      recentlyMoved = CR.checkRecentMove(helpers.actionListMove, now)
+      expect(recentlyMoved).to.eql false
       return
 
-    it 'chooses that a comment should be written to a current phase that has not moved', (done) ->
-      CR.decideCommentType(card, false, 0, false, prevMove, cardActions, 10, now).then (resp) ->
-        expect(getPreviousStub.callCount).to.equal 0
-        expect(getListStub.callCount).to.equal 1
-        expect(compileStub.callCount).to.equal 1
-        done()
-      return
-    return
-
-  describe '.compileCommentArtifact(cardID, dateList, nameList, fromDate, toDate, addCommentOpt)', ->
-    addComment = undefined
-
-    beforeEach ->
-      addComment = sandbox.stub(CR, 'addComment').resolves();
-      calcStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calculateDateDifference').returns([103,113]);
-      comments = undefined
-      return
-
-    it 'will run the date diff functions, build and post a comment', (done) ->
-      commentPromise = CR.compileCommentArtifact('xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', true, 0)
-      commentPromise.done (resp) ->
-        expect(addComment.calledWith('**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113. **Total Project Days: 0**')).to.be.ok
-        expect(addComment.callCount).to.equal 1
-        done()
-        return
-      return
-
-    it 'will run the date diff functions, but not actually create a comment', (done) ->
-      CR.compileCommentArtifact('xxxx', 'Workshop Prep', 'Workshop Prep', '2016-04-05T10:40:26.100Z', '2016-07-27T10:40:26.100Z', false, 0).then (comment) ->
-        expect(comment).to.eql '**Workshop Prep Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113. **Total Project Days: 0**'
-        expect(addComment.callCount).to.equal 0
-        done()
-        return
+    it 'returns true if the most move was less than a day ago', ->
+      updates = JSON.parse(JSON.stringify(helpers.actionListMove))
+      updates[1].date = now.toISOString()
+      recentlyMoved = CR.checkRecentMove(updates, now)
+      expect(recentlyMoved).to.eql true
       return
     return
 
@@ -303,10 +244,41 @@ describe 'app.CardRecorder', ->
       return
     return
 
-  describe '.buildComment', ->
-    it 'generates a comment Based off of date entry fields', ->
-      msg = CR.buildComment(103, 10, "2016-04-05T10:40:26.100Z", "2016-07-27T10:40:26.100Z", "Workshop", 113, 0)
+  describe '.generateNewCommentStats(comments, deletedNewComment, currentTime, listName)', ->
+    now = undefined
+    comments = undefined
+    dateDifferenceStub = undefined
+    calcTotalDaysStub = undefined
+
+    before ->
+      now = moment()
+      comments = JSON.parse(JSON.stringify(helpers.mockCommentCardObj.actions))
+      dateDifferenceStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calculateDateDifference').returns([6, 8])
+      calcTotalDaysStub = sandbox.stub(app.DateCommentHelpers.prototype, 'calcTotalDays').returns(10)
+
+    after ->
+      dateDifferenceStub.restore()
+      calcTotalDaysStub.restore()
+      return
+
+    it 'returns an object with all of the dates and time differentials from the DCH object', ->
+      commentStats = CR.generateNewCommentStats(comments, true, now, 'Workshop Prep')
+      commentStats.fromDate = commentStats.fromDate.format('L') # Convert back to date to avoid moment deep copy issues
+      commentStats.toDate = commentStats.toDate.format('L') # Convert back to date to avoid moment deep copy issues
+      expected = { fromDate: "03/21/2016", toDate: now.format('L'), totalDays: 10, timeTaken: 8, expectedTime: 10, dateDelta: 6 }
+      expect(commentStats).to.eql expected
+      return
+    return
+
+  describe '.buildComment(recentlyMoved, commentListName, commentStats)', ->
+    it 'constructs a comment string for the last phase', ->
+      msg = CR.buildComment(true, 'Workshop', { fromDate: moment("2016-04-05"), toDate: moment("2016-07-27T10:40:26.100Z"), totalDays: 0, timeTaken: 113, expectedTime: 10, dateDelta: 103 })
       expect(msg).to.eql("**Workshop Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113. **Total Project Days: 0**")
+      return
+
+    it 'constructs a comment string for the current phase', ->
+      msg = CR.buildComment(false, 'Workshop', { fromDate: moment("2016-04-05T10:40:26.100Z"), toDate: moment("2016-07-27T10:40:26.100Z"), totalDays: 0, timeTaken: 113, expectedTime: 10, dateDelta: 103 })
+      expect(msg).to.eql("**Current Stage:** `+103 days`. *04/05/2016 - 07/27/2016*.\n Expected days: 10 days. Actual Days spent: 113. **Total Project Days: 0**")
       return
     return
 
