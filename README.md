@@ -9,6 +9,9 @@
 Content of a Trello board for the agile BPA.
 
 ### Features
+
+[Full Documentation](documentation.md)
+
 #### Stage Manager
 Takes a yaml file of a list of stages and expected times of completion and builds Trello lists in the order of the file.
 The stage manager will also close all lists that are not in the stages file.
