@@ -140,10 +140,21 @@ class CardRecorder extends MyTrello {
     if (recentlyMoved) {
       listName = commentListName;
     }
+    const util = require('util')
     const formatDiff = (commentStats.dateDelta < 0) ? `**${commentStats.dateDelta} days**` : `\`+${commentStats.dateDelta} days\``;
     const fromDate = commentStats.fromDate.format('L');
     const toDate = commentStats.toDate.format('L');
     return `**${listName} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${commentStats.expectedTime} days. Actual Days spent: ${commentStats.timeTaken}. **Total Project Days: ${commentStats.totalDays}**`;
+  }
+
+  utilComment(fromDate, toDate, listName, totalDays) {
+    const stage = this.stages.find(s => s.name === listName);
+    const fromMoment = moment(fromDate);
+    const toMoment = moment(toDate);
+    const diffArray = DCH.calculateDateDifference(stage.expected_time, fromMoment, toMoment);
+    const commentStats = { fromDate: fromMoment, toDate: toMoment, totalDays, expectedTime: stage.expected_time, dateDelta: diffArray[0], timeTaken: diffArray[1] };
+    const comment = this.buildComment(true, listName, commentStats);
+    console.log(comment);
   }
 
   addComment(message, cardID) {
