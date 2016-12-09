@@ -140,7 +140,6 @@ class CardRecorder extends MyTrello {
     if (recentlyMoved) {
       listName = commentListName;
     }
-    const util = require('util')
     const formatDiff = (commentStats.dateDelta < 0) ? `**${commentStats.dateDelta} days**` : `\`+${commentStats.dateDelta} days\``;
     const fromDate = commentStats.fromDate.format('L');
     const toDate = commentStats.toDate.format('L');
