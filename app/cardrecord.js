@@ -146,6 +146,16 @@ class CardRecorder extends MyTrello {
     return `**${listName} Stage:** ${formatDiff}. *${fromDate} - ${toDate}*.\n Expected days: ${commentStats.expectedTime} days. Actual Days spent: ${commentStats.timeTaken}. **Total Project Days: ${commentStats.totalDays}**`;
   }
 
+  utilComment(fromDate, toDate, listName, totalDays) {
+    const stage = this.stages.find(s => s.name === listName);
+    const fromMoment = moment(fromDate);
+    const toMoment = moment(toDate);
+    const diffArray = DCH.calculateDateDifference(stage.expected_time, fromMoment, toMoment);
+    const commentStats = { fromDate: fromMoment, toDate: toMoment, totalDays, expectedTime: stage.expected_time, dateDelta: diffArray[0], timeTaken: diffArray[1] };
+    const comment = this.buildComment(true, listName, commentStats);
+    console.log(comment);
+  }
+
   addComment(message, cardID) {
     const deferred = Q.defer();
     const url = `1/cards/${cardID}/actions/comments`;

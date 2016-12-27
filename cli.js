@@ -50,8 +50,7 @@ const cliCommands = [
       if (argv.d) {
         dateList = argv.d;
       }
-      BuildCR.compileCommentArtifact(null, argv.l, dateList, argv.f, argv.t, false, argv.o)
-                  .then(comment => { console.log(comment); });
+      BuildCR.utilComment(argv.f, argv.t, dateList, argv.o);
     }
   }
 ];
