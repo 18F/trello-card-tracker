@@ -1,5 +1,5 @@
 {
-  "name": "bpa-trello-dashboard",
+  "name": "trello-card-tracker",
   "version": "1.0.0",
   "description": "An interface to interact with trello kanban lists",
   "main": "cli.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/18f/bpa-trello-dashboard.git"
+    "url": "git+https://github.com/18f/trello-card-tracker.git"
   },
   "keywords": [
     "trello",
@@ -19,9 +19,9 @@
   "author": "laura gerhardt",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/18f/bpa-trello-dashboard/issues"
+    "url": "https://github.com/18f/trello-card-tracker/issues"
   },
-  "homepage": "https://github.com/18f/bpa-trello-dashboard#readme",
+  "homepage": "https://github.com/18f/trello-card-tracker#readme",
   "engines": {
     "node": "^6.1.0",
     "npm": "^3.8.6"
