@@ -15,4 +15,4 @@ deploy:
   organization: 18F-acq
   space: tools
   on:
-    repo: 18F/bpa-trello
+    repo: 18F/trello-card-tracker
