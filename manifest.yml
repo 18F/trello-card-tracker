@@ -1,6 +1,6 @@
 ---
 applications:
-- name: bpa-trello
+- name: trello-card-tracker
   memory: 512M
   buildpack: https://github.com/cloudfoundry/nodejs-buildpack.git#v1.5.14
   instances: 1

@@ -1,10 +1,10 @@
-# bpa-trello
+# Trello Card Tracker
 
-[![Build Status](https://travis-ci.org/18F/bpa-trello.svg?branch=master)](https://travis-ci.org/18F/bpa-trello)
+[![Build Status](https://travis-ci.org/18F/trello-card-tracker.svg?branch=master)](https://travis-ci.org/18F/trello-card-tracker)
 
-[![Code Climate](https://codeclimate.com/github/18F/bpa-trello/badges/gpa.svg)](https://codeclimate.com/github/18F/bpa-trello)
+[![Code Climate](https://codeclimate.com/github/18F/trello-card-tracker/badges/gpa.svg)](https://codeclimate.com/github/18F/trello-card-tracker)
 
-[![codecov.io](https://codecov.io/github/18F/bpa-trello/coverage.svg?branch=master)](https://codecov.io/github/18F/bpa-trello?branch=master)
+[![codecov.io](https://codecov.io/github/18F/trello-card-tracker/coverage.svg?branch=master)](https://codecov.io/github/18F/trello-card-tracker?branch=master)
 
 Content of a Trello board for the agile BPA.
 
@@ -25,8 +25,8 @@ Will create cards that correspond to a particular order listed in an order file.
 ### Installation
 
 ```
-git clone https://github.com/18F/bpa-trello
-cd bpa-trello
+git clone https://github.com/18F/trello-card-tracker
+cd trello-card-tracker
 npm install
 ```
 
@@ -59,7 +59,7 @@ Or run the cli.
 Use the `develop` branch
 
 ```
-git clone https://github.com/18F/bpa-trello.git
+git clone https://github.com/18F/trello-card-tracker.git
 git fetch origin develop
 npm install --dev
 npm start
