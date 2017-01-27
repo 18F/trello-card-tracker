@@ -3,9 +3,11 @@ app = require('../app')
 helpers = require('./test-helpers.js')
 q = require('q')
 trello = require('node-trello')
-sinon = require('sinon');
+sinon = require('sinon')
 moment = require('moment')
-require('sinon-as-promised');
+require('sinon-as-promised')
+d = new Date()
+currentYear = d.getFullYear()
 
 CR = new app.CardRecorder(helpers.mockfile, helpers.board)
 
@@ -265,7 +267,7 @@ describe 'app.CardRecorder', ->
       commentStats = CR.generateNewCommentStats(comments, true, now, 'Workshop Prep')
       commentStats.fromDate = commentStats.fromDate.format('L') # Convert back to date to avoid moment deep copy issues
       commentStats.toDate = commentStats.toDate.format('L') # Convert back to date to avoid moment deep copy issues
-      expected = { fromDate: "03/21/2016", toDate: now.format('L'), totalDays: 10, timeTaken: 8, expectedTime: 10, dateDelta: 6 }
+      expected = { fromDate: "03/08/#{currentYear}", toDate: now.format('L'), totalDays: 10, timeTaken: 8, expectedTime: 10, dateDelta: 6 }
       expect(commentStats).to.eql expected
       return
     return
