@@ -5,11 +5,23 @@ install:
 - npm install --dev
 script:
 - npm test
+before_deploy:
+- export PATH=$HOME:$PATH
+- travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
+- tar xzvf $HOME/cf.tgz -C $HOME
 deploy:
-  edge: true
-  provider: cloudfoundry
-  api: https://api.fr.cloud.gov
-  organization: gsa-acq-proto
-  space: trello-card-tracker
+- provider: script
+  script: "./bin/deploy.sh"
+  skip_cleanup: true
   on:
-    repo: 18F/trello-card-tracker
+      repo: 18F/trello-card-tracker
+# deploy:
+#   edge: true
+#   provider: cloudfoundry
+#   api: https://api.fr.cloud.gov
+#   organization: gsa-acq-proto
+#   space: trello-card-tracker
+#   username: $CF_USERNAME
+#   password: $CF_PASSWORD
+#   on:
+#     repo: 18F/trello-card-tracker
