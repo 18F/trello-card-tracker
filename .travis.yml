@@ -15,13 +15,3 @@ deploy:
   skip_cleanup: true
   on:
       repo: 18F/trello-card-tracker
-# deploy:
-#   edge: true
-#   provider: cloudfoundry
-#   api: https://api.fr.cloud.gov
-#   organization: gsa-acq-proto
-#   space: trello-card-tracker
-#   username: $CF_USERNAME
-#   password: $CF_PASSWORD
-#   on:
-#     repo: 18F/trello-card-tracker
