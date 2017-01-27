@@ -1,5 +1,7 @@
 const sinon = require('sinon');
 const trello = require('node-trello');
+const d = new Date();
+const currentYear = d.getFullYear();
 
 module.exports = {
   trelloStub(fnName, err, callbackData) {
@@ -67,7 +69,7 @@ module.exports = {
       text: ''
     },
     type: 'commentCard',
-    date: '2016-02-24T19:52:38.613Z',
+    date: `${currentYear}-02-24T19:52:38.613Z`,
     memberCreator: {
       id: '10',
       avatarHash: '100',
@@ -88,7 +90,7 @@ module.exports = {
       }
     },
     type: 'updateCard',
-    date: '2016-02-25T22:00:35.866Z',
+    date: `${currentYear}-02-25T22:00:35.866Z`,
     memberCreator: { id: '4e', avatarHash: null, fullName: 'Member Name', initials: 'MN', username: 'membername' }
   },
   {
@@ -103,7 +105,7 @@ module.exports = {
       }
     },
     type: 'updateCard',
-    date: '2016-02-25T22:00:35.866Z',
+    date: `${currentYear}-02-25T22:00:35.866Z`,
     memberCreator: { id: '4e', avatarHash: null, fullName: 'Member Name', initials: 'MN', username: 'membername' }
   }],
   actionListMove: [{
@@ -118,7 +120,7 @@ module.exports = {
       }
     },
     type: 'updateCard',
-    date: '2016-02-25T22:00:35.866Z',
+    date: `${currentYear}-02-25T22:00:35.866Z`,
     memberCreator: { id: '4e', avatarHash: null, fullName: 'Member Name', initials: 'MN', username: 'membername' }
   },
   {
@@ -153,7 +155,7 @@ module.exports = {
         shortLink: 'bbbbb' },
      list: { id: '3b', name: 'List Name' } },
   type: 'commentCard',
-  date: '2016-02-26T22:39:32.285Z',
+  date: `${currentYear}-02-26T22:39:32.285Z`,
   memberCreator: { id: '4e', avatarHash: null, fullName: 'Member Name', initials: 'MN', username: 'membername' },
   entities:
    [{ type: 'member',
@@ -192,7 +194,7 @@ module.exports = {
      due: null },
   checkItemStates: [],
   closed: false,
-  dateLastActivity: '2016-03-02T16:53:32.017Z',
+  dateLastActivity: `${currentYear}-03-02T16:53:32.017Z`,
   desc: 'Project: BPA Project\nAgency: General Services Administration\nSubAgency: OCSIT\nTrello Board: https://trello.com/b/xxxx/bpa-dash',
   descData: { emoji: {} },
   due: null,
@@ -228,7 +230,7 @@ module.exports = {
     },
     checkItemStates: [],
     closed: false,
-    dateLastActivity: '2016-04-19T22:53:02.061Z',
+    dateLastActivity: `${currentYear}-04-19T22:53:02.061Z`,
     desc: 'Comment Card Obj ',
     descData: {
       emoji: { }
@@ -323,10 +325,10 @@ module.exports = {
             name: 'Comment Test Card',
             id: '322'
           },
-          text: '**Current Stage:** `+19 days`. *03/08/2016 - 03/21/2016*. Expected days: 2 days. Actual Days spent: 21.'
+          text: `**Current Stage:** +19 days. *03/08/${currentYear} - 03/21/${currentYear}*. Expected days: 2 days. Actual Days spent: 21.`
         },
         type: 'commentCard',
-        date: '2016-03-08T22:53:02.063Z',
+        date: `${currentYear}-03-08T22:53:02.063Z`,
         memberCreator: {
           id: 'asdf9',
           avatarHash: 'adafa',
@@ -357,7 +359,7 @@ module.exports = {
           text: 'This is not a current comment.'
         },
         type: 'commentCard',
-        date: '2016-03-08T22:53:02.063Z',
+        date: `${currentYear}-03-08T22:53:02.063Z`,
         memberCreator: {
           id: 'asdf9',
           avatarHash: 'adafa',

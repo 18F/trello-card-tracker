@@ -5,14 +5,13 @@ install:
 - npm install --dev
 script:
 - npm test
+before_deploy:
+- export PATH=$HOME:$PATH
+- travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
+- tar xzvf $HOME/cf.tgz -C $HOME
 deploy:
-  edge: true
-  provider: cloudfoundry
-  api: https://api.cloud.gov
-  username: 18f-acq_deployer
-  password:
-    secure: Uw/yVXyIwkkO0P55EBf9wurTTL+KbWpZtxV9PVhHV+kB/j+BO21Y1MVYM2VJ0WtS90KodlbDziqtWxtI52itgtcIWvRaoKwUb+COvZNvcRbAzH4RAd/XUHDRim5QhLdVIJNIKhPqL9lB0U9gE8bH4xndPn8MeNrF6gW9/+3+hoQrALjjLeUPDl4YmuQd3Nu8+5RlUTw2cBmhkDCYUiD2TcaxkegmOrog3faU0MXuqqXAWuUBvKZlcq2fC5+4VKSXmx0eAxm9Rs011AwIXmr3aBzl6ZgGOSjJ2dg2+6tnfAKW5hOILI1XQHHLIHLqJVooA6v6WGz+Md7RZPEedfpkskY8JP6iq3Y/4B3t0f5jzctM8jXabj/ypSvDTXjmhOnQGaGTuzwEQY8HLpuziflXRnGJHyPaL9LyeQLg+Pp/6+G3Zhe+Mf+Cot04whkkzC4imJOYOomwuOFp/8gPEHMCFEGcfLxNK9YpulHBCPjGCf1ehLljNcBkLGSwsWUdm/H9KiGJHhrIdkBIBF4tcWanS2i6i5N7PfhnUDKLXYzdu4ZmNGB6U1NK6I5bqZTdxQriMa2hLwWHkRisZBo4FLFy6aunuzo/4z5T6RTPWzpwQQnvhjx8qMnQrwWgELxxpQd2Jrrt4EPar9GPB7ng5EEabx6NMLPr+uxEUusszQhdcpM=
-  organization: 18F-acq
-  space: tools
+- provider: script
+  script: "./bin/deploy.sh"
+  skip_cleanup: true
   on:
-    repo: 18F/trello-card-tracker
+      repo: 18F/trello-card-tracker
