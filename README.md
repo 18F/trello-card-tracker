@@ -66,6 +66,11 @@ npm start
 Run the Mocha/Chai tests run via Istanbul.
 `npm test`
 
+### Deployment
+Note that because the application is a worker [health checks must be disabled](https://docs.cloudfoundry.org/running/apps-enable-diego.html#disable-health-checks).
+`cf set-health-check trello-card-tracker none`
+
+
 ### Public domain
 
 This project is in the worldwide [public domain](LICENSE.md). As stated in [CONTRIBUTING](CONTRIBUTING.md):
