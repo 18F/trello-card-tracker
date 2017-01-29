@@ -2,6 +2,7 @@
 applications:
 - name: trello-card-tracker
   memory: 512M
-  buildpack: https://github.com/cloudfoundry/nodejs-buildpack.git#v1.5.14
+  buildpack: nodejs_buildpack
   instances: 1
   no-route: true
+  health-check-type: none
